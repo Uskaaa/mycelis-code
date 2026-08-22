@@ -212,7 +212,10 @@ export function withCliFixture<A, E>(
 
     const spawn = Effect.fn("opencode.spawn")(function* (args: string[], opts?: SpawnOpts) {
       const start = Date.now()
-      const timeoutMs = opts?.timeoutMs ?? 45_000 // kilocode_change - current full CLI startup leaves less than 30s for multi-step runs
+      // kilocode_change - bumped 45s -> 90s: on GitHub's standard (non-Blacksmith)
+      // windows-latest runner, plain cold `bun` startup for this CLI can itself approach the
+      // old ceiling even with no contention, leaving too little room for multi-step runs.
+      const timeoutMs = opts?.timeoutMs ?? 90_000
       // stdin: "ignore" so the child doesn't see a piped stdin and block
       // on `Bun.stdin.text()` (see src/cli/cmd/run.ts — non-TTY stdin is
       // consumed as the prompt). The old Process.run wrapper defaulted to

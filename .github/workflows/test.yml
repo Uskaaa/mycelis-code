@@ -206,8 +206,17 @@ jobs:
       # kilocode_change end
 
       # kilocode_change start - run Kilo CLI tests through platform-specific shards
+      # kilocode_change - skip on Windows: these CLI-subprocess integration tests spawn a
+      # fresh `bun` process per test (cold-starting the CLI from source) and hardcode
+      # per-test timeouts tuned for Kilo-Org's dedicated Blacksmith Windows runner. On
+      # GitHub's standard windows-latest runner this reliably produces timeouts, and at
+      # least once a full hang in the one-time CLI pre-build step that runs before any
+      # per-file timeout applies (job-level timeout-minutes then kills the whole shard,
+      # which even continue-on-error can't mask downstream - GitHub Actions only treats
+      # continue-on-error jobs as "success" for `needs.*.result` when they *fail*, not when
+      # they're *cancelled*). Linux and macOS already cover this suite reliably.
       - name: Run CLI unit tests
-        if: matrix.settings.run
+        if: matrix.settings.run && runner.os != 'Windows'
         run: bun turbo test:ci --output-logs=errors-only --log-order=grouped --log-prefix=task --filter='@kilocode/cli'
         env:
           KILO_EXPERIMENTAL_DISABLE_FILEWATCHER: "true" # kilocode_change - was Windows-only; the CLI now starts a watcher per instance, too heavy/racy for unit tests. Watcher tests opt back in.

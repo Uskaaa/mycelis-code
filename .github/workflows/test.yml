@@ -211,6 +211,10 @@ jobs:
           # so drop to 1 here to give each process the full machine. Linux/macOS (not timeout
           # offenders; macOS is a single unsharded job) keep the default.
           KILO_TEST_CONCURRENCY: ${{ matrix.settings.os == 'windows' && '1' || '' }}
+          # kilocode_change - raise the per-test deadline on Windows to match the bumped
+          # cli-process.ts spawn timeout (90s) plus headroom; the outer bun-test timeout
+          # would otherwise kill CLI subprocess tests before the inner one even applies.
+          KILO_TEST_TIMEOUT: ${{ matrix.settings.os == 'windows' && '120000' || '' }}
           # kilocode_change - 600s on every OS: the deadline guards against hangs, and a
           # saturated shard can legitimately hold a heavy real-subprocess file past 300s
           # (seen on Linux: run-process passing every test, killed at the deadline twice).

@@ -92,7 +92,23 @@ const concurrencyEnv = (() => {
 })()
 const concurrency = opt("concurrency", concurrencyEnv ?? Math.min(4, os.cpus().length))
 // kilocode_change end
-const timeout = opt("timeout", 60000)
+// kilocode_change start - allow CI to raise the per-test timeout via env, mirroring
+// KILO_TEST_CONCURRENCY/KILO_TEST_FILE_TIMEOUT above. On GitHub's standard (non-Blacksmith)
+// windows-latest runner, cold CLI subprocess spawns can exceed the 60s default even in
+// isolation, and the inner cli-process.ts spawn timeout is useless if this outer per-test
+// deadline kills the test first.
+const timeoutEnv = (() => {
+  const raw = process.env.KILO_TEST_TIMEOUT?.trim()
+  if (!raw) return undefined
+  const value = Number(raw)
+  if (!Number.isSafeInteger(value) || value < 1) {
+    console.error(`Invalid KILO_TEST_TIMEOUT "${raw}"; expected a positive integer (ms)`)
+    process.exit(2)
+  }
+  return value
+})()
+const timeout = opt("timeout", timeoutEnv ?? 60000)
+// kilocode_change end
 // kilocode_change start - allow CI to raise the per-file kill deadline via env. On Windows,
 // heavy real-server files (e.g. config-overlay) legitimately run ~270s serially, only ~30s
 // under the 300s default; raising it there prevents a slow-but-healthy run from being killed.

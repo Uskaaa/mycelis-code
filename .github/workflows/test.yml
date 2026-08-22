@@ -204,12 +204,13 @@ jobs:
           KILO_EXPERIMENTAL_DISABLE_FILEWATCHER: "true" # kilocode_change - was Windows-only; the CLI now starts a watcher per instance, too heavy/racy for unit tests. Watcher tests opt back in.
           KILO_TEST_PROFILE: ${{ matrix.settings.os == 'macos' && 'darwin' || '' }}
           KILO_TEST_SHARD: ${{ format('{0}/{1}', matrix.settings.index, matrix.settings.total) }}
-          # kilocode_change - cap parallelism on the 4-vCPU Windows runner. At the default
-          # min(4, cpus)=4, four heavy real-server test files share 4 vCPUs (~1 each) and blow
-          # their per-test timeouts; 2 gives each process real CPU headroom. Windows grows to
-          # 6 shards to absorb the lower per-shard parallelism. Linux/macOS (not timeout
+          # kilocode_change - cap parallelism on Windows. Kilo-Org's dedicated 4-vCPU
+          # Blacksmith runner needed 2 to keep heavy real-server test files from blowing
+          # their per-test timeouts; GitHub's standard virtualized windows-latest runner has
+          # worse per-core throughput for the same vCPU count (slower process spawn/disk),
+          # so drop to 1 here to give each process the full machine. Linux/macOS (not timeout
           # offenders; macOS is a single unsharded job) keep the default.
-          KILO_TEST_CONCURRENCY: ${{ matrix.settings.os == 'windows' && '2' || '' }}
+          KILO_TEST_CONCURRENCY: ${{ matrix.settings.os == 'windows' && '1' || '' }}
           # kilocode_change - 600s on every OS: the deadline guards against hangs, and a
           # saturated shard can legitimately hold a heavy real-subprocess file past 300s
           # (seen on Linux: run-process passing every test, killed at the deadline twice).

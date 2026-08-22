@@ -4,6 +4,13 @@ description: "Build the Linux bubblewrap helper"
 runs:
   using: "composite"
   steps:
+    # GitHub-hosted Ubuntu 24.04 runners restrict unprivileged user namespaces via
+    # AppArmor by default, which breaks bubblewrap's uid map setup ("Permission
+    # denied"). Relax it for this ephemeral runner VM so the sandbox can actually run.
+    - name: Allow unprivileged user namespaces for bubblewrap
+      run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      shell: bash
+
     - name: Setup Zig
       run: |
         curl --fail --location --retry 3 \

@@ -7,8 +7,12 @@
 export const ENV_KILO_API_URL = "KILO_API_URL"
 
 /** Default Kilo API URL */
-// mycelis_change - placeholder until the Mycelis backend is live; swap this for the real URL
-export const DEFAULT_KILO_API_URL = "https://api.mycelis.dev"
+// mycelis_change - TODO: point this at the Mycelis backend once it's live. Left on Kilo's real
+// endpoint for now: pointing this at a domain that doesn't resolve/respond broke TUI startup
+// (something in the startup path apparently isn't resilient to an unreachable API yet - needs
+// investigation before this can safely point elsewhere). Use KILO_API_URL to test a real
+// endpoint of your own in the meantime.
+export const DEFAULT_KILO_API_URL = "https://api.kilo.ai"
 
 /** Base URL for Kilo API - can be overridden by KILO_API_URL env var */
 export const KILO_API_BASE = process.env[ENV_KILO_API_URL] || DEFAULT_KILO_API_URL
@@ -17,8 +21,8 @@ export const KILO_API_BASE = process.env[ENV_KILO_API_URL] || DEFAULT_KILO_API_U
 export const KILO_CHAT_URL_ENV = "KILO_CHAT_URL"
 
 /** Default Kilo Chat URL (REST endpoint for messages, conversations, etc.) */
-// mycelis_change - placeholder until the Mycelis backend is live; swap this for the real URL
-export const KILO_DEFAULT_CHAT_URL = "https://chat.mycelis.dev"
+// mycelis_change - TODO: point this at the Mycelis backend once it's live; see note above DEFAULT_KILO_API_URL
+export const KILO_DEFAULT_CHAT_URL = "https://chat.kiloapps.io"
 
 /** Base URL for Kilo Chat - can be overridden by KILO_CHAT_URL env var */
 export const KILO_CHAT_URL = process.env[KILO_CHAT_URL_ENV] || KILO_DEFAULT_CHAT_URL
@@ -27,8 +31,8 @@ export const KILO_CHAT_URL = process.env[KILO_CHAT_URL_ENV] || KILO_DEFAULT_CHAT
 export const KILO_EVENT_SERVICE_URL_ENV = "EVENT_SERVICE_URL"
 
 /** Default Event Service URL (WebSocket endpoint for kilo-chat events) */
-// mycelis_change - placeholder until the Mycelis backend is live; swap this for the real URL
-export const KILO_DEFAULT_EVENT_SERVICE_URL = "wss://events.mycelis.dev"
+// mycelis_change - TODO: point this at the Mycelis backend once it's live; see note above DEFAULT_KILO_API_URL
+export const KILO_DEFAULT_EVENT_SERVICE_URL = "wss://events.kiloapps.io"
 
 /** Base URL for Event Service - can be overridden by EVENT_SERVICE_URL env var */
 export const KILO_EVENT_SERVICE_URL = process.env[KILO_EVENT_SERVICE_URL_ENV] || KILO_DEFAULT_EVENT_SERVICE_URL

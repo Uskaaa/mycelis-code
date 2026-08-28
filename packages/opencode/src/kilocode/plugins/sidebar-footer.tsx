@@ -77,8 +77,14 @@ function View(props: { api: TuiPluginApi }) {
         Object.values(item.models).some((model) => model.cost?.input !== 0),
     ),
   )
+  // mycelis_change - Mycelis requires its own account rather than allowing Kilo's anonymous
+  // free tier; show the sign-in hint whenever the "kilo" provider isn't connected yet, not just
+  // when no *paid* provider is connected. Still dismissible - this is a hint, not a hard gate:
+  // a client-side block that runs before the TUI can render is unrecoverable if the backend is
+  // briefly unreachable, so enforcement belongs server-side once requests are actually made.
+  const signedIn = createMemo(() => props.api.state.provider.some((item) => item.id === "kilo"))
   const done = createMemo(() => props.api.kv.get("dismissed_getting_started", false))
-  const show = createMemo(() => !has() && !done())
+  const show = createMemo(() => (!signedIn() || !has()) && !done())
   const wallet = createMemo(() => {
     const data = state()
     if (!data) return undefined
@@ -230,18 +236,25 @@ function View(props: { api: TuiPluginApi }) {
           <box flexGrow={1} gap={1}>
             <box flexDirection="row" justifyContent="space-between">
               <text fg={theme().text}>
-                <b>Getting started</b>
+                <b>{signedIn() ? "Getting started" : "Sign in required"}</b>
               </text>
               <text fg={theme().textMuted} onMouseDown={() => props.api.kv.set("dismissed_getting_started", true)}>
                 ✕
               </text>
             </box>
-            <text fg={theme().textMuted}>Kilo includes free models so you can start immediately.</text>
+            {/* mycelis_change start - explain the Mycelis-account requirement; unchanged copy once signed in */}
+            <Show
+              when={signedIn()}
+              fallback={<text fg={theme().textMuted}>Sign in with your Mycelis account to use AI models.</text>}
+            >
+              <text fg={theme().textMuted}>Kilo includes free models so you can start immediately.</text>
+            </Show>
             <text fg={theme().textMuted}>
               Connect from 75+ providers to use other models, including Claude, GPT, Gemini etc
             </text>
+            {/* mycelis_change end */}
             <box flexDirection="row" gap={1} justifyContent="space-between">
-              <text fg={theme().text}>Connect provider</text>
+              <text fg={theme().text}>{signedIn() ? "Connect provider" : "Sign in"}</text>
               <text fg={theme().textMuted}>/connect</text>
             </box>
           </box>
@@ -253,8 +266,9 @@ function View(props: { api: TuiPluginApi }) {
       </text>
       <text fg={theme().textMuted}>
         <span style={{ fg: theme().success }}>•</span>{" "}
+        {/* mycelis_change */}
         <span style={{ fg: theme().text }}>
-          <b>Kilo</b>
+          <b>Mycelis</b>
         </span>{" "}
         <span>{props.api.app.version}</span>
       </text>

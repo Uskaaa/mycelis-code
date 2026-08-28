@@ -7,7 +7,8 @@
 export const ENV_KILO_API_URL = "KILO_API_URL"
 
 /** Default Kilo API URL */
-export const DEFAULT_KILO_API_URL = "https://api.kilo.ai"
+// mycelis_change - placeholder until the Mycelis backend is live; swap this for the real URL
+export const DEFAULT_KILO_API_URL = "https://api.mycelis.dev"
 
 /** Base URL for Kilo API - can be overridden by KILO_API_URL env var */
 export const KILO_API_BASE = process.env[ENV_KILO_API_URL] || DEFAULT_KILO_API_URL
@@ -16,7 +17,8 @@ export const KILO_API_BASE = process.env[ENV_KILO_API_URL] || DEFAULT_KILO_API_U
 export const KILO_CHAT_URL_ENV = "KILO_CHAT_URL"
 
 /** Default Kilo Chat URL (REST endpoint for messages, conversations, etc.) */
-export const KILO_DEFAULT_CHAT_URL = "https://chat.kiloapps.io"
+// mycelis_change - placeholder until the Mycelis backend is live; swap this for the real URL
+export const KILO_DEFAULT_CHAT_URL = "https://chat.mycelis.dev"
 
 /** Base URL for Kilo Chat - can be overridden by KILO_CHAT_URL env var */
 export const KILO_CHAT_URL = process.env[KILO_CHAT_URL_ENV] || KILO_DEFAULT_CHAT_URL
@@ -25,7 +27,8 @@ export const KILO_CHAT_URL = process.env[KILO_CHAT_URL_ENV] || KILO_DEFAULT_CHAT
 export const KILO_EVENT_SERVICE_URL_ENV = "EVENT_SERVICE_URL"
 
 /** Default Event Service URL (WebSocket endpoint for kilo-chat events) */
-export const KILO_DEFAULT_EVENT_SERVICE_URL = "wss://events.kiloapps.io"
+// mycelis_change - placeholder until the Mycelis backend is live; swap this for the real URL
+export const KILO_DEFAULT_EVENT_SERVICE_URL = "wss://events.mycelis.dev"
 
 /** Base URL for Event Service - can be overridden by EVENT_SERVICE_URL env var */
 export const KILO_EVENT_SERVICE_URL = process.env[KILO_EVENT_SERVICE_URL_ENV] || KILO_DEFAULT_EVENT_SERVICE_URL
@@ -46,7 +49,7 @@ export const DEFAULT_FREE_MODEL = "kilo-auto/free"
 export const TOKEN_EXPIRATION_MS = 365 * 24 * 60 * 60 * 1000
 
 /** User-Agent header base value for requests */
-export const USER_AGENT_BASE = "opencode-kilo-provider"
+export const USER_AGENT_BASE = "opencode-mycelis-provider" // mycelis_change
 
 /** Content-Type header value for requests */
 export const CONTENT_TYPE = "application/json"
@@ -72,7 +75,7 @@ export const HEADER_EDITORNAME = "X-KILOCODE-EDITORNAME"
 export const HEADER_MACHINEID = "X-KILOCODE-MACHINEID"
 
 /** Default editor name value */
-export const DEFAULT_EDITOR_NAME = "Kilo CLI"
+export const DEFAULT_EDITOR_NAME = "Mycelis CLI" // mycelis_change
 
 /** Environment variable name for custom editor name */
 export const ENV_EDITOR_NAME = "KILOCODE_EDITOR_NAME"

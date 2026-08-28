@@ -132,13 +132,14 @@ export function renderApiDescription(
     )
   }
   if (providerID !== "kilo") return undefined
+  // mycelis_change - Mycelis-branded copy; replace the placeholder URL once the account/key page is live
   return () => (
     <box gap={1}>
       <text fg={theme.textMuted}>
-        Kilo Gateway gives you access to all the best coding models at the cheapest prices with a single API key.
+        Mycelis gives you access to all the best coding models at the cheapest prices with a single API key.
       </text>
       <text fg={theme.text}>
-        Go to <span style={{ fg: theme.primary }}>https://kilo.ai/gateway</span> to get a key
+        Go to <span style={{ fg: theme.primary }}>https://mycelis.dev/keys</span> to get a key
       </text>
     </box>
   )

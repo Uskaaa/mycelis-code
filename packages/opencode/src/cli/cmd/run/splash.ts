@@ -194,7 +194,7 @@ function build(input: SplashWriterInput, kind: "entry" | "exit", ctx: Scrollback
       })
     }
 
-    push(lines, body_left, top, "Kilo", right, undefined, TextAttributes.BOLD) // kilocode_change
+    push(lines, body_left, top, "Mycelis", right, undefined, TextAttributes.BOLD) // mycelis_change
     if (input.detail) {
       push(
         lines,

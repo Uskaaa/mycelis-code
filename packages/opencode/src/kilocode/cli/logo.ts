@@ -1,36 +1,17 @@
 // kilocode_change - new file
+// mycelis_change - Kilo's hand-crafted block-letter "KILO" wordmark was replaced with a
+// plain-text "MYCELIS" wordmark below. Swap in custom ASCII/pixel art here later if desired;
+// this placeholder is deliberately simple to guarantee correct monospace alignment.
 const yes = new Set(["1", "true", "yes", "on"])
 const no = new Set(["0", "false", "no", "off"])
 
 const modern = {
-  tui: [
-    `██  ██ ██🬺🬏   ██  ██   ██🬺🬏     ████ ██     ██🬺🬏   `,
-    `████🬺🬏 ~~██   ██  ~~ ██~~██   ██~~~~ ██     ~~██   `,
-    `██  ██ ██████ 🬁🬬████ 🬁🬬██~~   🬁🬬████ 🬁🬬████ ██████ `,
-    `~~  ~~ ~~~~~~   ~~~~   ~~       ~~~~   ~~~~ ~~~~~~ `,
-  ],
-  plain: [
-    `██  ██ ██🬺🬏   ██  ██   ██🬺🬏     ████ ██     ██🬺🬏   `,
-    `████🬺🬏   ██   ██     ██  ██   ██     ██       ██   `,
-    `██  ██ ██████ 🬁🬬████ 🬁🬬██     🬁🬬████ 🬁🬬████ ██████ `,
-  ],
-  exit: [`  ██  ██ ██🬺🬏   ██  ██   ██🬺🬏  `, `  ████🬺🬏   ██   ██     ██  ██  `, `  ██  ██ ██████ 🬁🬬████ 🬁🬬██    `],
+  tui: [`MYCELIS`],
+  plain: [`MYCELIS`],
+  exit: [``, `MYC`, ``],
 }
 
-const fallback = {
-  tui: [
-    `██  ██ ████   ██  ██   ██       ████ ██     ████   `,
-    `████   ~~██   ██  ~~ ██~~██   ██~~~~ ██     ~~██   `,
-    `██  ██ ██████ ██████   ██~~     ████   ████ ██████ `,
-    `~~  ~~ ~~~~~~  ~~~~~   ~~       ~~~~   ~~~~ ~~~~~~ `,
-  ],
-  plain: [
-    `██  ██ ████   ██  ██   ███      ████ ██     ████   `,
-    `████     ██   ██     ██  ██   ██     ██       ██   `,
-    `██  ██ ██████ ██████   ██       ████ ██████ ██████ `,
-  ],
-  exit: [`  ██  ██ ████   ██  ██   ██    `, `  ████     ██   ██     ██  ██  `, `  ██  ██ ██████ ██████   ██    `],
-}
+const fallback = modern
 
 function flag(value: string | undefined) {
   const key = value?.toLowerCase()

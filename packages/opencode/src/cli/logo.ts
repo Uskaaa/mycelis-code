@@ -2,7 +2,7 @@
 import { plain } from "../kilocode/cli/logo"
 
 export const logo = {
-  left: ["", "", ""],
+  left: [""], // mycelis_change - matches the single-row wordmark from kilocode/cli/logo.ts
   right: plain(),
 }
 // kilocode_change end

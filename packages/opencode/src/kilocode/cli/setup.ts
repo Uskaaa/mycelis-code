@@ -71,9 +71,46 @@ export namespace KiloCli {
     return (await import("@/kilocode/background-process/runner")).BackgroundProcessRunner.maybe()
   }
 
+  // mycelis_change - administrative/non-interactive commands are exempt from the sign-in
+  // gate below; anything else (bare TUI, `kilo run`, `kilo <project>`) is treated as an
+  // interactive session and requires auth first, like Claude Code / GitHub Copilot.
+  const MYCELIS_GATE_EXEMPT_COMMANDS = new Set([
+    "acp",
+    "mcp",
+    "attach",
+    "generate",
+    "debug",
+    "auth",
+    "providers",
+    "agent",
+    "upgrade",
+    "uninstall",
+    "serve",
+    "models",
+    "stats",
+    "export",
+    "import",
+    "github",
+    "pr",
+    "session",
+    "plug",
+    "db",
+    "console",
+    "cloud",
+    "roll-call",
+    "profile",
+    "remote",
+    "daemon",
+    "config",
+    "worktree",
+    "dev-setup",
+    "dev-alias",
+    "completion",
+  ])
+
   // Runs from the upstream `.middleware`, before any command handler. Env tagging is additive so
   // it never has to modify upstream's own env assignments.
-  export async function bootstrap(opts: { [key: string]: unknown }): Promise<void> {
+  export async function bootstrap(opts: { [key: string]: unknown }, command?: string): Promise<void> {
     info = opts.help === true || opts.version === true
     if (info) return
 
@@ -111,6 +148,13 @@ export namespace KiloCli {
       async () => (await AppRuntime.runPromise(Auth.Service.use((s) => s.get("kilo")))) !== undefined,
       async (auth) => AppRuntime.runPromise(Auth.Service.use((s) => s.set("kilo", auth))),
     )
+
+    // mycelis_change start - require sign-in before interactive use; see require-login.ts
+    if (!command || !MYCELIS_GATE_EXEMPT_COMMANDS.has(command)) {
+      const { ensureMycelisAuth } = await import("@/mycelis/auth/require-login")
+      await ensureMycelisAuth()
+    }
+    // mycelis_change end
 
     const auth = await AppRuntime.runPromise(Auth.Service.use((s) => s.get("kilo")))
     if (auth) {

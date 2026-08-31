@@ -770,6 +770,7 @@ export function Session() {
       title: sidebarVisible() ? "Hide sidebar" : "Show sidebar",
       value: "session.sidebar.toggle",
       category: "Session",
+      slash: { name: "sidebar" }, // mycelis_change
       run: () => {
         batch(() => {
           const isVisible = sidebarVisible()
@@ -783,6 +784,7 @@ export function Session() {
       title: conceal() ? "Disable code concealment" : "Enable code concealment",
       value: "session.toggle.conceal",
       category: "Session",
+      slash: { name: "conceal" }, // mycelis_change
       run: () => {
         setConceal((prev) => !prev)
         dialog.clear()
@@ -822,6 +824,7 @@ export function Session() {
       title: showDetails() ? "Hide tool details" : "Show tool details",
       value: "session.toggle.actions",
       category: "Session",
+      slash: { name: "tool-details" }, // mycelis_change
       run: () => {
         setShowDetails((prev) => !prev)
         dialog.clear()
@@ -831,6 +834,7 @@ export function Session() {
       title: "Toggle session scrollbar",
       value: "session.toggle.scrollbar",
       category: "Session",
+      slash: { name: "scrollbar" }, // mycelis_change
       run: () => {
         setShowScrollbar((prev) => !prev)
         dialog.clear()
@@ -840,6 +844,7 @@ export function Session() {
       title: showGenericToolOutput() ? "Hide generic tool output" : "Show generic tool output",
       value: "session.toggle.generic_tool_output",
       category: "Session",
+      slash: { name: "generic-tool-output" }, // mycelis_change
       run: () => {
         setShowGenericToolOutput((prev) => !prev)
         dialog.clear()
@@ -1023,12 +1028,14 @@ export function Session() {
       title: "Rate last assistant message helpful",
       value: "messages.feedback.up",
       category: "Session",
+      slash: { name: "feedback-up" }, // mycelis_change
       run: () => submitFeedback("up", dialog, { toast, session, messages }),
     },
     {
       title: "Rate last assistant message not helpful",
       value: "messages.feedback.down",
       category: "Session",
+      slash: { name: "feedback-down" }, // mycelis_change
       run: () => submitFeedback("down", dialog, { toast, session, messages }),
     },
     // kilocode_change end

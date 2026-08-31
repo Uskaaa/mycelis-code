@@ -1,12 +1,11 @@
 import { TextAttributes } from "@opentui/core"
 import { useTheme } from "../context/theme"
 import { useDialog } from "./dialog"
-import { useBindings, useCommandShortcut } from "../keymap"
+import { useBindings } from "../keymap"
 
 export function DialogHelp() {
   const dialog = useDialog()
   const { theme } = useTheme()
-  const commandShortcut = useCommandShortcut("command.palette.show")
 
   useBindings(() => ({
     bindings: [
@@ -27,7 +26,8 @@ export function DialogHelp() {
       </box>
       <box paddingBottom={1}>
         <text fg={theme.textMuted}>
-          Press {commandShortcut()} to see all available actions and commands in any context.
+          {/* mycelis_change */}
+          Type / to see all available actions and commands in any context.
         </text>
       </box>
       <box flexDirection="row" justifyContent="flex-end" paddingBottom={1}>

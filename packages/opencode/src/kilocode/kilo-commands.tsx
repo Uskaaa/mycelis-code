@@ -54,7 +54,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
         name: "kilo.claw",
         title: "KiloClaw",
         desc: "Open KiloClaw chat & dashboard",
-        category: "Kilo",
+        category: "Mycelis", // mycelis_change
         slashName: "kiloclaw",
         slashAliases: ["claw"],
         enabled: isKiloConnected(),
@@ -94,7 +94,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
         name: "remote.toggle",
         title: "Toggle remote",
         desc: "Enable or disable remote session relay",
-        category: "Kilo",
+        category: "Mycelis", // mycelis_change
         slashName: "remote",
         enabled: isKiloConnected(),
         hidden: !isKiloConnected(),
@@ -132,7 +132,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
         name: "kilo.usage",
         title: "Plans & usage",
         desc: "View provider plans and quota",
-        category: "Kilo",
+        category: "Mycelis", // mycelis_change
         slashName: "usage",
         slashAliases: ["plans", "quota"],
         run: () => {
@@ -144,8 +144,8 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
       {
         name: "kilo.profile",
         title: "Profile",
-        desc: "View your Kilo Gateway profile",
-        category: "Kilo",
+        desc: "View your Mycelis profile", // mycelis_change
+        category: "Mycelis", // mycelis_change
         slashName: "profile",
         slashAliases: ["me", "whoami"],
         enabled: isKiloConnected(),
@@ -168,7 +168,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
               dialog.replace(() => (
                 <DialogAlert
                   title="Error"
-                  message="Failed to fetch profile. Please ensure you're authenticated with Kilo Gateway."
+                  message="Failed to fetch profile. Please ensure you're authenticated with Mycelis." // mycelis_change
                 />
               ))
               return
@@ -190,7 +190,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
               name: "kilo.indexing",
               title: "Indexing",
               desc: "Configure codebase indexing",
-              category: "Kilo",
+              category: "Mycelis", // mycelis_change
               slashName: "indexing",
               slashAliases: ["index", "embedding"],
               run: () => {
@@ -208,7 +208,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
           return active ? "Disable privacy mode" : "Enable privacy mode"
         },
         desc: "Blur PII (balance, email, etc.) and confirm before showing profile",
-        category: "Kilo",
+        category: "Mycelis", // mycelis_change
         slashName: "privacy",
         run: async () => {
           const active = sync.data.config.privacy_mode === true || sync.data.globalConfig.privacy_mode === true
@@ -251,8 +251,8 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
       {
         name: "kilo.teams",
         title: "Teams",
-        desc: "Switch between Kilo Gateway teams",
-        category: "Kilo",
+        desc: "Switch between Mycelis teams", // mycelis_change
+        category: "Mycelis", // mycelis_change
         slashName: "teams",
         slashAliases: ["team", "org", "orgs"],
         enabled: isKiloConnected(),
@@ -266,7 +266,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
               dialog.replace(() => (
                 <DialogAlert
                   title="Error"
-                  message="Failed to fetch teams. Please ensure you're authenticated with Kilo Gateway."
+                  message="Failed to fetch teams. Please ensure you're authenticated with Mycelis." // mycelis_change
                 />
               ))
               return

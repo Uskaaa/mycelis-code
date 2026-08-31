@@ -11,7 +11,6 @@ type Shortcuts = {
   childFirst: TipShortcut
   childNext: TipShortcut
   childPrevious: TipShortcut
-  commandList: TipShortcut
   editorOpen: TipShortcut
   helpShow: TipShortcut
   inputClear: TipShortcut
@@ -101,7 +100,6 @@ export function Tips(props: { api: TuiPluginApi; connected?: boolean }) {
     childFirst: configShortcut(props.api, "session.child.first"),
     childNext: configShortcut(props.api, "session.child.next"),
     childPrevious: configShortcut(props.api, "session.child.previous"),
-    commandList: useCommandShortcut("command.palette.show"),
     editorOpen: useCommandShortcut("prompt.editor"),
     helpShow: useCommandShortcut("help.show"),
     inputClear: useCommandShortcut("prompt.clear"),
@@ -188,7 +186,7 @@ const TIPS: Tip[] = [
   "Run {highlight}/compact{/highlight} to summarize long sessions near context limits",
   (shortcuts) => `Use ${commandText("/export", shortcuts.sessionExport())} to save the conversation as Markdown`,
   (shortcuts) => press(shortcuts.messagesCopy(), "to copy the assistant's last message to clipboard"),
-  (shortcuts) => press(shortcuts.commandList(), "to see all available actions and commands"),
+  "Type {highlight}/{/highlight} to see all available actions and commands", // mycelis_change
   "Run {highlight}/connect{/highlight} to add API keys for 75+ supported LLM providers",
   (shortcuts) => `The leader key is ${shortcutText(shortcuts.leader())}; combine with other keys for quick actions`,
   (shortcuts) => press(shortcuts.modelCycleRecent(), "to quickly switch between recently used models"),
@@ -274,12 +272,9 @@ const TIPS: Tip[] = [
   (shortcuts) => press(shortcuts.messagesToggleConceal(), "to toggle code block visibility in messages"),
   (shortcuts) => `Use ${commandText("/status", shortcuts.statusView())} to see system status info`,
   "Enable {highlight}scroll_acceleration{/highlight} in {highlight}tui.json{/highlight} for smooth scrolling",
-  (shortcuts) =>
-    shortcuts.commandList()
-      ? `Toggle username display in chat via the command palette (${shortcutText(shortcuts.commandList())})`
-      : "Toggle username display in chat via the command palette",
+  // mycelis_change - dropped: referenced a "toggle username display" action with no backing command
   "Run {highlight}docker run -it --rm ghcr.io/anomalyco/opencode{/highlight} in a container",
-  "Use {highlight}/connect{/highlight} with OpenCode Zen for curated, tested models",
+  "Use {highlight}/connect{/highlight} with Mycelis for curated, tested models", // mycelis_change
   "Commit your project's {highlight}AGENTS.md{/highlight} file to Git for team sharing",
   "Use {highlight}/review{/highlight} to review uncommitted changes, branches, or PRs",
   (shortcuts) => `Use ${commandText("/help", shortcuts.helpShow())} to show the help dialog`,

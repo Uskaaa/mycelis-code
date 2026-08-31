@@ -1206,6 +1206,7 @@ const tui: TuiPlugin = async (api) => {
         title: "View v2 session messages",
         category: "Debug",
         namespace: "palette",
+        slashName: "debug-v2-session", // mycelis_change
         suggested: () => api.route.current.name === "session",
         enabled: () => api.route.current.name === "session",
         run() {

@@ -14,6 +14,7 @@ const tui: TuiPlugin = async (api) => {
           return api.kv.get("news_hidden", false) ? "Show news" : "Hide news"
         },
         category: "System",
+        slashName: "news", // mycelis_change
         get hidden() {
           return api.route.current.name !== "home"
         },

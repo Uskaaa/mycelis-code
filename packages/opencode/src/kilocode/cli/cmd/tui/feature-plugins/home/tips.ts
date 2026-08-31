@@ -9,7 +9,6 @@ type Shortcuts = {
   childFirst: TipShortcut
   childNext: TipShortcut
   childPrevious: TipShortcut
-  commandList: TipShortcut
   editorOpen: TipShortcut
   helpShow: TipShortcut
   inputClear: TipShortcut
@@ -78,7 +77,7 @@ export const KILO_TIPS: Tip[] = [
   "Run {highlight}/compact{/highlight} to summarize long sessions near context limits",
   (shortcuts) => `Use ${commandText("/export", shortcuts.sessionExport())} to save the conversation as Markdown`,
   (shortcuts) => press(shortcuts.messagesCopy(), "to copy the assistant's last message to clipboard"),
-  (shortcuts) => press(shortcuts.commandList(), "to see all available actions and commands"),
+  "Type {highlight}/{/highlight} to see all available actions and commands", // mycelis_change
   "Run {highlight}/connect{/highlight} to add API keys for 75+ supported LLM providers",
   (shortcuts) => `The leader key is ${shortcutText(shortcuts.leader())}; combine with other keys for quick actions`,
   (shortcuts) => press(shortcuts.modelCycleRecent(), "to quickly switch between recently used models"),
@@ -127,12 +126,12 @@ export const KILO_TIPS: Tip[] = [
   "Tool definitions can invoke scripts written in Python, Go, etc",
   "Add {highlight}.ts{/highlight} files to {highlight}.kilo/plugins/{/highlight} for event hooks",
   "Use plugins to send OS notifications when sessions complete",
-  "Create a plugin to prevent Kilo from reading sensitive files",
+  "Create a plugin to prevent Mycelis from reading sensitive files", // mycelis_change
   "Use {highlight}kilo run{/highlight} for non-interactive scripting",
   "Use {highlight}kilo --continue{/highlight} to resume the last session",
   "Use {highlight}kilo run -f file.ts{/highlight} to attach files via CLI",
   "Use {highlight}--format json{/highlight} for machine-readable output in scripts",
-  "Run {highlight}kilo serve{/highlight} for headless API access to Kilo",
+  "Run {highlight}kilo serve{/highlight} for headless API access to Mycelis", // mycelis_change
   "Use {highlight}kilo run --attach{/highlight} to connect to a running server",
   "Run {highlight}kilo upgrade{/highlight} to update to the latest version",
   "Run {highlight}kilo auth list{/highlight} to see all configured providers",
@@ -162,12 +161,9 @@ export const KILO_TIPS: Tip[] = [
   (shortcuts) => press(shortcuts.messagesToggleConceal(), "to toggle code block visibility in messages"),
   (shortcuts) => `Use ${commandText("/status", shortcuts.statusView())} to see system status info`,
   "Enable {highlight}scroll_acceleration{/highlight} in {highlight}tui.json{/highlight} for smooth macOS-style scrolling",
-  (shortcuts) =>
-    shortcuts.commandList()
-      ? `Toggle username display in chat via the command palette (${shortcutText(shortcuts.commandList())})`
-      : "Toggle username display in chat via the command palette",
+  // mycelis_change - dropped: referenced a "toggle username display" action with no backing command
   "Run {highlight}docker run -it --rm ghcr.io/kilo-org/kilocode{/highlight} for containerized use",
-  "Use {highlight}/connect{/highlight} with Kilo Gateway for curated, tested models",
+  "Use {highlight}/connect{/highlight} with Mycelis for curated, tested models", // mycelis_change
   "Commit your project's {highlight}AGENTS.md{/highlight} file to Git for team sharing",
   "Use {highlight}/review{/highlight} to review uncommitted changes, commits, branches, or PRs",
   (shortcuts) => `Use ${commandText("/help", shortcuts.helpShow())} to show the help dialog`,

@@ -3,7 +3,6 @@ import type { TuiCommand, TuiPluginApi } from "@kilocode/plugin/tui"
 import { TuiKeybind } from "../config/keybind"
 import type { DialogContext } from "../ui/dialog"
 
-const COMMAND_PALETTE_SHOW = "command.palette.show"
 const warned = new Set<string>()
 
 type Warn = (api: string, replacement: string) => void
@@ -102,8 +101,8 @@ export function createCommandShim(
       keymap.dispatchCommand(value)
     },
     show() {
-      warnOnce("api.command.show", `api.keymap.dispatchCommand("${COMMAND_PALETTE_SHOW}")`, warnCommandShim)
-      keymap.dispatchCommand(COMMAND_PALETTE_SHOW)
+      // mycelis_change - command palette removed; commands are reachable via / instead
+      warnOnce("api.command.show", "typing / in the chat prompt to browse commands", warnCommandShim)
     },
   }
 }

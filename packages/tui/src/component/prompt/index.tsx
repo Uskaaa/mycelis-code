@@ -177,7 +177,6 @@ export function Prompt(props: PromptProps) {
   const stash = usePromptStash()
   const keymap = useOpencodeKeymap()
   const agentShortcut = useCommandShortcut("agent.cycle")
-  const paletteShortcut = useCommandShortcut("command.palette.show")
   const variantShortcut = useCommandShortcut("variant.cycle")
   const renderer = useRenderer()
   const exit = useExit()
@@ -388,6 +387,7 @@ export function Prompt(props: PromptProps) {
         title: "Remove editor context",
         name: "prompt.editor_context.clear",
         category: "Prompt",
+        slashName: "clear-editor-context", // mycelis_change
         enabled: Boolean(editorContext()),
         run: () => {
           dismissEditorContext()
@@ -450,7 +450,7 @@ export function Prompt(props: PromptProps) {
       // kilocode_change start
       {
         title: "Cost alert",
-        desc: "Set Kilo's cost alert",
+        desc: "Set Mycelis's cost alert", // mycelis_change
         name: "cost_alert",
         category: "Session",
         slashName: "cost-alert",
@@ -799,6 +799,7 @@ export function Prompt(props: PromptProps) {
         title: "Stash prompt",
         name: "prompt.stash",
         category: "Prompt",
+        slashName: "stash", // mycelis_change
         enabled: !!store.prompt.input,
         run: () => {
           if (!store.prompt.input) return
@@ -818,6 +819,7 @@ export function Prompt(props: PromptProps) {
         title: "Stash pop",
         name: "prompt.stash.pop",
         category: "Prompt",
+        slashName: "stash-pop", // mycelis_change
         enabled: stash.list().length > 0,
         run: () => {
           const entry = stash.pop()
@@ -835,6 +837,7 @@ export function Prompt(props: PromptProps) {
         title: "Stash list",
         name: "prompt.stash.list",
         category: "Prompt",
+        slashName: "stash-list", // mycelis_change
         enabled: stash.list().length > 0,
         run: () => {
           dialog.replace(() => (
@@ -1848,8 +1851,9 @@ export function Prompt(props: PromptProps) {
                       </text>
                     </Match>
                   </Switch>
+                  {/* mycelis_change */}
                   <text fg={theme.text}>
-                    {paletteShortcut()} <span style={{ fg: theme.textMuted }}>commands</span>
+                    / <span style={{ fg: theme.textMuted }}>commands</span>
                   </text>
                 </Match>
                 <Match when={store.mode === "shell"}>

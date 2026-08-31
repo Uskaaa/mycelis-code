@@ -475,7 +475,7 @@ export function PermissionPrompt(props: { request: PermissionRequest; directory?
                   <text fg={theme.textMuted}>
                     {props.request.permission === "edit"
                       ? "Config file edits always require approval"
-                      : "Kilo configuration access always requires approval"}
+                      : "Mycelis configuration access always requires approval"} {/* mycelis_change */}
                   </text>
                 </box>
               </Show>

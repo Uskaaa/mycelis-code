@@ -67,6 +67,7 @@ export const PROVIDER_DESCRIPTIONS: Record<string, string> = {
 
 export const PROVIDER_TITLES: Record<string, string> = {
   openai: "OpenAI / Codex",
+  kilo: "Mycelis", // mycelis_change
 }
 
 /** Local OpenAI-compatible providers where API key is optional (localhost). */

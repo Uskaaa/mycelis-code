@@ -23,7 +23,7 @@ Example:
   "leader_timeout": 2000,
   "keybinds": {
     "leader": "ctrl+x",
-    "command_list": "ctrl+p",
+    "help_show": "ctrl+p",
     "session_new": "<leader>n"
   },
   "plugin": ["@acme/opencode-plugin@1.2.3", ["./plugins/demo.tsx", { "label": "demo" }]],

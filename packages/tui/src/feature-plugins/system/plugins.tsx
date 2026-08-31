@@ -243,6 +243,7 @@ const tui: TuiPlugin = async (api) => {
         title: "Plugins",
         category: "System",
         namespace: "palette",
+        slashName: "plugins", // mycelis_change
         run() {
           show(api)
         },
@@ -252,6 +253,7 @@ const tui: TuiPlugin = async (api) => {
         title: "Install plugin",
         category: "System",
         namespace: "palette",
+        slashName: "plugins-install", // mycelis_change
         run() {
           showInstall(api)
         },

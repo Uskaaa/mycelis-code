@@ -14,6 +14,7 @@ function View(props: { api: TuiPluginApi; hidden: boolean; show: boolean; connec
         title: props.hidden ? "Show tips" : "Hide tips",
         category: "System",
         namespace: "palette",
+        slashName: "tips", // mycelis_change
         run() {
           props.api.kv.set("tips_hidden", !props.api.kv.get("tips_hidden", false))
           props.api.ui.dialog.clear()

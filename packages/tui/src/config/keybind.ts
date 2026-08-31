@@ -54,7 +54,11 @@ export const Definitions = {
   app_toggle_diffwrap: keybind("none", "Toggle diff wrapping"),
   app_toggle_paste_summary: keybind("none", "Toggle paste summary"),
   app_toggle_session_directory_filter: keybind("none", "Toggle session directory filtering"),
-  command_list: keybind("ctrl+p", "List available commands"),
+  // mycelis_change - command_list (ctrl+p) removed from the TUI, command palette retired in favor of /.
+  // `kilo run`'s separate interactive footer (cli/cmd/run/footer.view.tsx) still has its own
+  // command-palette route with no slash-command equivalent, so it keeps a dedicated binding here
+  // under the same "command.palette.show" command name via CommandMap below.
+  run_command_palette: keybind("ctrl+p", "Open command palette (kilo run)"),
   help_show: keybind("none", "Open help dialog"),
   docs_open: keybind("none", "Open documentation"),
   diff_open: keybind("none", "Open diff viewer"),
@@ -269,7 +273,8 @@ export const CommandMap = {
   app_toggle_diffwrap: "app.toggle.diffwrap",
   app_toggle_paste_summary: "app.toggle.paste_summary",
   app_toggle_session_directory_filter: "app.toggle.session_directory_filter",
-  command_list: "command.palette.show",
+  // mycelis_change - command_list removed; run_command_palette keeps `kilo run`'s palette working
+  run_command_palette: "command.palette.show",
   help_show: "help.show",
   docs_open: "docs.open",
   diff_open: "diff.open",

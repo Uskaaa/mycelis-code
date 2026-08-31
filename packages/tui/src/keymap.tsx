@@ -19,7 +19,6 @@ import { TuiKeybind } from "./config/keybind"
 
 export const LEADER_TOKEN = "leader"
 export const KILO_BASE_MODE = "base"
-export const COMMAND_PALETTE_COMMAND = "command.palette.show"
 
 const KILO_MODE_KEY = "opencode.mode"
 
@@ -47,7 +46,7 @@ type ResolvedKeymapConfig = FormatConfig & { leader_timeout: number }
 const modeStacks = new WeakMap<OpenTuiKeymap, OpencodeModeStack>()
 
 function isVisiblePaletteCommand(command: Command) {
-  return command.hidden !== true && command.name !== COMMAND_PALETTE_COMMAND
+  return command.hidden !== true // mycelis_change - command.palette.show removed
 }
 
 export function createOpencodeModeStack(keymap: OpenTuiKeymap) {

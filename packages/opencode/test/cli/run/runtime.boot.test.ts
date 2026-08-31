@@ -61,7 +61,6 @@ function config(input?: {
   leaderTimeout?: number
   diff_style?: "auto" | "stacked"
   bindings?: Partial<{
-    commandList: string[]
     variantCycle: string[]
     interrupt: string[]
     historyPrevious: string[]
@@ -77,7 +76,6 @@ function config(input?: {
     leader_timeout: input?.leaderTimeout,
     keybinds: {
       ...(input?.leader && { leader: input.leader }),
-      ...(bind?.commandList && { command_list: bind.commandList }),
       ...(bind?.variantCycle && { variant_cycle: bind.variantCycle }),
       ...(bind?.interrupt && { session_interrupt: bind.interrupt }),
       ...(bind?.historyPrevious && { history_previous: bind.historyPrevious }),
@@ -99,7 +97,6 @@ describe("run runtime boot", () => {
       config({
         leader: "ctrl+g",
         bindings: {
-          commandList: ["ctrl+p"],
           variantCycle: ["ctrl+t", "alt+t"],
           interrupt: ["ctrl+c"],
           historyPrevious: ["k"],
@@ -115,7 +112,6 @@ describe("run runtime boot", () => {
 
     expect(result.keybinds.get("leader")?.[0]?.key).toBe("ctrl+g")
     expect(result.leader_timeout).toBe(2000)
-    expect(result.keybinds.get("command.palette.show")?.[0]?.key).toBe("ctrl+p")
     expect(result.keybinds.get("variant.cycle").map((item) => item.key)).toEqual(["ctrl+t", "alt+t"])
     expect(result.keybinds.get("session.interrupt")?.[0]?.key).toBe("ctrl+c")
     expect(result.keybinds.get("prompt.history.previous")?.[0]?.key).toBe("k")
@@ -133,7 +129,6 @@ describe("run runtime boot", () => {
     expect(result.keybinds.get("leader")?.[0]?.key).toBe("ctrl+x")
     expect(result.leader_timeout).toBe(2000)
     expect(result.diff_style).toBe("auto")
-    expect(result.keybinds.get("command.palette.show")?.[0]?.key).toBe("ctrl+p")
     expect(result.keybinds.get("variant.cycle")?.[0]?.key).toBe("ctrl+t")
     expect(result.keybinds.get("session.interrupt")?.[0]?.key).toBe("escape")
     expect(result.keybinds.get("prompt.history.previous")?.[0]?.key).toBe("up")

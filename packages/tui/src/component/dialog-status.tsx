@@ -55,7 +55,8 @@ export function DialogStatus() {
         </text>
       </box>
       {/* kilocode_change start */}
-      <text fg={theme.textMuted}>Kilo v{InstallationVersion}</text>
+      {/* mycelis_change */}
+      <text fg={theme.textMuted}>Mycelis v{InstallationVersion}</text>
       {/* kilocode_change end */}
       {/* kilocode_change start */}
       <box>

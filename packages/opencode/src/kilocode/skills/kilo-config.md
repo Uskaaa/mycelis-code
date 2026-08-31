@@ -274,9 +274,10 @@ Skills are markdown files at `skills/<name>/SKILL.md` (or `skill/<name>/SKILL.md
 | `compaction.auto` | `boolean` | Auto-compact when context full (default: true) |
 | `compaction.prune` | `boolean` | Prune old tool outputs (default: true) |
 
-## TUI Settings (Ctrl+P Command Palette)
+## TUI Settings (Slash Commands)
 
-The CLI TUI has runtime settings accessible via `Ctrl+P` (command palette) or slash commands. **These are user-interactive only — the agent cannot change them programmatically.** When users ask to change these settings, tell them which command palette entry, keybind, or slash command to use.
+<!-- mycelis_change - Ctrl+P command palette removed; every setting below is reachable via / instead -->
+The CLI TUI has runtime settings accessible via slash commands or keybinds. **These are user-interactive only — the agent cannot change them programmatically.** When users ask to change these settings, tell them which slash command or keybind to use.
 
 Leader key default: `ctrl+x`. Keybinds below use `<leader>` prefix (e.g. `<leader>t` = `ctrl+x` then `t`).
 
@@ -285,7 +286,7 @@ Leader key default: `ctrl+x`. Keybinds below use `<leader>` prefix (e.g. `<leade
 | Action | Keybind | Slash | Notes |
 |---|---|---|---|
 | Switch theme | `<leader>t` | `/themes` | Pick from 35+ built-in themes (kilo, catppuccin, dracula, github, gruvbox, nord, tokyonight, etc.) |
-| Toggle appearance (dark/light) | — | — | Ctrl+P → "Toggle appearance" |
+| Toggle appearance (dark/light) | — | `/toggle-theme` | |
 
 Custom themes: place JSON files in `~/.config/kilo/themes/` or `.kilo/themes/`.
 
@@ -314,9 +315,9 @@ Custom themes: place JSON files in `~/.config/kilo/themes/` or `.kilo/themes/`.
 | Toggle MCPs | — | `/mcps` |
 | Cycle agent | `tab` / `shift+tab` | — |
 
-### Display Toggles (via Ctrl+P)
+### Display Toggles
 
-Toggle animations, Toggle diff wrapping, Toggle sidebar (`<leader>b`), Toggle thinking (`/thinking`), Toggle tool details, Toggle timestamps (`/timestamps`), Toggle scrollbar, Toggle header, Toggle code concealment (`<leader>h`).
+Toggle animations (`/toggle-animations`), Toggle diff wrapping (`/toggle-diff-wrap`), Toggle sidebar (`<leader>b`, `/sidebar`), Toggle thinking (`/thinking`), Toggle tool details (`/tool-details`), Toggle timestamps (`/timestamps`), Toggle scrollbar (`/scrollbar`), Toggle code concealment (`<leader>h`, `/conceal`).
 
 Notification settings are managed through `attention` in `tui.json` / `tui.jsonc`. There is no notification slash command or command-palette toggle.
 

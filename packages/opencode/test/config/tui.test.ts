@@ -487,7 +487,6 @@ it.instance("resolves keybind lookup from canonical keybinds", () =>
       yield* fs.writeJson(path.join(test.directory, "tui.json"), {
         keybinds: {
           leader: { key: { name: "g", ctrl: true } },
-          command_list: "alt+p",
           diff_open: "ctrl+j",
           which_key_toggle: "alt+k",
           editor_open: "ctrl+e",
@@ -503,7 +502,6 @@ it.instance("resolves keybind lookup from canonical keybinds", () =>
       const config = yield* getTuiConfig(test.directory)
       expect(config.keybinds.get("leader")?.[0]?.key).toEqual({ name: "g", ctrl: true })
       expect(config.leader_timeout).toBe(1234)
-      expect(config.keybinds.get("command.palette.show")?.[0]?.key).toBe("alt+p")
       expect(config.keybinds.get("diff.open")?.[0]?.key).toBe("ctrl+j")
       expect(config.keybinds.get("session.new")?.[0]?.key).toBe("<leader>n")
       expect(config.keybinds.get("which-key.toggle")?.[0]?.key).toBe("alt+k")
@@ -533,7 +531,7 @@ it.instance("keybinds accept OpenTUI binding specs", () =>
       const test = yield* TestInstance
       yield* fs.writeJson(path.join(test.directory, "tui.json"), {
         keybinds: {
-          command_list: [{ key: "alt+p", preventDefault: false }],
+          help_show: [{ key: "alt+p", preventDefault: false }], // mycelis_change - was command_list, now removed
           editor_open: { key: { name: "e", ctrl: true }, group: "Explicit" },
           "prompt.autocomplete.next": false,
           plugin_manager: "ctrl+shift+p",
@@ -541,8 +539,8 @@ it.instance("keybinds accept OpenTUI binding specs", () =>
       })
 
       const config = yield* getTuiConfig(test.directory)
-      expect(config.keybinds.get("command.palette.show")).toEqual([
-        { key: "alt+p", cmd: "command.palette.show", preventDefault: false, desc: "List available commands" },
+      expect(config.keybinds.get("help.show")).toEqual([
+        { key: "alt+p", cmd: "help.show", preventDefault: false, desc: "Open help dialog" },
       ])
       expect(config.keybinds.get("prompt.editor")?.[0]).toMatchObject({
         key: { name: "e", ctrl: true },

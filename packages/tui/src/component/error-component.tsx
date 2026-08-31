@@ -225,15 +225,16 @@ function buildIssueURL(message: string, stack: string) {
   // form opens pre-filled. Populating os/terminal/reproduce keeps the report past
   // the contributing-guidelines compliance check, which pushes for system info.
   // kilocode_change start
-  const url = new URL("https://github.com/Kilo-Org/kilocode/issues/new?template=bug-report.yml")
-  url.searchParams.set("title", `Kilo TUI crash: ${message}`)
+  // mycelis_change - point crash reports at this fork's own repo/issue tracker
+  const url = new URL("https://github.com/Uskaaa/mycelis-code/issues/new?template=bug-report.yml")
+  url.searchParams.set("title", `Mycelis TUI crash: ${message}`)
   url.searchParams.set("kilo-version", InstallationVersion)
   // kilocode_change end
   url.searchParams.set("os", describeOS())
   url.searchParams.set("terminal", describeTerminal())
   url.searchParams.set(
     "reproduce",
-    "Reported automatically from the Kilo crash screen. If you can, describe what you were doing when it crashed.",
+    "Reported automatically from the Mycelis crash screen. If you can, describe what you were doing when it crashed.", // mycelis_change
   )
 
   // Budget the stack against the fully URL-encoded length (not the raw length) so
@@ -242,7 +243,7 @@ function buildIssueURL(message: string, stack: string) {
   // so measuring url.toString() is both correct and safe on any input.
   const MAX_URL_LENGTH = 6000
   const marker = "\n... (truncated)"
-  const head = `The Kilo TUI crashed with an unexpected error.\n\n**Error:** ${message}\n\n**Stack trace:**\n`
+  const head = `The Mycelis TUI crashed with an unexpected error.\n\n**Error:** ${message}\n\n**Stack trace:**\n` // mycelis_change
   const setBody = (body: string) => url.searchParams.set("description", head + "```\n" + body + "\n```")
 
   setBody(stack)

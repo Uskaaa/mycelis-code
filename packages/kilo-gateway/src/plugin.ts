@@ -1,5 +1,5 @@
 import type { Plugin } from "@kilocode/plugin"
-import { authenticateWithDeviceAuthTUI } from "./auth/device-auth-tui.js"
+import { authenticateWithMycelisBrowserLogin } from "./auth/mycelis-browser-login.js" // mycelis_change
 
 /**
  * Kilo Gateway Authentication Plugin
@@ -45,11 +45,9 @@ export const KiloAuthPlugin: Plugin = async (ctx) => {
       methods: [
         {
           type: "oauth",
-          label: "Kilo Gateway (Device Authorization)",
+          label: "Mycelis (Browser Login)", // mycelis_change
           async authorize() {
-            // Use the TUI-compatible version that returns immediately
-            // This works with both TUI dialogs and Web UI
-            return await authenticateWithDeviceAuthTUI()
+            return await authenticateWithMycelisBrowserLogin() // mycelis_change
           },
         },
       ],

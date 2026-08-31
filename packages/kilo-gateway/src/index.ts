@@ -16,6 +16,7 @@ export { buildKiloHeaders, getEditorNameHeader, getFeatureHeader, getDefaultHead
 // ============================================================================
 export { authenticateWithDeviceAuth } from "./auth/device-auth.js"
 export { authenticateWithDeviceAuthTUI } from "./auth/device-auth-tui.js"
+export { authenticateWithMycelisBrowserLogin } from "./auth/mycelis-browser-login.js" // mycelis_change
 export { getKiloUrlFromToken, isValidKilocodeToken, getApiKey } from "./auth/token.js"
 export { poll, formatTimeRemaining } from "./auth/polling.js"
 export { migrateLegacyKiloAuth, LEGACY_CONFIG_PATH } from "./auth/legacy-migration.js"
@@ -142,6 +143,10 @@ export {
   KILO_CHAT_URL,
   KILO_EVENT_SERVICE_URL,
   KILO_OPENROUTER_BASE,
+  ENV_MYCELIS_WEB_URL, // mycelis_change
+  DEFAULT_MYCELIS_WEB_URL, // mycelis_change
+  MYCELIS_WEB_URL, // mycelis_change
+  MYCELIS_CLI_CLIENT_ID, // mycelis_change
   POLL_INTERVAL_MS,
   DEFAULT_MODEL,
   DEFAULT_FREE_MODEL,

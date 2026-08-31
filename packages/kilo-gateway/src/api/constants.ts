@@ -40,6 +40,26 @@ export const KILO_EVENT_SERVICE_URL = process.env[KILO_EVENT_SERVICE_URL_ENV] ||
 /** Default base URL for OpenRouter-compatible endpoint */
 export const KILO_OPENROUTER_BASE = `${KILO_API_BASE}/api/openrouter`
 
+// mycelis_change start
+/** Environment variable for custom Mycelis web app URL (OIDC login + dashboard) */
+export const ENV_MYCELIS_WEB_URL = "MYCELIS_WEB_URL"
+
+/** Default Mycelis web app URL - hosts /oidc/authorize, /oidc/token, and the dashboard */
+export const DEFAULT_MYCELIS_WEB_URL = "https://mycelis.ai"
+
+/** Base URL for the Mycelis web app - can be overridden by MYCELIS_WEB_URL env var */
+export const MYCELIS_WEB_URL = process.env[ENV_MYCELIS_WEB_URL] || DEFAULT_MYCELIS_WEB_URL
+
+/** Reserved OIDC client_id for the Mycelis CLI's browser-login flow (see mycelis-browser-login.ts) */
+export const MYCELIS_CLI_CLIENT_ID = "mycelis-cli"
+
+/**
+ * Mycelis's OpenAI-compatible model gateway (YarpGatewayController / ModelsProxyController).
+ * Authenticated via `Authorization: Bearer <PAT>` - the same PAT minted by the browser-login flow.
+ */
+export const MYCELIS_GATEWAY_BASE = `${MYCELIS_WEB_URL}/api/proxy/v1`
+// mycelis_change end
+
 /** Device auth polling interval in milliseconds */
 export const POLL_INTERVAL_MS = 3000
 

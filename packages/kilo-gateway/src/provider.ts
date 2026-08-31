@@ -5,7 +5,7 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible"
 import type { KiloProvider, KiloProviderOptions } from "./types.js"
 import { getApiKey } from "./auth/token.js"
 import { buildKiloHeaders, getDefaultHeaders } from "./headers.js"
-import { ANONYMOUS_API_KEY } from "./api/constants.js"
+import { ANONYMOUS_API_KEY, MYCELIS_GATEWAY_BASE } from "./api/constants.js" // mycelis_change
 import { resolveKiloOpenRouterBaseUrl } from "./api/url.js"
 import { transformRequestBody } from "./responses.js"
 import * as GatewayMetadata from "./gateway-metadata.js"
@@ -38,7 +38,12 @@ export function createKilo(options: KiloProviderOptions = {}): KiloProvider {
   // Get API key from options or environment
   const apiKey = getApiKey(options)
 
+  // mycelis_change start - point requests at the Mycelis model gateway instead of Kilo's
+  // OpenRouter-compatible endpoint; resolveKiloOpenRouterBaseUrl kept below (unused) for the
+  // embedding/image model paths, which still go through the `openrouter` SDK instance further down.
   const openRouterUrl = resolveKiloOpenRouterBaseUrl({ baseURL: options.baseURL, token: apiKey })
+  const gatewayUrl = options.baseURL ?? MYCELIS_GATEWAY_BASE
+  // mycelis_change end
 
   // Merge custom headers with defaults
   const customHeaders = {
@@ -75,14 +80,18 @@ export function createKilo(options: KiloProviderOptions = {}): KiloProvider {
     fetch: wrappedFetch as typeof fetch,
   }
 
+  // mycelis_change - chat requests go to Mycelis's OpenAI-compatible gateway; embedding/image
+  // models below still use `sdkOptions` (Kilo's OpenRouter endpoint), untouched for now.
+  const gatewaySdkOptions = { ...sdkOptions, baseURL: gatewayUrl }
+
   const openrouter = createOpenRouter(sdkOptions)
-  const anthropic = createAnthropic(sdkOptions)
-  const openai = createOpenAI(sdkOptions)
-  const openaiCompatible = createOpenAICompatible({ ...sdkOptions, name: "openaiCompatible" })
+  const anthropic = createAnthropic(gatewaySdkOptions) // mycelis_change
+  const openai = createOpenAI(gatewaySdkOptions) // mycelis_change
+  const openaiCompatible = createOpenAICompatible({ ...gatewaySdkOptions, name: "openaiCompatible" }) // mycelis_change
 
   return {
     languageModel(modelId) {
-      return openrouter(modelId)
+      return openaiCompatible(modelId) // mycelis_change
     },
     embeddingModel(modelId: string) {
       return openrouter.textEmbeddingModel(modelId)

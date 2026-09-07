@@ -147,11 +147,21 @@ function showInstall(api: TuiPluginApi) {
   api.ui.dialog.replace(() => <Install api={api} />)
 }
 
+// mycelis_change - plugins.list() rebuilds a brand-new object for every plugin on every call
+// (see listPluginStatus in plugin/tui/runtime.ts), so re-deriving DialogSelectOption rows from it
+// naively produces a fresh object identity per row on every recompute. DialogSelect's <For> keys
+// rows by identity, so a single toggle (which re-fetches the whole list) tore down and remounted
+// every row, not just the one that changed - that's the flicker/lag on navigate/toggle. Cache rows
+// by plugin id and reuse the previous option object when nothing relevant to it changed.
+function rowSignature(item: TuiPluginStatus, width: number, themeKey: string) {
+  return `${item.enabled}|${item.active}|${item.source}|${item.spec}|${width}|${themeKey}`
+}
+
 function View(props: { api: TuiPluginApi }) {
   const size = useTerminalDimensions()
   const [list, setList] = createSignal(props.api.plugins.list())
-  const [cur, setCur] = createSignal<string | undefined>()
   const [lock, setLock] = createSignal(false)
+  const rowCache = new Map<string, { sig: string; option: DialogSelectOption<string> }>()
 
   createEffect(() => {
     const width = size().width
@@ -166,16 +176,31 @@ function View(props: { api: TuiPluginApi }) {
     props.api.ui.dialog.setSize("medium")
   })
 
-  const rows = createMemo(() =>
-    [...list()]
+  const rows = createMemo(() => {
+    const width = size().width
+    const themeKey = props.api.theme.selected
+    const seen = new Set<string>()
+    const next = [...list()]
       .sort((a, b) => {
         const x = a.source === "internal" ? 1 : 0
         const y = b.source === "internal" ? 1 : 0
         if (x !== y) return x - y
         return a.id.localeCompare(b.id)
       })
-      .map((item) => row(props.api, item, size().width)),
-  )
+      .map((item) => {
+        seen.add(item.id)
+        const sig = rowSignature(item, width, themeKey)
+        const cached = rowCache.get(item.id)
+        if (cached && cached.sig === sig) return cached.option
+        const option = row(props.api, item, width)
+        rowCache.set(item.id, { sig, option })
+        return option
+      })
+    for (const key of rowCache.keys()) {
+      if (!seen.has(key)) rowCache.delete(key)
+    }
+    return next
+  })
 
   const flip = (x: string) => {
     if (lock()) return
@@ -198,19 +223,24 @@ function View(props: { api: TuiPluginApi }) {
       })
   }
 
+  // mycelis_change - this dialog used to mirror the highlighted row back into `current` via
+  // `onMove`/`setCur`. DialogSelect reacts to its `current` prop with a createEffect that
+  // re-centers the scroll (moveTo + scrollToSelection) on every change, so every arrow-key press
+  // fed straight back into a second, redundant scroll on the same tick - that's the lag/flicker on
+  // navigate. Other DialogSelect callers (e.g. dialog-model.tsx) pass an independent value for
+  // `current` (the active model), not an echo of their own onMove, and don't hit this. Plugins have
+  // no equivalent "current" concept - row highlighting is already handled internally by
+  // DialogSelect's own selected()/store.selected - so just drop current/onMove entirely.
   return (
     <DialogSelect
       title="Plugins"
       options={rows()}
-      current={cur()}
-      onMove={(item) => setCur(item.value)}
       actions={[
         {
           title: "toggle",
           command: "plugins.toggle",
           hidden: lock(),
           onTrigger: (item) => {
-            setCur(item.value)
             flip(item.value)
           },
         },
@@ -224,7 +254,6 @@ function View(props: { api: TuiPluginApi }) {
         },
       ]}
       onSelect={(item) => {
-        setCur(item.value)
         flip(item.value)
       }}
     />

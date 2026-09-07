@@ -26,6 +26,7 @@ export { migrateLegacyKiloAuth, LEGACY_CONFIG_PATH } from "./auth/legacy-migrati
 // ============================================================================
 export {
   fetchProfile,
+  fetchMycelisProfile, // mycelis_change
   fetchBalance,
   fetchProfileWithBalance,
   fetchDefaultModel,

@@ -192,15 +192,21 @@ export function createKiloRoutes(deps: KiloRoutesDeps) {
               },
             },
           },
-          ...errors(400, 401),
+          ...errors(400, 401, 502), // mycelis_change - 502 covers the Mycelis backend being unreachable
         },
       }),
       async (c: any) => {
         try {
           return c.json(await getProfile(Auth))
         } catch (err) {
-          if (!(err instanceof UnauthorizedError)) throw err
-          return c.json({ error: "Not authenticated with Kilo Gateway" }, 401)
+          if (err instanceof UnauthorizedError) {
+            return c.json({ error: "Not authenticated with Kilo Gateway" }, 401)
+          }
+          // mycelis_change - anything else (Mycelis backend unreachable, bad response, etc.) used
+          // to fall through to `throw err`, producing an unhandled 500 the SDK client can't parse
+          // and reports back as a generic "Failed to fetch" with no indication of the real cause.
+          const message = err instanceof Error ? err.message : String(err)
+          return c.json({ error: message }, 502)
         }
       },
     )

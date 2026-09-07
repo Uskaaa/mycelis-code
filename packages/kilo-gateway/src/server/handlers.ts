@@ -1,4 +1,4 @@
-import { fetchBalance, fetchProfile } from "../api/profile.js"
+import { fetchBalance, fetchProfile, fetchMycelisProfile } from "../api/profile.js" // mycelis_change
 import { fetchKiloPassState } from "../api/kilo-pass.js"
 import { fetchKilocodeNotifications } from "../api/notifications.js"
 import { clearModesCache } from "../api/modes.js"
@@ -66,7 +66,19 @@ export function getOrganizationId(auth: KiloAuth | undefined) {
 
 export async function getProfile(auth: AuthStore): Promise<KiloProfileResult> {
   const info = await auth.get("kilo")
-  if (!info || info.type !== "oauth") throw new UnauthorizedError("Not authenticated with Kilo Gateway")
+  if (!info) throw new UnauthorizedError("Not authenticated with Kilo Gateway")
+
+  // mycelis_change - the browser-login flow (mycelis-browser-login.ts) stores a PAT as "api"
+  // auth, not "oauth" - it never gets a JWT. Route those through Mycelis's own PAT-authenticated
+  // profile endpoint instead of upstream Kilo's, which they were never registered on. Legacy
+  // accounts migrated from the real Kilo Code CLI (legacy-migration.ts) still store "oauth" auth
+  // with a real Kilo JWT, so keep that path pointed at Kilo's backend.
+  if (info.type === "api") {
+    const { profile, balance } = await fetchMycelisProfile(info.key)
+    return { profile, balance, kiloPass: null, currentOrgId: null }
+  }
+
+  if (info.type !== "oauth") throw new UnauthorizedError("Not authenticated with Kilo Gateway")
 
   const currentOrgId = info.accountId ?? null
   const [profile, balance, kiloPass] = await Promise.all([

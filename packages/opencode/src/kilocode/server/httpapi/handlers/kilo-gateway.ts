@@ -24,6 +24,7 @@ import {
   fetchKiloPassState,
   fetchOrganizationModes,
   fetchProfile,
+  fetchMycelisProfile, // mycelis_change
 } from "@kilocode/kilo-gateway"
 import { DIRECT_FIM_ENV, requestMistralFim, resolveFimTarget } from "@kilocode/kilo-gateway/fim"
 import { DIRECT_EDIT_ENV, extractFencedBody, resolveEditTarget } from "@kilocode/kilo-gateway/edit"
@@ -76,7 +77,33 @@ export const kiloGatewayHandlers = HttpApiBuilder.group(InstanceHttpApi, "kilo",
 
     const profile = Effect.fn("KiloGatewayHttpApi.profile")(function* () {
       const info = yield* auth.get("kilo").pipe(Effect.mapError(() => new HttpApiError.BadRequest({})))
-      if (!info || info.type !== "oauth") return yield* Effect.fail(new HttpApiError.Unauthorized({}))
+      if (!info) return yield* Effect.fail(new HttpApiError.Unauthorized({}))
+
+      // mycelis_change - the browser-login flow (mycelis-browser-login.ts) stores a PAT as "api"
+      // auth, not "oauth" - it never gets a JWT. Route those through Mycelis's own
+      // PAT-authenticated profile endpoint instead of upstream Kilo's, which they were never
+      // registered on. Legacy accounts migrated from the real Kilo Code CLI (legacy-migration.ts)
+      // still store "oauth" auth with a real Kilo JWT, so keep that path pointed at Kilo.
+      if (info.type === "api") {
+        const outcome = yield* Effect.promise(() =>
+          fetchMycelisProfile(info.key).then(
+            (value) => ({ ok: true as const, value }),
+            (error: unknown) => ({
+              ok: false as const,
+              message: error instanceof Error ? error.message : String(error),
+            }),
+          ),
+        )
+        if (!outcome.ok) {
+          // HttpApiError.BadRequest/Unauthorized render as an empty body, which left the TUI
+          // with nothing to show but a generic "failed to fetch" - a real message here is what
+          // actually lets someone diagnose e.g. "Mycelis backend unreachable".
+          return HttpServerResponse.jsonUnsafe({ error: outcome.message }, { status: 502 })
+        }
+        return { ...outcome.value, kiloPass: null, currentOrgId: null }
+      }
+
+      if (info.type !== "oauth") return yield* Effect.fail(new HttpApiError.Unauthorized({}))
 
       const currentOrgId = info.accountId ?? null
       const [profile, balance, kiloPass] = yield* Effect.tryPromise({

@@ -1,6 +1,6 @@
 import { select } from "@clack/prompts"
 import type { KilocodeProfile, Organization, KilocodeBalance } from "../types.js"
-import { KILO_API_BASE, DEFAULT_MODEL, DEFAULT_FREE_MODEL } from "./constants.js"
+import { KILO_API_BASE, DEFAULT_MODEL, DEFAULT_FREE_MODEL, MYCELIS_WEB_URL } from "./constants.js" // mycelis_change
 
 /**
  * Fetch user profile from Kilo API
@@ -43,6 +43,61 @@ export async function fetchProfile(token: string): Promise<KilocodeProfile> {
  * Alias for compatibility with existing code
  */
 export const getKiloProfile = fetchProfile
+
+// mycelis_change start
+/**
+ * Fetch profile + balance from Mycelis's own backend (ProfileController in Mycelis.WebApp),
+ * authenticated with the PAT minted by the browser-login flow - not the JWT the upstream Kilo
+ * `/api/profile` (fetchProfile above) expects, which Mycelis users never actually have. Combines
+ * what fetchProfile+fetchBalance do separately for Kilo into one request since the Mycelis
+ * endpoint already returns both.
+ */
+export async function fetchMycelisProfile(pat: string): Promise<{
+  profile: KilocodeProfile
+  balance: KilocodeBalance | null
+}> {
+  let response: Response
+  try {
+    response = await fetch(`${MYCELIS_WEB_URL}/api/profile`, {
+      headers: {
+        Authorization: `Bearer ${pat}`,
+        "Content-Type": "application/json",
+      },
+    })
+  } catch (cause) {
+    // mycelis_change - the raw fetch() rejection here is a generic "fetch failed"/"Failed to
+    // fetch" with no indication of what actually went wrong, which is useless when it surfaces in
+    // the TUI. Name the concrete, most likely cause instead.
+    throw new Error(`Could not reach Mycelis backend at ${MYCELIS_WEB_URL} - is it running?`, { cause })
+  }
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("Invalid token")
+    }
+    throw new Error(`Failed to fetch profile: ${response.status}`)
+  }
+
+  const data = (await response.json()) as {
+    user?: { email?: string; name?: string }
+    organizations?: Organization[]
+    selectedOrganizationId?: string | null
+    hasPersonalAccount?: boolean | null
+    balance?: number | null
+  }
+
+  return {
+    profile: {
+      email: data.user?.email ?? "",
+      name: data.user?.name,
+      organizations: data.organizations,
+      selectedOrganizationId: data.selectedOrganizationId ?? undefined,
+      hasPersonalAccount: data.hasPersonalAccount ?? undefined,
+    },
+    balance: typeof data.balance === "number" ? { balance: data.balance } : null,
+  }
+}
+// mycelis_change end
 
 /**
  * Resolve the organization a fresh login should default to.

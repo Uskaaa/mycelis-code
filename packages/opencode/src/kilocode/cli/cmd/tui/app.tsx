@@ -299,6 +299,12 @@ export function init() {
             })
             return
           }
+          // mycelis_change - give the same success feedback as /remote and /privacy instead of
+          // just closing the dialog, so it's clear the toggle actually took effect.
+          toast.show({
+            message: !enabled ? "Auto-approve enabled" : "Auto-approve disabled",
+            variant: "success",
+          })
           dialog.clear()
         },
       },

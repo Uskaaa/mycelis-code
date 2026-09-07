@@ -57,6 +57,7 @@ import { KiloSessionTuiSync } from "@/kilocode/session/tui-sync"
 import { slashMatches } from "@/kilocode/cli/cmd/command-display"
 import { createCostAlertController } from "@/kilocode/cli/cmd/tui/cost-alert"
 import { MemoryPrompt } from "@/kilocode/cli/cmd/tui/component/memory-prompt"
+import { isAllowEverything } from "@/kilocode/cli/cmd/tui/app"
 // kilocode_change end
 import { KILO_BASE_MODE, useBindings, useCommandShortcut, useLeaderActive, useOpencodeKeymap } from "../../keymap"
 import { useTuiConfig } from "../../config"
@@ -173,6 +174,9 @@ export function Prompt(props: PromptProps) {
   const toast = useToast()
   const nudge = useNudge() // kilocode_change
   const status = createMemo(() => sync.data.session_status?.[props.sessionID ?? ""] ?? { type: "idle" })
+  // mycelis_change - the "auto" badge should also reflect the saved (server-side) auto-approve
+  // rule from /auto-approve, not just the in-memory /auto-approve-session mode.
+  const globalAutoApprove = createMemo(() => isAllowEverything(sync.data.config.permission))
   const history = usePromptHistory()
   const stash = usePromptStash()
   const keymap = useOpencodeKeymap()
@@ -1618,8 +1622,13 @@ export function Prompt(props: PromptProps) {
                         alpha={agentMetaAlpha}
                       />
                       {/* kilocode_change end */}
-                      <Show when={store.mode === "normal" && local.permission.mode === "auto"}>
-                        <text fg={fadeColor(theme.textMuted, agentMetaAlpha())}>auto</text>
+                      {/* mycelis_change - "auto*" (saved, /auto-approve) vs "auto" (this TUI run
+                          only, /auto-approve-session) - previously both showed as plain "auto",
+                          which didn't tell the user which one was actually active */}
+                      <Show when={store.mode === "normal" && (local.permission.mode === "auto" || globalAutoApprove())}>
+                        <text fg={fadeColor(theme.textMuted, agentMetaAlpha())}>
+                          {globalAutoApprove() ? "auto*" : "auto"}
+                        </text>
                       </Show>
                       <Show when={store.mode === "normal"}>
                       <box flexDirection="row" gap={1}>

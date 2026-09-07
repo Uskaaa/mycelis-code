@@ -1336,7 +1336,9 @@ export function fromModelsDevProvider(provider: ModelsDev.Provider): Info {
   return {
     id: ProviderV2.ID.make(provider.id),
     source: "custom",
-    name: provider.name,
+    // mycelis_change - the upstream catalog still calls this provider "Kilo Gateway"; rename it
+    // here since it's the single place every provider display (model picker, search, etc.) reads from.
+    name: provider.id === "kilo" ? "Mycelis" : provider.name,
     description: provider.description, // kilocode_change
     env: [...(provider.env ?? [])],
     options: {},

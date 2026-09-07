@@ -708,6 +708,7 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         category: "Agent",
         hidden: true,
         run: () => {
+          if (!connected()) return // mycelis_change - don't allow switching agents while logged out
           local.agent.move(1)
         },
       },
@@ -743,6 +744,7 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         category: "Agent",
         hidden: true,
         run: () => {
+          if (!connected()) return // mycelis_change - don't allow switching agents while logged out
           local.agent.move(-1)
         },
       },

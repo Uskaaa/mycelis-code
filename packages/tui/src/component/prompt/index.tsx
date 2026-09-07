@@ -45,6 +45,7 @@ import { formatDuration } from "../../util/format"
 import { createColors, createFrames } from "../../ui/spinner"
 import { useDialog } from "../../ui/dialog"
 import { DialogProvider as DialogProviderConnect } from "../dialog-provider"
+import { useConnected } from "../use-connected" // mycelis_change
 import { DialogAlert } from "../../ui/dialog-alert"
 import { useToast } from "../../ui/toast"
 import { useKV } from "../../context/kv"
@@ -58,6 +59,7 @@ import { slashMatches } from "@/kilocode/cli/cmd/command-display"
 import { createCostAlertController } from "@/kilocode/cli/cmd/tui/cost-alert"
 import { MemoryPrompt } from "@/kilocode/cli/cmd/tui/component/memory-prompt"
 import { isAllowEverything } from "@/kilocode/cli/cmd/tui/app"
+import { REDACTED } from "@/kilocode/pii" // mycelis_change
 // kilocode_change end
 import { KILO_BASE_MODE, useBindings, useCommandShortcut, useLeaderActive, useOpencodeKeymap } from "../../keymap"
 import { useTuiConfig } from "../../config"
@@ -172,6 +174,7 @@ export function Prompt(props: PromptProps) {
   const tuiConfig = useTuiConfig()
   const dialog = useDialog()
   const toast = useToast()
+  const connected = useConnected() // mycelis_change
   const nudge = useNudge() // kilocode_change
   const status = createMemo(() => sync.data.session_status?.[props.sessionID ?? ""] ?? { type: "idle" })
   // mycelis_change - the "auto" badge should also reflect the saved (server-side) auto-approve
@@ -1606,8 +1609,10 @@ export function Prompt(props: PromptProps) {
                         {/* kilocode_change start */}
                         {store.mode === "shell"
                           ? "Shell"
-                          : (local.agent.current()?.displayName ??
-                            Locale.titlecase(local.agent.current()?.name ?? ""))}{" "}
+                          : !connected() // mycelis_change - don't reveal the configured agent while logged out
+                            ? REDACTED
+                            : (local.agent.current()?.displayName ??
+                              Locale.titlecase(local.agent.current()?.name ?? ""))}{" "}
                         {/* kilocode_change end */}
                       </text>
                       {/* kilocode_change start - vim mode indicator */}
@@ -1637,10 +1642,14 @@ export function Prompt(props: PromptProps) {
                           flexShrink={0}
                           fg={fadeColor(leader() ? theme.textMuted : theme.text, modelMetaAlpha())}
                         >
-                          {local.model.parsed().model}
+                          {/* mycelis_change - don't reveal the configured model (incl. locally
+                              configured ones from kilo.json) while logged out */}
+                          {connected() ? local.model.parsed().model : REDACTED}
                         </text>
-                        <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>{currentProviderLabel()}</text>
-                        <Show when={showVariant()}>
+                        <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>
+                          {connected() ? currentProviderLabel() : ""}
+                        </text>
+                        <Show when={showVariant() && connected()}>
                           <text fg={fadeColor(theme.textMuted, variantMetaAlpha())}>·</text>
                           <text>
                             <span style={{ fg: fadeColor(theme.warning, variantMetaAlpha()), bold: true }}>

@@ -234,16 +234,20 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
             toast.show({ message: `Failed to update privacy mode (${status})`, variant: "error" })
             return
           }
+          // mycelis_change - show feedback as soon as the toggle itself succeeded instead of
+          // gating it behind a second round trip (two more config.get() calls) that only exists
+          // to refresh local state. /auto-approve feels instant because it does exactly one call
+          // before toasting; this now matches that instead of waiting on ~3 sequential requests.
+          toast.show({
+            message: next ? "Privacy mode enabled" : "Privacy mode disabled",
+            variant: "success",
+          })
           const [cfg, global] = await Promise.all([
             sdk.client.config.get({}),
             sdk.client.global.config.get({}),
           ])
           if (cfg.data) sync.set("config", reconcile(cfg.data))
           if (global.data) sync.set("globalConfig", reconcile(global.data))
-          toast.show({
-            message: next ? "Privacy mode enabled" : "Privacy mode disabled",
-            variant: "success",
-          })
         },
       },
 

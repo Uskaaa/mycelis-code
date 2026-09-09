@@ -12,6 +12,7 @@ import { useConnected } from "./use-connected"
 import { ModelInfoPanel } from "@/kilocode/components/model-info-panel" // kilocode_change
 import { FreeModelDisclosure } from "@/kilocode/components/free-model-disclosure" // kilocode_change
 import { buildModelPickerOptions, rankProviderOptions } from "../kilocode/model-picker" // kilocode_change
+import * as KiloProvider from "@/kilocode/cli/cmd/tui/component/dialog-provider" // mycelis_change
 
 export function DialogModel(props: { providerID?: string }) {
   const local = useLocal()
@@ -33,6 +34,11 @@ export function DialogModel(props: { providerID?: string }) {
   // kilocode_change end
 
   const showExtra = createMemo(() => connected() && !props.providerID)
+
+  // mycelis_change - while Mycelis is the only supported sign-in path, the model picker should
+  // only ever offer Mycelis's own models, not the full generic models.dev catalog for every
+  // other BYOK provider (same filter already applied to the "connect a provider" list).
+  const visibleProviders = createMemo(() => sync.data.provider.filter((p) => !KiloProvider.isProviderHidden(p.id)))
 
   // kilocode_change start
   const wide = createMemo(() => dimensions().width >= 108)
@@ -78,7 +84,7 @@ export function DialogModel(props: { providerID?: string }) {
   const options = createMemo(() => {
     const needle = query().trim()
     const modelOptions = buildModelPickerOptions({
-      providers: sync.data.provider,
+      providers: visibleProviders(), // mycelis_change - was sync.data.provider
       favorites: connected() ? local.model.favorite() : [],
       recents: local.model.recent(),
       connected: connected(),

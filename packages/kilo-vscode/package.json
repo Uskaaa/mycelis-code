@@ -1,6 +1,6 @@
 {
   "name": "kilo-code",
-  "displayName": "Kilo Code: AI Coding Agent, Copilot, and Autocomplete",
+  "displayName": "Mycelis: AI Coding Agent, Copilot, and Autocomplete",
   "description": "Open Source AI coding agent that generates code from natural language, automates tasks, and runs terminal commands. Features inline autocomplete, browser automation, automated refactoring, and custom modes for planning, coding, and debugging. Supports 500+ AI models including Claude (Anthropic), Gemini, Grok, GPT, Codex and GLM.",
   "version": "7.4.23",
   "icon": "assets/icons/logo-outline-black.png",
@@ -19,7 +19,7 @@
   },
   "license": "MIT",
   "author": {
-    "name": "Kilo Code"
+    "name": "Mycelis"
   },
   "categories": [
     "AI",
@@ -30,6 +30,8 @@
     "Testing"
   ],
   "keywords": [
+    "mycelis",
+    "Mycelis",
     "kilo",
     "Kilo Code",
     "kilocode",
@@ -78,7 +80,7 @@
     ],
     "icons": {
       "kilo-logo": {
-        "description": "Kilo Code logo",
+        "description": "Mycelis logo",
         "default": {
           "fontPath": "assets/icons/kilo-icon-font.woff2",
           "fontCharacter": "\\F101"
@@ -89,7 +91,7 @@
       "activitybar": [
         {
           "id": "kilo-code-ActivityBar",
-          "title": "Kilo Code",
+          "title": "Mycelis",
           "icon": "assets/icons/kilo-light.png",
           "darkIcon": "assets/icons/kilo-dark.png"
         }
@@ -100,7 +102,7 @@
         {
           "type": "webview",
           "id": "kilo-code.SidebarProvider",
-          "name": "Kilo Code"
+          "name": "Mycelis"
         }
       ]
     },
@@ -108,43 +110,43 @@
       {
         "command": "kilo-code.new.plusButtonClicked",
         "title": "New Task",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(add)"
       },
       {
         "command": "kilo-code.new.agentManagerOpen",
         "title": "Agent Manager",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(organization)"
       },
       {
         "command": "kilo-code.new.kiloClawOpen",
-        "title": "KiloClaw",
-        "category": "Kilo Code",
+        "title": "MycelisClaw",
+        "category": "Mycelis",
         "icon": "$(comment-discussion)"
       },
       {
         "command": "kilo-code.new.marketplaceButtonClicked",
         "title": "Marketplace",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(extensions)"
       },
       {
         "command": "kilo-code.new.historyButtonClicked",
         "title": "History",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(history)"
       },
       {
         "command": "kilo-code.new.profileButtonClicked",
         "title": "Profile",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(account)"
       },
       {
         "command": "kilo-code.new.settingsButtonClicked",
         "title": "Settings",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(settings-gear)"
       },
       {
@@ -159,7 +161,7 @@
       },
       {
         "command": "kilo-code.new.sidebarTitle.kiloClawOpen",
-        "title": "KiloClaw",
+        "title": "MycelisClaw",
         "icon": "$(comment-discussion)"
       },
       {
@@ -185,7 +187,7 @@
       {
         "command": "kilo-code.new.openInTab",
         "title": "Open in Tab",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": {
           "light": "assets/icons/kilo-light.svg",
           "dark": "assets/icons/kilo-dark.svg"
@@ -194,201 +196,201 @@
       {
         "command": "kilo-code.new.showChanges",
         "title": "Show Changes",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.openMigrationWizard",
         "title": "Migrate Settings from Legacy Version",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.showMemory",
         "title": "Show Project Memory",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.toggleMemory",
         "title": "Toggle Project Memory",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.autocomplete.generateSuggestions",
         "title": "Generate Suggested Edits",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.autocomplete.cancelSuggestions",
         "title": "Cancel Suggested Edits",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.autocomplete.nextEdit.acceptOrJump",
         "title": "Next Edit: Accept or Jump to Suggested Edit",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.autocomplete.nextEdit.dismiss",
         "title": "Next Edit: Dismiss Pending Suggestion",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.previousSession",
         "title": "Agent Manager: Previous Session",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.nextSession",
         "title": "Agent Manager: Next Session",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.previousTab",
         "title": "Agent Manager: Previous Tab",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.nextTab",
         "title": "Agent Manager: Next Tab",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.previousTerminal",
         "title": "Agent Manager: Previous Terminal",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.nextTerminal",
         "title": "Agent Manager: Next Terminal",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.search",
         "title": "Agent Manager: Search Worktrees and Sessions",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.showTerminal",
         "title": "Agent Manager: Focus Terminal",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(terminal)"
       },
       {
         "command": "kilo-code.new.agentManager.runScript",
         "title": "Agent Manager: Run Script",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(play)"
       },
       {
         "command": "kilo-code.new.agentManager.toggleDiff",
         "title": "Agent Manager: Toggle Diff Panel",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(diff)"
       },
       {
         "command": "kilo-code.new.agentManager.showShortcuts",
         "title": "Agent Manager: Show Keyboard Shortcuts",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": "$(keyboard)"
       },
       {
         "command": "kilo-code.new.agentManager.newTab",
         "title": "Agent Manager: New Tab",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.newTerminalTab",
         "title": "Agent Manager: New Terminal Tab",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.newSideTerminal",
         "title": "Agent Manager: New Sidebar Terminal Tab",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.closeTab",
         "title": "Agent Manager: Close Tab",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.newWorktree",
         "title": "Agent Manager: Configure New Worktree",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.quickWorktree",
         "title": "Agent Manager: New Worktree",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.openWorktree",
         "title": "Agent Manager: Open Worktree",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.openPR",
         "title": "Agent Manager: Open Pull Request",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.closeWorktree",
         "title": "Agent Manager: Close Worktree",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.advancedWorktree",
         "title": "Agent Manager: Configure New Worktree",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo1",
         "title": "Agent Manager: Jump to Item 1",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo2",
         "title": "Agent Manager: Jump to Item 2",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo3",
         "title": "Agent Manager: Jump to Item 3",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo4",
         "title": "Agent Manager: Jump to Item 4",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo5",
         "title": "Agent Manager: Jump to Item 5",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo6",
         "title": "Agent Manager: Jump to Item 6",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo7",
         "title": "Agent Manager: Jump to Item 7",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo8",
         "title": "Agent Manager: Jump to Item 8",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.jumpTo9",
         "title": "Agent Manager: Jump to Item 9",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.generateCommitMessage",
         "title": "Generate Commit Message",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "icon": {
           "light": "assets/icons/kilo-light.svg",
           "dark": "assets/icons/kilo-dark.svg"
@@ -397,87 +399,87 @@
       {
         "command": "kilo-code.new.explainCode",
         "title": "Explain Code",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.fixCode",
         "title": "Fix Code",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.improveCode",
         "title": "Improve Code",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.addToContext",
         "title": "Add to Context",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.terminalAddToContext",
         "title": "Add Terminal Content to Context",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.terminalFixCommand",
         "title": "Fix This Command",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.terminalExplainCommand",
         "title": "Explain This Command",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.focusChatInput",
         "title": "Focus Chat Input",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.toggleChatSearch",
         "title": "Toggle Chat Search",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.cycleAgentMode",
         "title": "Cycle Agent Mode",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.cyclePreviousAgentMode",
         "title": "Cycle Previous Agent Mode",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.toggleAutoApprove",
         "title": "Toggle Auto-Approve",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.generateTerminalCommand",
         "title": "Generate Terminal Command",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.takeHeapSnapshot",
         "title": "Take Heap Snapshot",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.reload",
         "title": "Reload Config and Skills",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       }
     ],
     "submenus": [
       {
         "id": "kilo-code.new.editorContextMenu",
-        "label": "Kilo Code"
+        "label": "Mycelis"
       },
       {
         "id": "kilo-code.new.terminalContextMenu",
-        "label": "Kilo Code"
+        "label": "Mycelis"
       }
     ],
     "menus": {
@@ -885,12 +887,12 @@
       }
     ],
     "configuration": {
-      "title": "Kilo Code",
+      "title": "Mycelis",
       "properties": {
         "kilo-code.new.language": {
           "type": "string",
           "default": "",
-          "description": "Override the UI language for Kilo Code (e.g. en, de, ja). Empty means use VS Code's display language.",
+          "description": "Override the UI language for Mycelis (e.g. en, de, ja). Empty means use VS Code's display language.",
           "enum": [
             "",
             "en",
@@ -943,7 +945,7 @@
         "kilo-code.new.languageCommitMessage": {
           "type": "string",
           "default": "sync",
-          "description": "Language used for AI-generated commit messages. Choose 'sync' to follow the Kilo Code UI language, or select a specific language.",
+          "description": "Language used for AI-generated commit messages. Choose 'sync' to follow the Mycelis UI language, or select a specific language.",
           "enum": [
             "sync",
             "en",
@@ -1014,9 +1016,9 @@
             "mercury-next-edit"
           ],
           "enumDescriptions": [
-            "Codestral via Kilo Gateway",
-            "Mercury Edit 2 (FIM) via Kilo Gateway",
-            "Mercury Edit 2 (Next Edit), multi-line edit predictions with jump-to-edit UX, via Kilo Gateway",
+            "Codestral via Mycelis",
+            "Mercury Edit 2 (FIM) via Mycelis",
+            "Mercury Edit 2 (Next Edit), multi-line edit predictions with jump-to-edit UX, via Mycelis",
             "Codestral via your connected Mistral provider API key",
             "Mercury Edit 2 (FIM) via your connected Inception provider API key",
             "Mercury Edit 2 (Next Edit), multi-line edit predictions with jump-to-edit UX, via your connected Inception provider API key"
@@ -1031,11 +1033,11 @@
             "inception"
           ],
           "enumDescriptions": [
-            "Use autocomplete models through Kilo Gateway",
+            "Use autocomplete models through Mycelis",
             "Use autocomplete models through your connected Mistral provider API key",
             "Use autocomplete models through your connected Inception provider API key"
           ],
-          "description": "Provider to use for inline autocomplete suggestions. If unset, Kilo Gateway is used."
+          "description": "Provider to use for inline autocomplete suggestions. If unset, Mycelis is used."
         },
         "kilo-code.new.autocomplete.enableAutoTrigger": {
           "type": "boolean",
@@ -1093,17 +1095,17 @@
         "kilo-code.new.claudeCodeCompat": {
           "type": "boolean",
           "default": false,
-          "description": "Load CLAUDE.md instructions and skills from your Claude Code configuration directory into Kilo sessions. Enable this if you want Kilo to use your Claude Code instructions and skills."
+          "description": "Load CLAUDE.md instructions and skills from your Claude Code configuration directory into Mycelis sessions. Enable this if you want Mycelis to use your Claude Code instructions and skills."
         },
         "kilo-code.new.extraCaCerts": {
           "type": "string",
           "default": "",
-          "description": "Absolute path to a PEM file containing extra CA certificates to trust when the Kilo backend makes HTTPS requests (sets NODE_EXTRA_CA_CERTS on the CLI process). Use this if you're behind a corporate proxy that performs SSL inspection. Leave empty to rely on the OS trust store."
+          "description": "Absolute path to a PEM file containing extra CA certificates to trust when the Mycelis backend makes HTTPS requests (sets NODE_EXTRA_CA_CERTS on the CLI process). Use this if you're behind a corporate proxy that performs SSL inspection. Leave empty to rely on the OS trust store."
         },
         "kilo-code.new.autoApprove.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Start Kilo Code with the main auto-approve toggle enabled. When enabled, permission prompts are approved automatically."
+          "description": "Start Mycelis with the main auto-approve toggle enabled. When enabled, permission prompts are approved automatically."
         },
         "kilo-code.new.maxCost": {
           "type": "number",
@@ -1116,7 +1118,7 @@
           "default": 13,
           "minimum": 10,
           "maximum": 24,
-          "description": "Font size in pixels for the Kilo Code webview UI."
+          "description": "Font size in pixels for the Mycelis webview UI."
         },
         "kilo-code.new.browserAutomation.enabled": {
           "type": "boolean",
@@ -1225,7 +1227,7 @@
           "enumDescriptions": [
             "Show work style onboarding so you can choose again",
             "Human in the Loop: review agent actions as they happen",
-            "High autonomy: let Kilo take most actions with fewer interruptions",
+            "High autonomy: let Mycelis take most actions with fewer interruptions",
             "Onboarding was skipped without changing work style settings"
           ],
           "description": "Preferred agent work style. Set to Unset to show the onboarding flow again."
@@ -1233,7 +1235,7 @@
         "kilo-code.new.diff.renderMarkdown": {
           "type": "boolean",
           "default": false,
-          "description": "Render Markdown files in Kilo diff viewers by default. Toggle this from a Markdown file header in the diff viewer."
+          "description": "Render Markdown files in Mycelis diff viewers by default. Toggle this from a Markdown file header in the diff viewer."
         }
       }
     }

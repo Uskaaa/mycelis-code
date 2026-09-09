@@ -6,7 +6,7 @@
  * an action to launch the create flow (dialog-deployment-create.tsx).
  */
 
-import { createSignal, onMount, Show } from "solid-js"
+import { createSignal, Show } from "solid-js"
 import { useDialog } from "@tui/ui/dialog"
 import { useToast } from "@tui/ui/toast"
 import { useTheme } from "@tui/context/theme"
@@ -30,6 +30,12 @@ const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" 
 
 interface DialogDeploymentsProps {
   useSDK: () => UseSDK
+  // mycelis_change - fetched by the /deployments command BEFORE opening this dialog (same
+  // pattern as /profile and /workspace) instead of fetching inside onMount here. This dialog's
+  // own onMount fetch used to fire far more often than "the user pressed /deployments once" -
+  // the terminal renderer re-runs component bodies more eagerly than a DOM renderer would, so
+  // any fetch triggered from onMount here turned into a request storm hammering the backend.
+  initialDeployments: Deployment[]
 }
 
 export function DialogDeployments(props: DialogDeploymentsProps) {
@@ -37,35 +43,29 @@ export function DialogDeployments(props: DialogDeploymentsProps) {
   const toast = useToast()
   const { theme } = useTheme()
   const sdk = props.useSDK()
-  const [deployments, setDeployments] = createSignal<Deployment[]>([])
-  const [loading, setLoading] = createSignal(true)
+  const [deployments, setDeployments] = createSignal<Deployment[]>(props.initialDeployments)
   const [busy, setBusy] = createSignal(false)
+  let refreshInFlight = false // mycelis_change - guard against re-entrant/duplicate refresh() calls
 
+  // mycelis_change - only called explicitly after a mutating action (toggle/delete/create), never
+  // from onMount - see the initialDeployments note above.
   async function refresh() {
-    setLoading(true)
+    if (refreshInFlight) return
+    refreshInFlight = true
     try {
       const response = await sdk.client.kilo.deployments.list()
       if (response.error || !response.data) {
         const err = response.error as { error?: string } | undefined
-        toast.show({ message: err?.error ?? "Failed to load deployments", variant: "error" })
-        setDeployments([])
+        toast.show({ message: err?.error ?? "Failed to refresh deployments", variant: "error" })
         return
       }
       setDeployments(response.data as Deployment[])
     } catch (error) {
-      // mycelis_change - a bug here used to leave the dialog stuck on "Loading..." forever with
-      // no feedback at all (any throw, sync or async, skipped straight past setLoading(false)
-      // below). Surface it and always clear the loading state no matter what went wrong.
-      toast.show({ message: `Failed to load deployments: ${error}`, variant: "error" })
-      setDeployments([])
+      toast.show({ message: `Failed to refresh deployments: ${error}`, variant: "error" })
     } finally {
-      setLoading(false)
+      refreshInFlight = false
     }
   }
-
-  onMount(() => {
-    refresh().catch((error) => toast.show({ message: `Failed to load deployments: ${error}`, variant: "error" }))
-  })
 
   function statusColor(status: string) {
     if (status === "Running") return theme.success
@@ -87,7 +87,16 @@ export function DialogDeployments(props: DialogDeploymentsProps) {
       <DialogDeploymentCreate
         useSDK={props.useSDK}
         onDone={() => {
-          dialog.replace(() => <DialogDeployments useSDK={props.useSDK} />)
+          // mycelis_change - re-fetch here (a single explicit call, not onMount) before reopening
+          // so the newly created deployment shows up immediately.
+          void sdk.client.kilo.deployments
+            .list()
+            .then((response: any) =>
+              dialog.replace(() => (
+                <DialogDeployments useSDK={props.useSDK} initialDeployments={response.data ?? []} />
+              )),
+            )
+            .catch(() => dialog.replace(() => <DialogDeployments useSDK={props.useSDK} initialDeployments={[]} />))
         }}
       />
     ))
@@ -132,43 +141,41 @@ export function DialogDeployments(props: DialogDeploymentsProps) {
   }
 
   return (
-    <Show when={!loading()} fallback={<DialogAlert title="Deployments" message="Loading..." />}>
-      <Show
-        when={deployments().length > 0}
-        fallback={
-          <DialogAlert
-            title="No Deployments"
-            message={"You don't have any deployments in this workspace yet.\nPress enter to create one."}
-            onConfirm={openCreate}
-          />
-        }
-      >
-        <DialogSelect
-          title="Deployments"
-          options={deployments().map(row)}
-          actions={[
-            {
-              title: "toggle start/stop",
-              command: "deployments.toggle",
-              hidden: busy(),
-              onTrigger: (item) => void toggle(item.value),
-            },
-            {
-              title: "delete",
-              command: "deployments.delete",
-              hidden: busy(),
-              onTrigger: (item) => void remove(item.value),
-            },
-            {
-              title: "create",
-              command: "deployments.create",
-              hidden: busy(),
-              onTrigger: openCreate,
-            },
-          ]}
-          onSelect={(item) => void toggle(item.value)}
+    <Show
+      when={deployments().length > 0}
+      fallback={
+        <DialogAlert
+          title="No Deployments"
+          message={"You don't have any deployments in this workspace yet.\nPress enter to create one."}
+          onConfirm={openCreate}
         />
-      </Show>
+      }
+    >
+      <DialogSelect
+        title="Deployments"
+        options={deployments().map(row)}
+        actions={[
+          {
+            title: "toggle start/stop",
+            command: "deployments.toggle",
+            hidden: busy(),
+            onTrigger: (item) => void toggle(item.value),
+          },
+          {
+            title: "delete",
+            command: "deployments.delete",
+            hidden: busy(),
+            onTrigger: (item) => void remove(item.value),
+          },
+          {
+            title: "create",
+            command: "deployments.create",
+            hidden: busy(),
+            onTrigger: openCreate,
+          },
+        ]}
+        onSelect={(item) => void toggle(item.value)}
+      />
     </Show>
   )
 }

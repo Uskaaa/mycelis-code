@@ -111,8 +111,22 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
         slashAliases: ["deploy", "instances"],
         enabled: isKiloConnected(),
         hidden: !isKiloConnected(),
-        run: () => {
-          dialog.replace(() => <DialogDeployments useSDK={useSDK} />)
+        run: async () => {
+          // mycelis_change - fetch before opening (same pattern as /profile and /workspace
+          // below), not inside the dialog's own onMount - see dialog-deployments.tsx for why.
+          try {
+            const response = await sdk.client.kilo.deployments.list()
+            if (response.error || !response.data) {
+              const err = response.error as { error?: string } | undefined
+              dialog.replace(() => (
+                <DialogAlert title="Error" message={err?.error ?? "Failed to fetch deployments."} />
+              ))
+              return
+            }
+            dialog.replace(() => <DialogDeployments useSDK={useSDK} initialDeployments={response.data} />)
+          } catch (error) {
+            dialog.replace(() => <DialogAlert title="Error" message={`Failed to fetch deployments: ${error}`} />)
+          }
         },
       },
 
@@ -193,6 +207,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
             sdk.client.config.overlayUpdate({
               scope: "global",
               set: { privacy_mode: next },
+              skipResponse: true, // mycelis_change - the response is never used; see ConfigOverlayPatch.skipResponse
             }),
           ]
           if (!next && sync.data.config.privacy_mode === true) {
@@ -200,6 +215,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
               sdk.client.config.overlayUpdate({
                 scope: "project",
                 unset: [["privacy_mode"]],
+                skipResponse: true, // mycelis_change
               }),
             )
           }
@@ -289,22 +305,24 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
                       return
                     }
 
-                    // Refresh provider state to reload models scoped to the new workspace
-                    await sdk.client.instance.dispose()
-                    await sync.bootstrap()
-
-                    // Update the sidebar balance immediately for the newly selected workspace
-                    refreshBalance()
-
-                    // Show success toast
+                    // Show success toast and close immediately - don't make the user wait on
+                    // the dialog for this.
                     const workspaceName = organizations.find((o: Organization) => o.id === orgId)?.name
                     toast.show({
                       message: `Switched to: ${workspaceName}`,
                       variant: "success",
                     })
-
-                    // Close dialog
                     dialog.clear()
+
+                    // mycelis_change - re-resolving the full provider/model list (not just
+                    // Mycelis's, which alone answers in ~25ms) takes several seconds - it's the
+                    // same fixed cost as any provider cache invalidation, unrelated to this
+                    // switch specifically. Run it in the background instead of blocking the
+                    // dialog on it; the model picker and prompt bar already re-validate the
+                    // selected model reactively once sync.data.provider updates (see
+                    // isModelValid/currentModel in tui/context/local.tsx), so there's nothing
+                    // else to wait for here.
+                    void sync.bootstrap().then(() => refreshBalance())
                   } catch (error) {
                     if (error instanceof DOMException && error.name === "AbortError") return
                     toast.show({

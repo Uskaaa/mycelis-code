@@ -52,7 +52,7 @@ import { WorkspaceRef } from "@/effect/instance-ref"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { Identifier } from "@/id/id"
 import { Instance } from "@/kilocode/instance"
-import { InstanceStore } from "@/project/instance-store"
+import { Provider } from "@/provider/provider" // mycelis_change
 import { ModelCache } from "@/provider/model-cache"
 import { InstanceHttpApi } from "@/server/routes/instance/httpapi/api"
 import { MessageTable, PartTable } from "@opencode-ai/core/session/sql"
@@ -76,7 +76,7 @@ function logError(route: string, err: unknown) {
 export const kiloGatewayHandlers = HttpApiBuilder.group(InstanceHttpApi, "kilo", (handlers) =>
   Effect.gen(function* () {
     const auth = yield* Auth.Service
-    const store = yield* InstanceStore.Service
+    const provider = yield* Provider.Service // mycelis_change
     const cache = yield* ModelCache.Service
     const events = yield* EventV2Bridge.Service
     const database = yield* Database.Service
@@ -411,7 +411,18 @@ export const kiloGatewayHandlers = HttpApiBuilder.group(InstanceHttpApi, "kilo",
 
       yield* cache.clear("kilo")
       clearModesCache()
-      yield* store.disposeAll().pipe(Effect.mapError(() => new HttpApiError.Unauthorized({})))
+      // mycelis_change - store.disposeAll() here used to tear down every loaded instance
+      // (LSP clients, plugins, indexing, and - critically - the very instance serving this
+      // request/the TUI's own connection) just to make the newly selected workspace's models
+      // show up, exactly the same "disposeAll for a cache refresh" issue already fixed for
+      // sign-in/out (see provider-auth-lifecycle.ts). That could tear down the connection mid
+      // request, which is why /workspace switching looked like it silently did nothing.
+      // Provider.invalidate() refreshes just the provider/model cache for this instance instead.
+      // Confirmed fast on its own (~90ms) - the several-second delay users see afterward is in
+      // re-resolving the FULL provider/model list (all providers, not just Mycelis's, which
+      // alone answers in ~25ms), a fixed cost of any provider invalidation. See kilo-commands.tsx
+      // /workspace, which no longer blocks on that before closing the dialog.
+      yield* provider.invalidate()
       return true
     })
 

@@ -10,6 +10,7 @@ import { KiloGatewayApi, KiloGatewayPaths } from "../../../src/kilocode/server/h
 import { kiloGatewayHandlers } from "../../../src/kilocode/server/httpapi/handlers/kilo-gateway"
 import { InstanceStore } from "../../../src/project/instance-store"
 import { ModelCache } from "../../../src/provider/model-cache"
+import { Provider } from "../../../src/provider/provider" // mycelis_change
 import { Session } from "../../../src/session/session"
 import { Storage } from "../../../src/storage/storage"
 import { Authorization } from "../../../src/server/routes/instance/httpapi/middleware/authorization"
@@ -27,6 +28,7 @@ const auth = Layer.mock(Auth.Service)({
   get: () => Effect.succeed(new Auth.Api({ type: "api", key: "test-token" })),
 })
 const store = Layer.mock(InstanceStore.Service)({})
+const provider = Layer.mock(Provider.Service)({ invalidate: () => Effect.void }) // mycelis_change
 const cache = Layer.mock(ModelCache.Service)({})
 const session = Layer.mock(Session.Service)({})
 const storage = Layer.mock(Storage.Service)({})
@@ -54,6 +56,7 @@ const layer = HttpRouter.serve(
       testWorkspaceRouting,
       auth,
       store,
+      provider,
       cache,
       session,
       AppNodeBuilder.build(EventV2Bridge.node),

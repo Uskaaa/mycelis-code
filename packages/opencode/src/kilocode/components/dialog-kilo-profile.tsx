@@ -9,7 +9,7 @@ import { useTheme } from "@tui/context/theme"
 import { useDialog } from "@tui/ui/dialog"
 import { Link } from "@tui/ui/link"
 import { TextAttributes } from "@opentui/core"
-import type { KilocodeProfile, KilocodeBalance } from "@kilocode/kilo-gateway"
+import { MYCELIS_WEB_URL, type KilocodeProfile, type KilocodeBalance } from "@kilocode/kilo-gateway" // mycelis_change
 
 interface DialogKiloProfileProps {
   profile: KilocodeProfile
@@ -41,10 +41,10 @@ export function DialogKiloProfile(props: DialogKiloProfileProps) {
       ? `$${props.balance.balance.toFixed(2)}`
       : null
 
-  // Generate usage URL based on organization context
-  const usageUrl = props.currentOrgId
-    ? `https://app.kilo.ai/organizations/${props.currentOrgId}/usage-details`
-    : "https://app.kilo.ai/usage"
+  // mycelis_change - Mycelis's dashboard has no per-workspace deep link for usage/spend (it
+  // operates on whichever workspace is active in the browser session, not a URL param) - point
+  // at the settings page (spend/billing) instead of the old hardcoded app.kilo.ai link.
+  const usageUrl = `${MYCELIS_WEB_URL}/dashboard/settings`
 
   return (
     <box paddingLeft={2} paddingRight={2} gap={1}>

@@ -1,7 +1,7 @@
 import { Auth } from "@/auth"
 // kilocode_change start
 import {
-  invalidateAfterProviderAuthChange,
+  invalidateAllLoadedInstanceProviders, // mycelis_change - these routes have no InstanceRef, see provider-auth-lifecycle.ts
   invalidatePresence,
 } from "@/kilocode/server/provider-auth-lifecycle"
 // kilocode_change end
@@ -23,7 +23,7 @@ export const controlHandlers = HttpApiBuilder.group(RootHttpApi, "control", (han
       yield* auth.set(ctx.params.providerID, ctx.payload).pipe(Effect.orDie)
       // kilocode_change start - drop old presence socket before instance disposal on Kilo auth changes
       if (ctx.params.providerID === "kilo") yield* invalidatePresence()
-      yield* invalidateAfterProviderAuthChange(ctx.params.providerID)
+      yield* invalidateAllLoadedInstanceProviders(ctx.params.providerID)
       // kilocode_change end
       return true
     })
@@ -34,7 +34,7 @@ export const controlHandlers = HttpApiBuilder.group(RootHttpApi, "control", (han
       // kilocode_change start
       yield* removeAuth(ctx.params.providerID)
       if (ctx.params.providerID === "kilo") yield* invalidatePresence()
-      yield* invalidateAfterProviderAuthChange(ctx.params.providerID)
+      yield* invalidateAllLoadedInstanceProviders(ctx.params.providerID)
       // kilocode_change end
       return true
     })

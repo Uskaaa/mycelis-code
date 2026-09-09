@@ -3,6 +3,7 @@ import type { BuiltinTuiPlugin } from "../builtins"
 import { createMemo, Show } from "solid-js"
 import { Tips } from "./tips-view"
 import { useBindings } from "../../keymap"
+import { useConnected } from "../../component/use-connected" // mycelis_change
 
 const id = "internal:home-tips"
 
@@ -40,11 +41,7 @@ const tui: TuiPlugin = async (api) => {
       home_bottom() {
         const hidden = createMemo(() => api.kv.get("tips_hidden", false))
         const first = createMemo(() => api.state.session.count() === 0)
-        const connected = createMemo(() =>
-          api.state.provider.some(
-            (item) => item.id !== "opencode" || Object.values(item.models).some((model) => model.cost?.input !== 0),
-          ),
-        )
+        const connected = useConnected() // mycelis_change - shared Mycelis-specific check instead of a local near-duplicate
         const show = createMemo(() => !hidden()) // kilocode_change - always show tips regardless of first-time status
         return <View api={api} hidden={hidden()} show={show()} connected={connected()} />
       },

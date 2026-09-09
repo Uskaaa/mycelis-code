@@ -89,6 +89,7 @@ function provider(
   } satisfies Provider.Info
   return {
     list: () => Effect.succeed({ [providerID]: info }),
+    invalidate: () => Effect.void, // mycelis_change
     getProvider: () => Effect.succeed(info),
     getModel: (providerID, modelID) => {
       const found = info.models[modelID]

@@ -1,6 +1,7 @@
 import type { TuiPlugin, TuiPluginModule } from "@kilocode/plugin/tui"
 import { createMemo, Show } from "solid-js"
 import { Tips } from "@/kilocode/components/tips"
+import { useConnected } from "@tui/component/use-connected" // mycelis_change
 
 const id = "internal:home-onboarding"
 
@@ -13,11 +14,7 @@ const tui: TuiPlugin = async (api) => {
       home_bottom() {
         const hidden = createMemo(() => api.kv.get("tips_hidden", false))
         const first = createMemo(() => api.state.session.count() === 0)
-        const connected = createMemo(() =>
-          api.state.provider.some(
-            (x) => (x.id !== "opencode" && x.id !== "kilo") || Object.values(x.models).some((y) => y.cost?.input !== 0),
-          ),
-        )
+        const connected = useConnected() // mycelis_change - shared Mycelis-specific check (api.state.provider can't tell auth from anonymous autoload)
         const onboarding = createMemo(() => first() && !connected())
         const show = createMemo(() => onboarding() && !hidden())
         return (

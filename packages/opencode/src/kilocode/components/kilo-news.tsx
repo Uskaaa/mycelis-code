@@ -7,6 +7,7 @@
 
 import { createEffect, createMemo, createSignal, on, Show } from "solid-js"
 import { useSync } from "@tui/context/sync"
+import { useConnected } from "@tui/component/use-connected" // mycelis_change
 import { useSDK } from "@tui/context/sdk"
 import { useDialog } from "@tui/ui/dialog"
 import { useKV } from "@tui/context/kv"
@@ -23,7 +24,7 @@ export function KiloNews() {
 
   const [notifications, setNotifications] = createSignal<KilocodeNotification[]>([])
   const [fetched, setFetched] = createSignal(false)
-  const isKiloConnected = createMemo(() => sync.data.provider_next.connected.includes("kilo"))
+  const isKiloConnected = useConnected() // mycelis_change - raw provider_next.connected.includes("kilo") is always true (Kilo free tier autoloads anonymously)
   const unread = createMemo(() => News.unread(notifications(), kv.get(News.key, [])))
 
   const openNewsDialog = () => {

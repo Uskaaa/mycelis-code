@@ -16,6 +16,7 @@ import { KeymapProvider, useKeymap, useKeymapSelector, useBindings } from "@open
 import { createMemo, type Accessor } from "solid-js"
 import { useTuiConfig } from "./config"
 import { TuiKeybind } from "./config/keybind"
+import { useConnected } from "./component/use-connected" // mycelis_change
 
 export const LEADER_TOKEN = "leader"
 export const KILO_BASE_MODE = "base"
@@ -48,6 +49,21 @@ const modeStacks = new WeakMap<OpenTuiKeymap, OpencodeModeStack>()
 function isVisiblePaletteCommand(command: Command) {
   return command.hidden !== true // mycelis_change - command.palette.show removed
 }
+
+// mycelis_change start - Mycelis requires its own account before any real work can happen
+// (no anonymous/free tier like Kilo's). Rather than blocking the TUI from rendering at all
+// (the previous approach in mycelis/auth/require-login.ts, reverted because a single
+// pre-render network call meant the whole CLI wouldn't start if the backend was briefly
+// unreachable), gate the slash-command list itself: it's built reactively off already-synced
+// local auth state, so the TUI always renders and only the *feature* commands stay hidden
+// until sign-in succeeds. /connect (+ /help, /exit so nobody gets stuck) stay exempt.
+//
+// Uses the shared useConnected() (isKiloConnected) check, not a raw
+// provider_next.connected.includes("kilo") lookup - "kilo" always autoloads anonymously as
+// Kilo's free tier, so it's unconditionally present in provider_next.connected whether or not
+// Mycelis sign-in ever happened. See use-connected.tsx for the real (source-based) signal.
+const MYCELIS_AUTH_GATE_EXEMPT_COMMANDS = new Set(["provider.connect", "help.show", "app.exit"])
+// mycelis_change end
 
 export function createOpencodeModeStack(keymap: OpenTuiKeymap) {
   keymap.setData(KILO_MODE_KEY, KILO_BASE_MODE)
@@ -258,11 +274,15 @@ export function useCommandShortcut(command: string): Accessor<string> {
 
 export function useCommandSlashes(): Accessor<readonly CommandSlashEntry[]> {
   const keymap = useOpencodeKeymap()
+  const kiloConnected = useConnected() // mycelis_change
   const entries = useKeymapSelector((keymap: OpenTuiKeymap) =>
     keymap.getCommandEntries({
       visibility: "reachable",
       namespace: "palette",
-      filter: isVisiblePaletteCommand,
+      // mycelis_change - hide everything except the sign-in exemptions until connected
+      filter: (command) =>
+        isVisiblePaletteCommand(command) &&
+        (kiloConnected() || MYCELIS_AUTH_GATE_EXEMPT_COMMANDS.has(command.name)),
     }),
   )
 

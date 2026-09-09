@@ -1,5 +1,8 @@
 // kilocode_change - new file
-import { fetchKiloModels, type KiloModelsResult } from "@kilocode/kilo-gateway"
+// mycelis_change - swap the catalog source for Mycelis's own model gateway; the
+// KiloModelsResult/KiloOptions names below are kept so the rest of this file's plumbing
+// (all written against the generic "kilo" provider id) stays unchanged.
+import { fetchMycelisModels as fetchKiloModels, type MycelisModelsResult as KiloModelsResult } from "@kilocode/kilo-gateway"
 import { Context, Deferred, Duration, Effect, Exit, Layer, Schema, Scope } from "effect"
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
 import { Config } from "../config/config"
@@ -28,7 +31,7 @@ export class KiloModelsService extends Context.Service<KiloModelsService, KiloMo
 
 export const kiloModelsLayer = Layer.succeed(
   KiloModelsService,
-  KiloModelsService.of({ fetch: (options) => Effect.tryPromise(() => fetchKiloModels(options)) }),
+  KiloModelsService.of({ fetch: (options) => Effect.tryPromise(() => fetchKiloModels(options)) }), // mycelis_change - fetchKiloModels aliased to fetchMycelisModels above
 )
 type Cell = {
   readonly providerID: string

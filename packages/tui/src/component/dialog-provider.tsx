@@ -42,7 +42,7 @@ type ProviderOption =
 export function providerOptions(list: { id: string; name: string }[]): ProviderOption[] {
   return [
     ...pipe(
-      list,
+      list.filter((provider) => !KiloProvider.isProviderHidden(provider.id)), // mycelis_change
       sortBy(
         (x) => PROVIDER_PRIORITY[x.id] ?? 99,
         (x) => x.name.toLowerCase(),

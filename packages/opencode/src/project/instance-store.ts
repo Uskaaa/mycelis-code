@@ -24,6 +24,10 @@ export interface Interface {
   readonly disposeDirectory: (directory: string) => Effect.Effect<void>
   readonly disposeAll: () => Effect.Effect<void>
   readonly provide: <A, E, R>(input: LoadInput, effect: Effect.Effect<A, E, R>) => Effect.Effect<A, E, R>
+  // mycelis_change - lets a caller with no InstanceRef of its own (e.g. a control-plane route)
+  // run something against every *already loaded* instance without disposing any of them - see
+  // provider-auth-lifecycle.ts's fast provider-cache refresh for auth.set/auth.remove.
+  readonly loaded: () => Effect.Effect<readonly InstanceContext[]>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/InstanceStore") {}
@@ -223,6 +227,15 @@ const layer: Layer.Layer<Service, never, Project.Service | InstanceBootstrap.Ser
     const provide = <A, E, R>(input: LoadInput, effect: Effect.Effect<A, E, R>): Effect.Effect<A, E, R> =>
       load(input).pipe(Effect.flatMap((ctx) => effect.pipe(Effect.provideService(InstanceRef, ctx))))
 
+    // mycelis_change
+    const loaded = Effect.fn("InstanceStore.loaded")(function* () {
+      const entries = [...cache.values()]
+      const exits = yield* Effect.forEach(entries, (entry) => Deferred.await(entry.deferred).pipe(Effect.exit), {
+        concurrency: 4,
+      })
+      return exits.filter(Exit.isSuccess).map((exit) => exit.value)
+    })
+
     yield* Effect.addFinalizer(() => disposeAll().pipe(Effect.ignore))
 
     return Service.of({
@@ -232,6 +245,7 @@ const layer: Layer.Layer<Service, never, Project.Service | InstanceBootstrap.Ser
       disposeDirectory,
       disposeAll,
       provide,
+      loaded,
     })
   }),
 )

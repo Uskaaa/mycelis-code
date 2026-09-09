@@ -1,6 +1,6 @@
 import { expect } from "bun:test"
 import { Auth } from "@/auth"
-import { InstanceStore } from "@/project/instance-store"
+import { Provider } from "@/provider/provider" // mycelis_change
 import { ModelCache } from "@/provider/model-cache"
 import { Effect, Layer, Redacted, Ref } from "effect"
 import * as Discovery from "../../../src/kilocode/anaconda-desktop/discovery"
@@ -77,22 +77,23 @@ it.live("sync atomically replaces the standard auth record and invalidates provi
     const cache = Layer.mock(ModelCache.Service)({
       clear: (id) => Ref.update(events, (items) => [...items, `clear:${id}`]),
     })
-    const instances = Layer.mock(InstanceStore.Service)({
-      disposeAll: () => Ref.update(events, (items) => [...items, "dispose"]),
+    // mycelis_change - sync() invalidates just the provider cache now, not the whole instance
+    const provider = Layer.mock(Provider.Service)({
+      invalidate: () => Ref.update(events, (items) => [...items, "invalidate"]),
     })
     const layer = Desktop.layer.pipe(
       Layer.provide(discovery),
       Layer.provide(platform),
       Layer.provide(auth),
       Layer.provide(cache),
-      Layer.provide(instances),
+      Layer.provide(provider),
     )
 
     const first = yield* Desktop.Service.use((service) => service.sync()).pipe(Effect.provide(layer))
     expect(first.serverID).toBe("first")
     const unchanged = yield* Desktop.Service.use((service) => service.sync()).pipe(Effect.provide(layer))
     expect(unchanged.serverID).toBe("first")
-    expect(yield* Ref.get(events)).toEqual([`clear:${PROVIDER_ID}`, "dispose"])
+    expect(yield* Ref.get(events)).toEqual([`clear:${PROVIDER_ID}`, "invalidate"])
     yield* Ref.set(index, 1)
     const second = yield* Desktop.Service.use((service) => service.sync()).pipe(Effect.provide(layer))
     expect(second.serverID).toBe("second")
@@ -104,7 +105,12 @@ it.live("sync atomically replaces the standard auth record and invalidates provi
     const metadata = decodeMetadata(stored.metadata)
     expect(metadata?.serverID).toBe("second")
     expect(metadata?.baseURL).toBe("http://127.0.0.1:8081/v1")
-    expect(yield* Ref.get(events)).toEqual([`clear:${PROVIDER_ID}`, "dispose", `clear:${PROVIDER_ID}`, "dispose"])
+    expect(yield* Ref.get(events)).toEqual([
+      `clear:${PROVIDER_ID}`,
+      "invalidate",
+      `clear:${PROVIDER_ID}`,
+      "invalidate",
+    ])
   }),
 )
 
@@ -124,13 +130,13 @@ it.live("sync requires acknowledgement for limited tool support", () =>
       set: () => Ref.update(writes, (count) => count + 1),
     })
     const cache = Layer.mock(ModelCache.Service)({ clear: () => Effect.void })
-    const instances = Layer.mock(InstanceStore.Service)({ disposeAll: () => Effect.void })
+    const provider = Layer.mock(Provider.Service)({ invalidate: () => Effect.void }) // mycelis_change
     const layer = Desktop.layer.pipe(
       Layer.provide(discovery),
       Layer.provide(platform),
       Layer.provide(auth),
       Layer.provide(cache),
-      Layer.provide(instances),
+      Layer.provide(provider),
     )
 
     const refused = yield* Desktop.Service.use((service) => service.sync()).pipe(Effect.provide(layer), Effect.result)

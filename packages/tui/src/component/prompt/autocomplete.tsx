@@ -14,6 +14,7 @@ import { getScrollAcceleration } from "../../util/scroll"
 import { useTuiPaths } from "../../context/runtime"
 import { useTuiConfig } from "../../config"
 import { useLocation } from "../../context/location"
+import { useConnected } from "../use-connected" // mycelis_change
 import { useTheme, selectedForeground } from "../../context/theme"
 import { SplitBorder } from "../../ui/border"
 import { useTerminalDimensions } from "@opentui/solid"
@@ -98,6 +99,7 @@ export function Autocomplete(props: {
   const data = useData()
   const project = useProject()
   const slashes = useCommandSlashes()
+  const connected = useConnected() // mycelis_change
   const modeStack = useOpencodeModeStack()
   const { theme } = useTheme()
   const dimensions = useTerminalDimensions()
@@ -474,6 +476,20 @@ export function Autocomplete(props: {
   )
 
   const commands = createMemo((): AutocompleteOption[] => {
+    // mycelis_change start - before sign-in, nothing has a working model behind it yet, so the
+    // only command worth showing (or letting the user reach) is the one that fixes that.
+    if (!connected()) {
+      return slashes()
+        .filter((entry) => entry.display === "/connect")
+        .map((entry) => ({
+          display: entry.display,
+          description: entry.description,
+          aliases: entry.aliases,
+          onSelect: entry.onSelect,
+        }))
+    }
+    // mycelis_change end
+
     const results: AutocompleteOption[] = [...slashes()]
 
     for (const serverCommand of sync.data.command) {

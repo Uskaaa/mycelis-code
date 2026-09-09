@@ -759,6 +759,29 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         },
         category: "Provider",
       },
+      // mycelis_change start
+      {
+        name: "provider.disconnect",
+        title: "Sign out of Mycelis",
+        hidden: !connected(),
+        slashName: "logout",
+        run: () => {
+          void (async () => {
+            const result = await sdk.client.auth.remove({ providerID: "kilo" })
+            if (result.error) {
+              toast.show({ variant: "error", message: "Sign-out failed." })
+              return
+            }
+            // mycelis_change - auth.remove already invalidates just the provider/model cache
+            // server-side (see provider-auth-lifecycle.ts); a full instance.dispose() here was
+            // redundant and made sign-out (and the next sign-in) feel slow.
+            await sync.bootstrap()
+            toast.show({ message: "Signed out of Mycelis", variant: "success" })
+          })()
+        },
+        category: "Provider",
+      },
+      // mycelis_change end
       ...(sync.data.console_state.switchableOrgCount > 1
         ? [
             {

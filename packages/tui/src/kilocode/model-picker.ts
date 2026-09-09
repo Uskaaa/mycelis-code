@@ -16,7 +16,7 @@ import * as fuzzysort from "fuzzysort"
 import { entries, filter, flatMap, groupBy, map, pipe, sortBy } from "remeda"
 
 export const KILO_PROVIDER_ID = "kilo"
-export const RECOMMENDED_CATEGORY = "Recommended"
+export const MYCELIS_CATEGORY = "Mycelis" // mycelis_change - replaces RECOMMENDED_CATEGORY; every Mycelis model/agent lands here
 
 export interface ModelPickerRef {
   providerID: string
@@ -142,7 +142,9 @@ export function buildModelPickerOptions<M extends ModelPickerModel>(
   const providerOptions = pipe(
     input.providers,
     sortBy(
-      (provider) => provider.id !== "opencode",
+      // mycelis_change - Mycelis sorts first (took over the slot "Recommended" used to occupy),
+      // then the built-in opencode provider, then everyone else alphabetically.
+      (provider) => (provider.id === KILO_PROVIDER_ID ? -1 : provider.id !== "opencode" ? 1 : 0),
       (provider) => provider.name,
     ),
     flatMap((provider) =>
@@ -157,8 +159,8 @@ export function buildModelPickerOptions<M extends ModelPickerModel>(
               ? "(Favorite)"
               : undefined,
             category: connected
-              ? provider.id === KILO_PROVIDER_ID && model.recommendedIndex !== undefined
-                ? RECOMMENDED_CATEGORY
+              ? provider.id === KILO_PROVIDER_ID // mycelis_change - all Mycelis models/agents share one category
+                ? MYCELIS_CATEGORY
                 : provider.name
               : undefined,
           }),

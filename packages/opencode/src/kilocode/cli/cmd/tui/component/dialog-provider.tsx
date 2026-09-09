@@ -70,6 +70,17 @@ export const PROVIDER_TITLES: Record<string, string> = {
   kilo: "Mycelis", // mycelis_change
 }
 
+// mycelis_change start
+/**
+ * While Mycelis is the only supported sign-in path, every other connectable provider is
+ * hidden from the "Connect a provider" list and the unauthenticated /models fallback -
+ * nothing is removed, so re-enabling BYOK providers later is just deleting this filter.
+ */
+export function isProviderHidden(providerID: string) {
+  return providerID !== "kilo"
+}
+// mycelis_change end
+
 /** Local OpenAI-compatible providers where API key is optional (localhost). */
 export const LOCAL_OPTIONAL_API_KEY = new Set(["atomic-chat", "lmstudio"])
 

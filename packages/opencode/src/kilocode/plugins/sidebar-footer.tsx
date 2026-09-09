@@ -6,6 +6,7 @@ import type { KiloPassState } from "@kilocode/kilo-gateway"
 import type { Message } from "@kilocode/sdk/v2"
 import { onBalanceRefresh } from "../balance-refresh"
 import { REDACTED_BALANCE } from "../pii"
+import { useConnected } from "@tui/component/use-connected" // mycelis_change
 
 const id = "internal:kilo-sidebar-footer"
 const TEAM_POLL_MS = 5 * 60_000
@@ -70,13 +71,7 @@ function View(props: { api: TuiPluginApi }) {
   let seq = 0
   let inflight: AbortController | undefined
   let teamPoll: ReturnType<typeof setInterval> | undefined
-  const has = createMemo(() =>
-    props.api.state.provider.some(
-      (item) =>
-        (item.id !== "opencode" && item.id !== "kilo") ||
-        Object.values(item.models).some((model) => model.cost?.input !== 0),
-    ),
-  )
+  const has = useConnected() // mycelis_change - shared Mycelis-specific check (api.state.provider can't tell auth from anonymous autoload)
   const done = createMemo(() => props.api.kv.get("dismissed_getting_started", false))
   const show = createMemo(() => !has() && !done())
   const wallet = createMemo(() => {

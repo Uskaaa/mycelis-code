@@ -1,21 +1,20 @@
 // kilocode_change - new file
+// mycelis_change - rewritten: "connected" means signed in to Mycelis specifically. The "kilo"
+// provider always autoloads anonymously (Kilo's free tier), so it's unconditionally present in
+// provider_next - the only thing that distinguishes real Mycelis sign-in is its `source`, which
+// is "api" (the Mycelis PAT credential) rather than "custom" (the anonymous free-tier fallback).
 import { describe, expect, test } from "bun:test"
-import { connected } from "../src/component/use-connected"
+import { isKiloConnected } from "../src/component/use-connected"
 
-const provider = (id: string, input?: number): Parameters<typeof connected>[0][number] => ({
-  id,
-  models: input === undefined ? {} : { model: { cost: { input } } },
-})
-
-describe("connected", () => {
-  test("does not treat anonymous built-in providers as connected", () => {
-    expect(connected([provider("kilo", 0)])).toBe(false)
-    expect(connected([provider("opencode", 0)])).toBe(false)
+describe("isKiloConnected", () => {
+  test("not connected when kilo is missing or only anonymously autoloaded", () => {
+    expect(isKiloConnected([])).toBe(false)
+    expect(isKiloConnected([{ id: "anthropic", source: "api" }])).toBe(false)
+    expect(isKiloConnected([{ id: "kilo", source: "custom" }])).toBe(false)
   })
 
-  test("accepts authenticated built-ins and ordinary providers", () => {
-    expect(connected([provider("kilo", 1)])).toBe(true)
-    expect(connected([provider("opencode", 1)])).toBe(true)
-    expect(connected([provider("anthropic")])).toBe(true)
+  test("connected once kilo has a real credential-backed source", () => {
+    expect(isKiloConnected([{ id: "kilo", source: "api" }])).toBe(true)
+    expect(isKiloConnected([{ id: "anthropic", source: "api" }, { id: "kilo", source: "oauth" }])).toBe(true)
   })
 })

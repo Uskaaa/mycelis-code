@@ -1,6 +1,6 @@
 import { Auth } from "@/auth"
 import { invalidateAfterProviderAuthChange } from "@/kilocode/server/provider-auth-lifecycle"
-import { InstanceStore } from "@/project/instance-store"
+import { Provider } from "@/provider/provider" // mycelis_change
 import { ModelCache } from "@/provider/model-cache"
 import { Context, Effect, Layer, Redacted } from "effect"
 import * as Discovery from "./discovery"
@@ -39,7 +39,7 @@ export const layer = Layer.effect(
     const auth = yield* Auth.Service
     const cache = yield* ModelCache.Service
     const discovery = yield* Discovery.Service
-    const instances = yield* InstanceStore.Service
+    const provider = yield* Provider.Service // mycelis_change
     const platform = yield* DesktopPlatform.Service
 
     const status = Effect.fn("AnacondaDesktop.status")(function* () {
@@ -77,7 +77,7 @@ export const layer = Layer.effect(
         .pipe(Effect.mapError(() => new SyncError({ operation: "store" })))
       yield* invalidateAfterProviderAuthChange(PROVIDER_ID).pipe(
         Effect.provideService(ModelCache.Service, cache),
-        Effect.provideService(InstanceStore.Service, instances),
+        Effect.provideService(Provider.Service, provider), // mycelis_change
       )
       return found.status
     })

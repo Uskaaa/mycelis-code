@@ -62,7 +62,7 @@ export function Footer() {
         <RemoteIndicator
           sdk={sdk}
           theme={theme}
-          kilo={sync.data.provider_next.connected.includes("kilo")}
+          kilo={connected()}
           event={event}
         />
         {/* kilocode_change end */}

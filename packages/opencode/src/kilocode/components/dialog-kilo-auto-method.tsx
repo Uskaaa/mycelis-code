@@ -1,11 +1,16 @@
 /**
- * Custom OAuth handler for Kilo Gateway
+ * Browser-login completion handler for Mycelis.
  *
- * Handles the device authorization flow and organization selection
- * before completing authentication.
+ * mycelis_change - this used to also drive Kilo Cloud's org-selection step (fetching
+ * /kilo/profile and letting the user switch organizations) after the device-auth flow
+ * completed. Mycelis auth stores a PAT as auth.type "api", not "oauth", so kilo.profile()
+ * (which requires type "oauth") always failed here - silently on callback errors, and with
+ * a misleading "using personal account" toast on success. Org/tenant resolution already
+ * happens server-side when the PAT is minted (OidcProviderController.Token), so there is
+ * nothing left for this component to do beyond reporting success or failure.
  */
 
-import { createSignal, onMount, Show } from "solid-js"
+import { onMount } from "solid-js"
 import { TextAttributes } from "@opentui/core"
 import { useKeyboard } from "@opentui/solid"
 import { useDialog } from "@tui/ui/dialog"
@@ -13,7 +18,6 @@ import { useSync } from "@tui/context/sync"
 import { useToast } from "@tui/ui/toast"
 import { Link } from "@tui/ui/link"
 import * as Clipboard from "@tui/clipboard"
-import { DialogKiloOrganization } from "./dialog-kilo-organization.js"
 
 // These types are OpenCode-internal and imported at runtime
 type UseSDK = any
@@ -37,8 +41,6 @@ export function KiloAutoMethod(props: KiloAutoMethodProps) {
   const dialog = useDialog()
   const sync = useSync()
   const toast = useToast()
-  const [status, setStatus] = createSignal<"waiting" | "fetching" | "error">("waiting")
-  const [tokenForOrgSelection, setTokenForOrgSelection] = createSignal<string | null>(null)
 
   useKeyboard((evt: any) => {
     if (evt.name === "c" && !evt.ctrl && !evt.meta) {
@@ -51,77 +53,39 @@ export function KiloAutoMethod(props: KiloAutoMethodProps) {
 
   onMount(async () => {
     try {
-      // Step 1: Poll for OAuth completion
       const result = await sdk.client.provider.oauth.callback({
         providerID: props.providerID,
         method: props.index,
       })
 
       if (result.error) {
+        toast.show({
+          variant: "error",
+          message:
+            "name" in result.error && result.error.name === "ProviderAuthOauthCallbackFailed"
+              ? "Sign-in failed. Try /connect again."
+              : JSON.stringify(result.error),
+        })
         dialog.clear()
         return
       }
 
-      setStatus("fetching")
-
-      // Step 2: Fetch profile using the new server endpoint
-      // This endpoint uses the stored auth credentials to fetch profile
-      const profileResponse = await sdk.client.kilo.profile()
-
-      if (profileResponse.error || !profileResponse.data) {
-        // Couldn't fetch profile - fallback to personal account
-        throw new Error("Failed to fetch profile")
-      }
-
-      const { profile } = profileResponse.data
-
-      // Step 3: Check if user has organizations
-      if (profile.organizations && profile.organizations.length > 0) {
-        // Has organizations - show selection dialog
-        // Bootstrap first to ensure sync is up to date
-        await sdk.client.instance.dispose()
-        await sync.bootstrap()
-
-        dialog.replace(() => (
-          <DialogKiloOrganization
-            organizations={profile.organizations!}
-            userEmail={profile.email}
-            providerID={props.providerID}
-            hasPersonalAccount={profile.hasPersonalAccount !== false}
-            useSDK={props.useSDK}
-            useTheme={props.useTheme}
-            DialogModel={props.DialogModel}
-          />
-        ))
-      } else {
-        // No organizations - proceed with personal account
-        await sdk.client.instance.dispose()
-        await sync.bootstrap()
-        dialog.replace(() => <props.DialogModel providerID={props.providerID} />)
-      }
+      // mycelis_change - the oauth callback above already invalidates just the provider/model
+      // cache server-side (see provider-auth-lifecycle.ts); a full instance.dispose() here was
+      // redundant and is what made sign-in feel slow (tears down and restarts LSP clients etc.
+      // just to pick up a refreshed provider list).
+      await sync.bootstrap()
+      toast.show({ message: "Signed in to Mycelis", variant: "success" })
+      dialog.replace(() => <props.DialogModel providerID={props.providerID} />)
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return
 
-      // Error fetching profile - fallback to personal account
-      console.warn("Failed to fetch Kilo profile, using personal account:", error)
-      setStatus("error")
-
+      console.warn("Mycelis sign-in failed:", error)
       toast.show({
-        message: "Couldn't fetch organizations, using personal account",
-        variant: "warning",
+        variant: "error",
+        message: "Sign-in failed. Try /connect again.",
       })
-
-      // Small delay to show the warning, then proceed
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      try {
-        await sdk.client.instance.dispose()
-        await sync.bootstrap()
-      } catch (e) {
-        if (e instanceof DOMException && e.name === "AbortError") return
-        console.warn("Failed to reset state during fallback:", e)
-      }
-      dialog.replace(() => <props.DialogModel providerID={props.providerID} />)
+      dialog.clear()
     }
   })
 
@@ -139,17 +103,7 @@ export function KiloAutoMethod(props: KiloAutoMethodProps) {
         <text fg={theme.textMuted}>{props.authorization.instructions}</text>
       </box>
 
-      <Show when={status() === "waiting"}>
-        <text fg={theme.textMuted}>Waiting for authorization...</text>
-      </Show>
-
-      <Show when={status() === "fetching"}>
-        <text fg={theme.textMuted}>Fetching organizations...</text>
-      </Show>
-
-      <Show when={status() === "error"}>
-        <text fg={theme.warning}>Using personal account</text>
-      </Show>
+      <text fg={theme.textMuted}>Waiting for authorization...</text>
 
       <text fg={theme.text}>
         c <span style={{ fg: theme.textMuted }}>copy</span>

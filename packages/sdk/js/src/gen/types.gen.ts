@@ -911,10 +911,6 @@ export type KeybindsConfig = {
    */
   model_cycle_recent_reverse?: string
   /**
-   * List available commands
-   */
-  command_list?: string
-  /**
    * List agents
    */
   agent_list?: string

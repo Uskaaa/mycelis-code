@@ -6,7 +6,7 @@
 // This module exports patch functions and data that the upstream provider.ts
 // calls at well-defined injection points (each marked with kilocode_change).
 
-import { createKilo, type KiloProvider, AI_SDK_PROVIDERS, PROMPTS } from "@kilocode/kilo-gateway"
+import { createKilo, type KiloProvider, AI_SDK_PROVIDERS, PROMPTS, MYCELIS_GATEWAY_BASE } from "@kilocode/kilo-gateway" // mycelis_change
 import { DEFAULT_HEADERS } from "@/kilocode/const"
 import { ProviderV2 } from "@opencode-ai/core/provider"
 import { ModelV2 } from "@opencode-ai/core/model"
@@ -182,15 +182,33 @@ export function kiloCustomLoaders(dep: CustomDep): Record<string, CustomLoader> 
     kilo: Effect.fnUntraced(function* (input: any) {
       const env = yield* dep.env()
       const config = yield* dep.config()
+      const authInfo = yield* dep.auth(input.id)
       const hasKey = yield* Effect.gen(function* () {
         if (input.env.some((item: string) => env[item])) return true
-        if (yield* dep.auth(input.id)) return true
+        if (authInfo) return true
         if (config.provider?.["kilo"]?.options?.apiKey) return true
         return false
       })
 
       const options: Record<string, string> = {}
-      if (env.KILO_ORG_ID) {
+      // mycelis_change - resolveSDK (provider.ts) falls back to model.api.url whenever this
+      // options object doesn't set its own baseURL, and model.api.url for "kilo" models is the
+      // real kilocode.ai endpoint from the ModelsDev catalog, not Mycelis's gateway. That
+      // fallback silently overrode createKilo's own `options.baseURL ?? MYCELIS_GATEWAY_BASE`
+      // default, so completions were reaching the real Kilo backend (which doesn't recognize a
+      // Mycelis PAT) even though the model *list* correctly came from Mycelis. Pin it here so
+      // resolveSDK preserves it instead of substituting model.api.url.
+      options.baseURL = MYCELIS_GATEWAY_BASE
+      // mycelis_change - the currently selected workspace (set via /workspace) lives on the
+      // stored credential (accountId for legacy oauth accounts, metadata.organizationId for the
+      // PAT the browser-login flow issues - see setOrganization in kilo-gateway/server/handlers.ts).
+      // Without this, every chat request kept hitting whichever workspace the PAT's own tenant
+      // defaults to, no matter what /workspace switched to - only the model *list* picked it up.
+      const selectedOrgId =
+        authInfo?.type === "oauth" ? authInfo.accountId : authInfo?.type === "api" ? authInfo.metadata?.organizationId : undefined
+      if (selectedOrgId) {
+        options.kilocodeOrganizationId = selectedOrgId
+      } else if (env.KILO_ORG_ID) {
         options.kilocodeOrganizationId = env.KILO_ORG_ID
       }
       if (config.hide_prompt_training_models === true) {

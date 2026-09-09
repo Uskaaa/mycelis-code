@@ -14,10 +14,11 @@ import { DialogAlert } from "@tui/ui/dialog-alert"
 import { DialogConfirm } from "@tui/ui/dialog-confirm"
 import { reconcile } from "solid-js/store"
 import type { Organization } from "@kilocode/kilo-gateway"
-import { DialogKiloTeamSelect } from "./components/dialog-kilo-team-select.js"
+import { DialogKiloWorkspaceSelect } from "./components/dialog-kilo-workspace-select.js" // mycelis_change
 import { DialogKiloProfile } from "./components/dialog-kilo-profile.js"
 import { DialogIndexing } from "./components/dialog-indexing.js"
 import { DialogProviderUsage } from "./components/dialog-provider-usage.js"
+import { DialogDeployments } from "./components/dialog-deployments.js" // mycelis_change
 import { indexingEnabled } from "./indexing-feature"
 import { refreshBalance } from "./balance-refresh"
 
@@ -94,6 +95,24 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
         slashAliases: ["plans", "quota"],
         run: () => {
           dialog.replace(() => <DialogProviderUsage />)
+        },
+      },
+
+      // /deployments command
+      // mycelis_change - opens the compact overview first (start/stop/delete existing
+      // deployments); creating a new one is one of the actions from there, not a separate
+      // top-level command, so there's always a single, predictable entry point.
+      {
+        name: "kilo.deployments",
+        title: "Deployments",
+        desc: "View and manage Mycelis deployments",
+        category: "Mycelis",
+        slashName: "deployments",
+        slashAliases: ["deploy", "instances"],
+        enabled: isKiloConnected(),
+        hidden: !isKiloConnected(),
+        run: () => {
+          dialog.replace(() => <DialogDeployments useSDK={useSDK} />)
         },
       },
 
@@ -208,78 +227,79 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
         },
       },
 
-      // /teams command
+      // /workspace command
+      // mycelis_change - renamed from /teams: everything runs through workspaces now, so there's
+      // no separate "personal account" concept to pick between - just a list of workspaces
+      // (owned or joined) to switch to. See ProfileController in Mycelis.WebApp.
       {
-        name: "kilo.teams",
-        title: "Teams",
-        desc: "Switch between Mycelis teams", // mycelis_change
-        category: "Mycelis", // mycelis_change
-        slashName: "teams",
-        slashAliases: ["team", "org", "orgs"],
+        name: "kilo.workspaces",
+        title: "Workspaces",
+        desc: "Switch between Mycelis workspaces",
+        category: "Mycelis",
+        slashName: "workspace",
+        slashAliases: ["workspaces"],
         enabled: isKiloConnected(),
         hidden: !isKiloConnected(),
         run: async () => {
           try {
-            // Fetch profile to get organizations
+            // Fetch profile to get workspaces
             const response = await sdk.client.kilo.profile()
 
             if (response.error || !response.data) {
               dialog.replace(() => (
                 <DialogAlert
                   title="Error"
-                  message="Failed to fetch teams. Please ensure you're authenticated with Mycelis." // mycelis_change
+                  message="Failed to fetch workspaces. Please ensure you're authenticated with Mycelis."
                 />
               ))
               return
             }
 
             const { profile, currentOrgId } = response.data
+            const organizations = profile.organizations ?? []
 
-            if (!profile.organizations || profile.organizations.length === 0) {
+            if (organizations.length === 0) {
               dialog.replace(() => (
-                <DialogAlert
-                  title="No Teams Available"
-                  message="You're not a member of any teams.\nVisit https://app.kilo.ai to create or join a team."
-                />
+                <DialogAlert title="No Workspaces Available" message="You don't have any workspaces yet." />
               ))
               return
             }
 
-            // Show team selection dialog
+            // Default to the owned workspace until a selection has ever been made
+            const effectiveCurrentOrgId =
+              currentOrgId ?? organizations.find((o: Organization) => o.role === "Owner")?.id ?? organizations[0].id
+
+            // Show workspace selection dialog
             dialog.replace(() => (
-              <DialogKiloTeamSelect
-                organizations={profile.organizations!}
-                currentOrgId={currentOrgId}
-                hasPersonalAccount={profile.hasPersonalAccount !== false}
+              <DialogKiloWorkspaceSelect
+                organizations={organizations}
+                currentOrgId={effectiveCurrentOrgId}
                 onSelect={async (orgId) => {
                   try {
-                    // Switch to team immediately using server endpoint
+                    // Switch workspace immediately using server endpoint
                     const result = await sdk.client.kilo.organization.set({
                       organizationId: orgId,
                     })
                     if (result.error) {
                       toast.show({
-                        message: "Failed to switch team",
+                        message: "Failed to switch workspace",
                         variant: "error",
                       })
                       dialog.clear()
                       return
                     }
 
-                    // Refresh provider state to reload models with new organization context
+                    // Refresh provider state to reload models scoped to the new workspace
                     await sdk.client.instance.dispose()
                     await sync.bootstrap()
 
-                    // Update the sidebar balance immediately for the newly selected account
+                    // Update the sidebar balance immediately for the newly selected workspace
                     refreshBalance()
 
                     // Show success toast
-                    const teamName = orgId
-                      ? profile.organizations!.find((o: Organization) => o.id === orgId)?.name
-                      : "Personal"
-
+                    const workspaceName = organizations.find((o: Organization) => o.id === orgId)?.name
                     toast.show({
-                      message: `Switched to: ${teamName}`,
+                      message: `Switched to: ${workspaceName}`,
                       variant: "success",
                     })
 
@@ -288,7 +308,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
                   } catch (error) {
                     if (error instanceof DOMException && error.name === "AbortError") return
                     toast.show({
-                      message: "Failed to switch team",
+                      message: "Failed to switch workspace",
                       variant: "error",
                     })
                     dialog.clear()
@@ -297,7 +317,7 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
               />
             ))
           } catch (error) {
-            dialog.replace(() => <DialogAlert title="Error" message={`Failed to fetch teams: ${error}`} />)
+            dialog.replace(() => <DialogAlert title="Error" message={`Failed to fetch workspaces: ${error}`} />)
           }
         },
       },

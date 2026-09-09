@@ -12124,6 +12124,90 @@ export type McpDisconnectResponses = {
 
 export type McpDisconnectResponse = McpDisconnectResponses[keyof McpDisconnectResponses]
 
+export type McpReadResourceData = {
+  body?: {
+    uri: string
+    server: string
+  }
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/experimental/resource/read"
+}
+
+export type McpReadResourceErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type McpReadResourceError = McpReadResourceErrors[keyof McpReadResourceErrors]
+
+export type McpReadResourceResponses = {
+  /**
+   * Resource content
+   */
+  200: {
+    uri: string
+    mimeType?: string
+    text?: string
+    blob?: string
+  }
+}
+
+export type McpReadResourceResponse = McpReadResourceResponses[keyof McpReadResourceResponses]
+
+export type McpCallToolData = {
+  body?: {
+    server: string
+    name: string
+    arguments?: {
+      [key: string]: unknown
+    }
+  }
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/experimental/mcp/call-tool"
+}
+
+export type McpCallToolErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type McpCallToolError = McpCallToolErrors[keyof McpCallToolErrors]
+
+export type McpCallToolResponses = {
+  /**
+   * Tool call result
+   */
+  200: {
+    content: Array<unknown>
+    isError?: boolean
+    structuredContent?: {
+      [key: string]: unknown
+    }
+  }
+}
+
+export type McpCallToolResponse = McpCallToolResponses[keyof McpCallToolResponses]
+
 export type ProjectListData = {
   body?: never
   path?: never
@@ -16509,6 +16593,279 @@ export type KiloCloudSessionImportResponses = {
 }
 
 export type KiloCloudSessionImportResponse = KiloCloudSessionImportResponses[keyof KiloCloudSessionImportResponses]
+
+export type KiloDeploymentsListData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kilo/deployments"
+}
+
+export type KiloDeploymentsListErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KiloDeploymentsListError = KiloDeploymentsListErrors[keyof KiloDeploymentsListErrors]
+
+export type KiloDeploymentsListResponses = {
+  /**
+   * Deployments in the active workspace
+   */
+  200: Array<{
+    id: string
+    name: string
+    slug: string
+    modelId: string
+    modelName: string
+    status: string
+    accessUrl?: string
+    maxConcurrentUsers: number
+    costPerHour: number
+    workspaceId?: string
+  }>
+}
+
+export type KiloDeploymentsListResponse = KiloDeploymentsListResponses[keyof KiloDeploymentsListResponses]
+
+export type KiloDeploymentsCreateData = {
+  body?: {
+    name: string
+    modelId: string
+    maxConcurrentUsers?: number
+  }
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kilo/deployments"
+}
+
+export type KiloDeploymentsCreateErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KiloDeploymentsCreateError = KiloDeploymentsCreateErrors[keyof KiloDeploymentsCreateErrors]
+
+export type KiloDeploymentsCreateResponses = {
+  /**
+   * Created deployment
+   */
+  200: {
+    id: string
+    name: string
+    slug: string
+    modelId: string
+    modelName: string
+    status: string
+    accessUrl?: string
+    maxConcurrentUsers: number
+    costPerHour: number
+    workspaceId?: string
+  }
+}
+
+export type KiloDeploymentsCreateResponse = KiloDeploymentsCreateResponses[keyof KiloDeploymentsCreateResponses]
+
+export type KiloDeploymentsDeleteData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kilo/deployments/{id}"
+}
+
+export type KiloDeploymentsDeleteErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type KiloDeploymentsDeleteError = KiloDeploymentsDeleteErrors[keyof KiloDeploymentsDeleteErrors]
+
+export type KiloDeploymentsDeleteResponses = {
+  /**
+   * Deployment deleted
+   */
+  200: boolean
+}
+
+export type KiloDeploymentsDeleteResponse = KiloDeploymentsDeleteResponses[keyof KiloDeploymentsDeleteResponses]
+
+export type KiloDeploymentsStartData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kilo/deployments/{id}/start"
+}
+
+export type KiloDeploymentsStartErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type KiloDeploymentsStartError = KiloDeploymentsStartErrors[keyof KiloDeploymentsStartErrors]
+
+export type KiloDeploymentsStartResponses = {
+  /**
+   * Started deployment
+   */
+  200: {
+    id: string
+    name: string
+    slug: string
+    modelId: string
+    modelName: string
+    status: string
+    accessUrl?: string
+    maxConcurrentUsers: number
+    costPerHour: number
+    workspaceId?: string
+  }
+}
+
+export type KiloDeploymentsStartResponse = KiloDeploymentsStartResponses[keyof KiloDeploymentsStartResponses]
+
+export type KiloDeploymentsStopData = {
+  body?: never
+  path: {
+    id: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/kilo/deployments/{id}/stop"
+}
+
+export type KiloDeploymentsStopErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type KiloDeploymentsStopError = KiloDeploymentsStopErrors[keyof KiloDeploymentsStopErrors]
+
+export type KiloDeploymentsStopResponses = {
+  /**
+   * Deployment stopping
+   */
+  200: boolean
+}
+
+export type KiloDeploymentsStopResponse = KiloDeploymentsStopResponses[keyof KiloDeploymentsStopResponses]
+
+export type KiloDeploymentsMarketplaceModelsData = {
+  body?: never
+  path?: never
+  query?: {
+    directory?: string
+    workspace?: string
+    search?: string
+  }
+  url: "/kilo/deployments/marketplace-models"
+}
+
+export type KiloDeploymentsMarketplaceModelsErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+}
+
+export type KiloDeploymentsMarketplaceModelsError =
+  KiloDeploymentsMarketplaceModelsErrors[keyof KiloDeploymentsMarketplaceModelsErrors]
+
+export type KiloDeploymentsMarketplaceModelsResponses = {
+  /**
+   * Open-source marketplace models
+   */
+  200: Array<{
+    id: string
+    name: string
+    provider: string
+    description: string
+    vramRequiredGb: number
+  }>
+}
+
+export type KiloDeploymentsMarketplaceModelsResponse =
+  KiloDeploymentsMarketplaceModelsResponses[keyof KiloDeploymentsMarketplaceModelsResponses]
+
+export type KiloDeploymentsGpuEstimateData = {
+  body?: never
+  path?: never
+  query: {
+    directory?: string
+    workspace?: string
+    modelId: string
+    concurrentUsers?: string
+  }
+  url: "/kilo/deployments/gpu-estimate"
+}
+
+export type KiloDeploymentsGpuEstimateErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type KiloDeploymentsGpuEstimateError = KiloDeploymentsGpuEstimateErrors[keyof KiloDeploymentsGpuEstimateErrors]
+
+export type KiloDeploymentsGpuEstimateResponses = {
+  /**
+   * Estimated GPU and cost for the model
+   */
+  200: {
+    modelId: string
+    gpuTypeId?: string
+    gpuName?: string
+    costPerHourUsd?: number
+    memoryInGb?: number
+  }
+}
+
+export type KiloDeploymentsGpuEstimateResponse =
+  KiloDeploymentsGpuEstimateResponses[keyof KiloDeploymentsGpuEstimateResponses]
 
 export type KilocodeHeapSnapshotData = {
   body?: never

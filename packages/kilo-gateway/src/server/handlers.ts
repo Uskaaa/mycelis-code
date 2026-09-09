@@ -7,7 +7,7 @@ import type { KilocodeBalance, KilocodeProfile, KiloPassState } from "../types.j
 import { buildKiloHeaders } from "../headers.js"
 
 export type KiloAuth =
-  | { type: "api"; key: string }
+  | { type: "api"; key: string; metadata?: Record<string, string> } // mycelis_change - metadata.organizationId holds the selected workspace
   | { type: "oauth"; access: string; refresh: string; expires: number; accountId?: string }
   | { type: "wellknown"; key: string; token: string }
 
@@ -27,7 +27,7 @@ export interface ClawChatCredentials {
 
 export interface AuthStore {
   get(provider: string): Promise<KiloAuth | undefined>
-  set(provider: string, auth: Extract<KiloAuth, { type: "oauth" }>): Promise<void>
+  set(provider: string, auth: Extract<KiloAuth, { type: "oauth" } | { type: "api" }>): Promise<void> // mycelis_change
 }
 
 export interface OrganizationDeps {
@@ -61,6 +61,7 @@ export function getToken(auth: KiloAuth | undefined) {
 
 export function getOrganizationId(auth: KiloAuth | undefined) {
   if (auth?.type === "oauth") return auth.accountId
+  if (auth?.type === "api") return auth.metadata?.organizationId // mycelis_change
   return undefined
 }
 
@@ -75,7 +76,7 @@ export async function getProfile(auth: AuthStore): Promise<KiloProfileResult> {
   // with a real Kilo JWT, so keep that path pointed at Kilo's backend.
   if (info.type === "api") {
     const { profile, balance } = await fetchMycelisProfile(info.key)
-    return { profile, balance, kiloPass: null, currentOrgId: null }
+    return { profile, balance, kiloPass: null, currentOrgId: getOrganizationId(info) ?? null } // mycelis_change
   }
 
   if (info.type !== "oauth") throw new UnauthorizedError("Not authenticated with Kilo Gateway")
@@ -102,15 +103,27 @@ export async function getNotifications(auth: AuthStore) {
 
 export async function setOrganization(deps: OrganizationDeps, organizationId: string | null) {
   const info = await deps.auth.get("kilo")
-  if (!info || info.type !== "oauth") throw new UnauthorizedError("Not authenticated with Kilo Gateway")
+  if (!info) throw new UnauthorizedError("Not authenticated with Kilo Gateway")
 
-  await deps.auth.set("kilo", {
-    type: "oauth",
-    refresh: info.refresh,
-    access: info.access,
-    expires: info.expires,
-    ...(organizationId && { accountId: organizationId }),
-  })
+  // mycelis_change - PAT ("api") auth has no refresh/access token to reattach, unlike oauth; the
+  // workspace selection just rides along on the credential's own metadata bag instead.
+  if (info.type === "api") {
+    await deps.auth.set("kilo", {
+      type: "api",
+      key: info.key,
+      metadata: { ...info.metadata, ...(organizationId ? { organizationId } : {}) },
+    })
+  } else if (info.type === "oauth") {
+    await deps.auth.set("kilo", {
+      type: "oauth",
+      refresh: info.refresh,
+      access: info.access,
+      expires: info.expires,
+      ...(organizationId && { accountId: organizationId }),
+    })
+  } else {
+    throw new UnauthorizedError("Not authenticated with Kilo Gateway")
+  }
 
   await deps.clear()
   clearModesCache()

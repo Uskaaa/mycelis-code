@@ -21,7 +21,6 @@ interface DialogKiloOrganizationProps {
   organizations: Organization[]
   userEmail: string
   providerID: string
-  hasPersonalAccount?: boolean
   useSDK: () => UseSDK
   useTheme: () => UseTheme
   DialogModel: DialogModel
@@ -34,7 +33,7 @@ export function DialogKiloOrganization(props: DialogKiloOrganizationProps) {
   const toast = useToast()
 
   // Get formatted options with current markers
-  const options = getOrganizationOptions(props.organizations, undefined, props.hasPersonalAccount !== false)
+  const options = getOrganizationOptions(props.organizations, undefined)
 
   // Pre-select first organization (user requirement)
   const defaultSelection = getDefaultOrganizationSelection(props.organizations)

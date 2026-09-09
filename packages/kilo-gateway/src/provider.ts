@@ -39,9 +39,16 @@ export function createKilo(options: KiloProviderOptions = {}): KiloProvider {
   const apiKey = getApiKey(options)
 
   // mycelis_change start - point requests at the Mycelis model gateway instead of Kilo's
-  // OpenRouter-compatible endpoint; resolveKiloOpenRouterBaseUrl kept below (unused) for the
-  // embedding/image model paths, which still go through the `openrouter` SDK instance further down.
-  const openRouterUrl = resolveKiloOpenRouterBaseUrl({ baseURL: options.baseURL, token: apiKey })
+  // OpenRouter-compatible endpoint; resolveKiloOpenRouterBaseUrl kept below for the
+  // embedding/image model paths, which still go through the `openrouter` SDK instance further
+  // down and intentionally stay on Kilo's real endpoint (not yet migrated to Mycelis).
+  //
+  // openRouterUrl deliberately does NOT read options.baseURL: the auth-plugin loader
+  // (kiloCustomLoaders.kilo in opencode) pins options.baseURL to MYCELIS_GATEWAY_BASE so that
+  // Provider.resolveSDK's own fallback (model.api.url, the real Kilo endpoint from the
+  // ModelsDev catalog) can't silently override gatewayUrl below - reusing that same
+  // Mycelis-pinned value here would incorrectly redirect embeddings/images at Mycelis too.
+  const openRouterUrl = resolveKiloOpenRouterBaseUrl({ token: apiKey })
   const gatewayUrl = options.baseURL ?? MYCELIS_GATEWAY_BASE
   // mycelis_change end
 

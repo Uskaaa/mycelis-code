@@ -44,8 +44,15 @@ export const KILO_OPENROUTER_BASE = `${KILO_API_BASE}/api/openrouter`
 /** Environment variable for custom Mycelis web app URL (OIDC login + dashboard) */
 export const ENV_MYCELIS_WEB_URL = "MYCELIS_WEB_URL"
 
-/** Default Mycelis web app URL - hosts /oidc/authorize, /oidc/token, and the dashboard */
-export const DEFAULT_MYCELIS_WEB_URL = "https://mycelis.ai"
+/**
+ * Default Mycelis web app URL - hosts /oidc/authorize, /oidc/token, and the dashboard.
+ * mycelis_change - TODO: switch back to "https://mycelis.ai" once the CLI-login backend
+ * changes (OidcProviderController's "mycelis-cli" client_id + PAT minting) are confirmed
+ * deployed there. Defaulting to the local dev instance for now so /connect doesn't silently
+ * hit a production deployment that hasn't caught up yet. Override with MYCELIS_WEB_URL to
+ * point at anything else (including production, to test it explicitly).
+ */
+export const DEFAULT_MYCELIS_WEB_URL = "http://localhost:5220"
 
 /** Base URL for the Mycelis web app - can be overridden by MYCELIS_WEB_URL env var */
 export const MYCELIS_WEB_URL = process.env[ENV_MYCELIS_WEB_URL] || DEFAULT_MYCELIS_WEB_URL

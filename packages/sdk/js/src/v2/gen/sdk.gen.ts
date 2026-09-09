@@ -215,6 +215,20 @@ import type {
   KilocodeSessionImportSessionResponses,
   KilocodeSessionModelUsageErrors,
   KilocodeSessionModelUsageResponses,
+  KiloDeploymentsCreateErrors,
+  KiloDeploymentsCreateResponses,
+  KiloDeploymentsDeleteErrors,
+  KiloDeploymentsDeleteResponses,
+  KiloDeploymentsGpuEstimateErrors,
+  KiloDeploymentsGpuEstimateResponses,
+  KiloDeploymentsListErrors,
+  KiloDeploymentsListResponses,
+  KiloDeploymentsMarketplaceModelsErrors,
+  KiloDeploymentsMarketplaceModelsResponses,
+  KiloDeploymentsStartErrors,
+  KiloDeploymentsStartResponses,
+  KiloDeploymentsStopErrors,
+  KiloDeploymentsStopResponses,
   KiloEditErrors,
   KiloEditResponses,
   KiloFimErrors,
@@ -244,11 +258,15 @@ import type {
   McpAuthRemoveResponses,
   McpAuthStartErrors,
   McpAuthStartResponses,
+  McpCallToolErrors,
+  McpCallToolResponses,
   McpConnectErrors,
   McpConnectResponses,
   McpDisconnectErrors,
   McpDisconnectResponses,
   McpLocalConfig,
+  McpReadResourceErrors,
+  McpReadResourceResponses,
   McpRemoteConfig,
   McpStatusErrors,
   McpStatusResponses,
@@ -3181,6 +3199,88 @@ export class Mcp extends HeyApiClient {
       url: "/mcp/{name}/disconnect",
       ...options,
       ...params,
+    })
+  }
+
+  /**
+   * Read MCP resource
+   *
+   * Read a resource from a connected MCP server by URI. Used by MCP Apps to load UI resources.
+   */
+  public readResource<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      uri?: string
+      server?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "uri" },
+            { in: "body", key: "server" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<McpReadResourceResponses, McpReadResourceErrors, ThrowOnError>({
+      url: "/experimental/resource/read",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Call MCP tool
+   *
+   * Call a tool on a connected MCP server. Used by MCP Apps for widget-initiated tool calls.
+   */
+  public callTool<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      server?: string
+      name?: string
+      arguments?: {
+        [key: string]: unknown
+      }
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "server" },
+            { in: "body", key: "name" },
+            { in: "body", key: "arguments" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<McpCallToolResponses, McpCallToolErrors, ThrowOnError>({
+      url: "/experimental/mcp/call-tool",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
     })
   }
 
@@ -7124,6 +7224,263 @@ export class Cloud extends HeyApiClient {
   }
 }
 
+export class Deployments extends HeyApiClient {
+  /**
+   * List deployments
+   *
+   * List the deployments in the currently active Mycelis workspace
+   */
+  public list<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<KiloDeploymentsListResponses, KiloDeploymentsListErrors, ThrowOnError>({
+      url: "/kilo/deployments",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Create deployment
+   *
+   * Deploy an open-source marketplace model in the currently active Mycelis workspace
+   */
+  public create<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      name?: string
+      modelId?: string
+      maxConcurrentUsers?: number
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "body", key: "name" },
+            { in: "body", key: "modelId" },
+            { in: "body", key: "maxConcurrentUsers" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      KiloDeploymentsCreateResponses,
+      KiloDeploymentsCreateErrors,
+      ThrowOnError
+    >({
+      url: "/kilo/deployments",
+      ...options,
+      ...params,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+        ...params.headers,
+      },
+    })
+  }
+
+  /**
+   * Delete deployment
+   *
+   * Permanently delete a deployment
+   */
+  public delete<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).delete<
+      KiloDeploymentsDeleteResponses,
+      KiloDeploymentsDeleteErrors,
+      ThrowOnError
+    >({
+      url: "/kilo/deployments/{id}",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Start deployment
+   *
+   * Start a previously stopped deployment
+   */
+  public start<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<
+      KiloDeploymentsStartResponses,
+      KiloDeploymentsStartErrors,
+      ThrowOnError
+    >({
+      url: "/kilo/deployments/{id}/start",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Stop deployment
+   *
+   * Stop a running deployment (scale-to-zero)
+   */
+  public stop<ThrowOnError extends boolean = false>(
+    parameters: {
+      id: string
+      directory?: string
+      workspace?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "path", key: "id" },
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).post<KiloDeploymentsStopResponses, KiloDeploymentsStopErrors, ThrowOnError>(
+      {
+        url: "/kilo/deployments/{id}/stop",
+        ...options,
+        ...params,
+      },
+    )
+  }
+
+  /**
+   * List marketplace models
+   *
+   * List open-source models available to deploy
+   */
+  public marketplaceModels<ThrowOnError extends boolean = false>(
+    parameters?: {
+      directory?: string
+      workspace?: string
+      search?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "query", key: "search" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      KiloDeploymentsMarketplaceModelsResponses,
+      KiloDeploymentsMarketplaceModelsErrors,
+      ThrowOnError
+    >({
+      url: "/kilo/deployments/marketplace-models",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Estimate deployment cost
+   *
+   * Estimate the GPU and hourly cost for deploying a marketplace model
+   */
+  public gpuEstimate<ThrowOnError extends boolean = false>(
+    parameters: {
+      directory?: string
+      workspace?: string
+      modelId: string
+      concurrentUsers?: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams(
+      [parameters],
+      [
+        {
+          args: [
+            { in: "query", key: "directory" },
+            { in: "query", key: "workspace" },
+            { in: "query", key: "modelId" },
+            { in: "query", key: "concurrentUsers" },
+          ],
+        },
+      ],
+    )
+    return (options?.client ?? this.client).get<
+      KiloDeploymentsGpuEstimateResponses,
+      KiloDeploymentsGpuEstimateErrors,
+      ThrowOnError
+    >({
+      url: "/kilo/deployments/gpu-estimate",
+      ...options,
+      ...params,
+    })
+  }
+}
+
 export class Kilo extends HeyApiClient {
   /**
    * Get Kilo Gateway profile
@@ -7411,6 +7768,11 @@ export class Kilo extends HeyApiClient {
   private _cloud?: Cloud
   get cloud(): Cloud {
     return (this._cloud ??= new Cloud({ client: this.client }))
+  }
+
+  private _deployments?: Deployments
+  get deployments(): Deployments {
+    return (this._deployments ??= new Deployments({ client: this.client }))
   }
 }
 

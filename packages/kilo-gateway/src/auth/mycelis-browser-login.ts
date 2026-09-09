@@ -16,11 +16,17 @@ const FAILURE_HTML =
   "<h2>Sign-in failed</h2><p>You can close this tab and try again in the terminal.</p></body>"
 
 function openBrowser(url: string) {
+  // mycelis_change - "cmd /c start" runs the URL through cmd.exe's own command-line parser,
+  // which splits on unescaped "&" (and other metacharacters) *before* argument quoting is
+  // applied - a query string like "?client_id=...&redirect_uri=...&state=..." gets truncated
+  // at the first "&", silently dropping every parameter after it. rundll32's FileProtocolHandler
+  // opens the URL in the default browser without going through a shell at all, so nothing in
+  // the URL needs escaping.
   const [cmd, ...args] =
     process.platform === "darwin"
       ? ["open", url]
       : process.platform === "win32"
-        ? ["cmd", "/c", "start", "", url]
+        ? ["rundll32", "url.dll,FileProtocolHandler", url]
         : ["xdg-open", url]
   execFile(cmd, args, { windowsHide: true })
 }

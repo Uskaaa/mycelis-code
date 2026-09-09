@@ -60,6 +60,7 @@ import { createCostAlertController } from "@/kilocode/cli/cmd/tui/cost-alert"
 import { MemoryPrompt } from "@/kilocode/cli/cmd/tui/component/memory-prompt"
 import { isAllowEverything } from "@/kilocode/cli/cmd/tui/app"
 import { REDACTED } from "@/kilocode/pii" // mycelis_change
+import { onBalanceRefresh } from "@/kilocode/balance-refresh" // mycelis_change
 // kilocode_change end
 import { KILO_BASE_MODE, useBindings, useCommandShortcut, useLeaderActive, useOpencodeKeymap } from "../../keymap"
 import { useTuiConfig } from "../../config"
@@ -180,6 +181,30 @@ export function Prompt(props: PromptProps) {
   // mycelis_change - the "auto" badge should also reflect the saved (server-side) auto-approve
   // rule from /auto-approve, not just the in-memory /auto-approve-session mode.
   const globalAutoApprove = createMemo(() => isAllowEverything(sync.data.config.permission))
+  // mycelis_change - show the active workspace next to the model/agent info so it's visible on
+  // both the home screen and in a session (this component is shared by both - see home.tsx).
+  // Refreshed the same way the sidebar balance is: once on mount, and again whenever
+  // refreshBalance() fires (i.e. right after /workspace switches).
+  const [workspaceName, setWorkspaceName] = createSignal<string | undefined>()
+  const refreshWorkspace = async () => {
+    if (!connected()) {
+      setWorkspaceName(undefined)
+      return
+    }
+    const response = await sdk.client.kilo.profile().catch(() => undefined)
+    const data = response?.data
+    if (!data) return
+    const organizations = data.profile.organizations ?? []
+    const current =
+      organizations.find((org: { id: string }) => org.id === data.currentOrgId) ??
+      organizations.find((org: { role: string }) => org.role === "Owner") ??
+      organizations[0]
+    setWorkspaceName(current?.name)
+  }
+  onMount(() => {
+    void refreshWorkspace()
+    onCleanup(onBalanceRefresh(() => void refreshWorkspace()))
+  })
   const history = usePromptHistory()
   const stash = usePromptStash()
   const keymap = useOpencodeKeymap()
@@ -251,6 +276,19 @@ export function Prompt(props: PromptProps) {
     if (sync.data.provider.length === 0) {
       dialog.replace(() => <DialogProviderConnect />)
     }
+  }
+
+  // mycelis_change - Mycelis has no anonymous/free tier, but "kilo" always autoloads a free
+  // model anonymously (see use-connected.tsx), so the selectedModel check below alone would let
+  // an unauthenticated submit silently go through against that anonymous fallback and switch
+  // straight to the session view. Block it explicitly and point at /connect instead.
+  function promptSignInWarning() {
+    toast.show({
+      variant: "warning",
+      message: "Sign in first — run /connect to use Mycelis",
+      duration: 3000,
+    })
+    dialog.replace(() => <DialogProviderConnect />)
   }
 
   function dismissEditorContext() {
@@ -1090,6 +1128,12 @@ export function Prompt(props: PromptProps) {
     })
     if (memory) return true
     // kilocode_change end
+    // mycelis_change start
+    if (!connected()) {
+      promptSignInWarning()
+      return false
+    }
+    // mycelis_change end
     const selectedModel = local.model.current()
     if (!selectedModel) {
       void promptModelWarning()
@@ -1656,6 +1700,12 @@ export function Prompt(props: PromptProps) {
                               {local.model.variant.current()}
                             </span>
                           </text>
+                        </Show>
+                        {/* mycelis_change - active workspace, shown on both the home screen and
+                            in a session so switching via /workspace is always visible */}
+                        <Show when={connected() && workspaceName()}>
+                          <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>·</text>
+                          <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>{workspaceName()}</text>
                         </Show>
                       </box>
                     </Show>

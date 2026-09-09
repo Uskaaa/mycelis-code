@@ -2,7 +2,14 @@ import { z } from "zod"
 import { getKiloUrlFromToken } from "../auth/token.js"
 import { getDefaultHeaders, buildKiloHeaders } from "../headers.js"
 import { resolveKiloGatewayBaseUrl } from "./url.js"
-import { KILO_API_BASE, KILO_OPENROUTER_BASE, MODELS_FETCH_TIMEOUT_MS, PROMPTS, AI_SDK_PROVIDERS } from "./constants.js"
+import {
+  KILO_API_BASE,
+  KILO_OPENROUTER_BASE,
+  MODELS_FETCH_TIMEOUT_MS,
+  PROMPTS,
+  AI_SDK_PROVIDERS,
+  MYCELIS_GATEWAY_BASE, // mycelis_change
+} from "./constants.js"
 
 export type KiloModelsResult = {
   models: Record<string, any>
@@ -110,6 +117,69 @@ export async function fetchKiloModels(options?: {
 
   return { models }
 }
+
+// mycelis_change start
+export type MycelisModelsResult = {
+  models: Record<string, any>
+  error?: { kind: "unauthorized" | "network" | "schema" | "http"; status?: number }
+}
+
+const mycelisModelSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+})
+
+const mycelisModelsResponseSchema = z.object({
+  data: z.array(mycelisModelSchema),
+})
+
+/**
+ * Fetch models (and agent virtual-models, both exposed the same way) from Mycelis's own
+ * OpenAI-compatible gateway (ModelsProxyController) - authenticated with the PAT minted
+ * during browser login (see mycelis-browser-login.ts). Mycelis has no anonymous tier, so
+ * a missing token returns an empty catalog rather than making a request.
+ */
+export async function fetchMycelisModels(options?: {
+  kilocodeToken?: string
+  kilocodeOrganizationId?: string
+  baseURL?: string
+}): Promise<MycelisModelsResult> {
+  const token = options?.kilocodeToken
+  if (!token) return { models: {} }
+
+  const baseURL = (options?.baseURL ?? MYCELIS_GATEWAY_BASE).replace(/\/+$/, "")
+  const response = await fetch(`${baseURL}/models`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(MODELS_FETCH_TIMEOUT_MS),
+  }).catch((err: unknown) => err as Error)
+
+  if (response instanceof Error) return { models: {}, error: { kind: "network" } }
+  if (!response.ok) {
+    const kind = response.status === 401 || response.status === 403 ? "unauthorized" : "http"
+    return { models: {}, error: { kind, status: response.status } }
+  }
+
+  const json = await response.json().catch(() => null)
+  const result = mycelisModelsResponseSchema.safeParse(json)
+  if (!result.success) return { models: {}, error: { kind: "schema" } }
+
+  const models: Record<string, any> = {}
+  for (const model of result.data.data) {
+    models[model.id] = {
+      id: model.id,
+      name: model.name,
+      release_date: "",
+      attachment: false,
+      reasoning: false,
+      temperature: true,
+      tool_call: true,
+      limit: { context: 128000, output: 4096 },
+      modalities: { input: ["text"], output: ["text"] },
+    }
+  }
+  return { models }
+}
+// mycelis_change end
 
 export type KiloImageModel = {
   id: string

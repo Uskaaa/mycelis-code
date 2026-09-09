@@ -26,14 +26,12 @@ export function formatProfileInfo(
     content += `Email: ${profile.email}\n`
   }
 
-  // Show current organization
+  // Show current workspace
   if (currentOrgId && profile.organizations) {
     const currentOrg = profile.organizations.find((org) => org.id === currentOrgId)
     if (currentOrg) {
-      content += `Team: ${currentOrg.name} (${currentOrg.role})\n`
+      content += `Workspace: ${currentOrg.name} (${currentOrg.role})\n` // mycelis_change
     }
-  } else {
-    content += `Team: Personal\n`
   }
 
   if (balance && balance.balance !== undefined && balance.balance !== null) {
@@ -50,42 +48,30 @@ export function formatProfileInfo(
 }
 
 /**
- * Get organization options formatted for TUI DialogSelect
- * Pre-selects the first organization by default
+ * Get workspace options formatted for TUI DialogSelect.
+ * mycelis_change - there's no separate "personal account" anymore: a user's own workspace is
+ * just another entry in `organizations` (see ProfileController in Mycelis.WebApp), so every
+ * workspace - owned or joined - is listed the same way.
  */
 export function getOrganizationOptions(
   organizations: Organization[],
   currentOrgId?: string,
-  hasPersonalAccount = true,
 ): Array<{
   title: string
-  value: string | null
+  value: string
   description?: string
   category: string
 }> {
-  const personal = hasPersonalAccount || organizations.length === 0
-  return [
-    ...(personal
-      ? [
-          {
-            title: "Personal Account",
-            value: null,
-            description: !currentOrgId ? "→ (current)" : undefined,
-            category: "Accounts",
-          },
-        ]
-      : []),
-    ...organizations.map((org) => ({
-      title: org.name,
-      value: org.id,
-      description: org.id === currentOrgId ? `→ (current) ${org.role}` : org.role,
-      category: "Teams",
-    })),
-  ]
+  return organizations.map((org) => ({
+    title: org.name,
+    value: org.id,
+    description: org.id === currentOrgId ? `→ (current) ${org.role}` : org.role,
+    category: "Workspaces", // mycelis_change
+  }))
 }
 
 /**
- * Get the default organization selection (first org if available, otherwise personal)
+ * Get the default workspace selection (first one if available).
  */
 export function getDefaultOrganizationSelection(organizations: Organization[]): string | null {
   return organizations.length > 0 ? organizations[0].id : null

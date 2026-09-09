@@ -66,6 +66,43 @@ export const OrganizationBody = Schema.Struct({
   organizationId: Schema.NullOr(Schema.String),
 })
 
+// mycelis_change start - /deployments
+export const Deployment = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  slug: Schema.String,
+  modelId: Schema.String,
+  modelName: Schema.String,
+  status: Schema.String,
+  accessUrl: Schema.optional(Schema.String),
+  maxConcurrentUsers: Schema.Finite,
+  costPerHour: Schema.Finite,
+  workspaceId: Schema.optional(Schema.String),
+})
+
+export const MarketplaceModel = Schema.Struct({
+  id: Schema.String,
+  name: Schema.String,
+  provider: Schema.String,
+  description: Schema.String,
+  vramRequiredGb: Schema.Finite,
+})
+
+export const GpuEstimate = Schema.Struct({
+  modelId: Schema.String,
+  gpuTypeId: Schema.optional(Schema.String),
+  gpuName: Schema.optional(Schema.String),
+  costPerHourUsd: Schema.optional(Schema.Finite),
+  memoryInGb: Schema.optional(Schema.Finite),
+})
+
+export const CreateDeploymentBody = Schema.Struct({
+  name: Schema.String,
+  modelId: Schema.String,
+  maxConcurrentUsers: Schema.optional(Schema.Finite),
+})
+// mycelis_change end
+
 export const ClawStatus = Schema.Struct({
   status: Schema.NullOr(
     Schema.Literals([
@@ -285,6 +322,14 @@ export const KiloGatewayPaths = {
   cloudSessions: `${root}/cloud-sessions`,
   cloudSession: `${root}/cloud/session/:id`,
   cloudSessionImport: `${root}/cloud/session/import`,
+  // mycelis_change start
+  deployments: `${root}/deployments`,
+  deployment: `${root}/deployments/:id`,
+  deploymentStart: `${root}/deployments/:id/start`,
+  deploymentStop: `${root}/deployments/:id/stop`,
+  deploymentMarketplaceModels: `${root}/deployments/marketplace-models`,
+  deploymentGpuEstimate: `${root}/deployments/gpu-estimate`,
+  // mycelis_change end
 } as const
 
 export const KiloGatewayApi = HttpApi.make("kilo")
@@ -471,6 +516,93 @@ export const KiloGatewayApi = HttpApi.make("kilo")
             description: "Download a cloud-synced session and write it to local storage with fresh IDs.",
           }),
         ),
+        // mycelis_change start - /deployments
+        HttpApiEndpoint.get("deployments", KiloGatewayPaths.deployments, {
+          query: WorkspaceRoutingQuery,
+          success: described(Schema.Array(Deployment), "Deployments in the active workspace"),
+          error: [HttpApiError.BadRequest, HttpApiError.Unauthorized],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "kilo.deployments.list",
+            summary: "List deployments",
+            description: "List the deployments in the currently active Mycelis workspace",
+          }),
+        ),
+        HttpApiEndpoint.post("deploymentsCreate", KiloGatewayPaths.deployments, {
+          query: WorkspaceRoutingQuery,
+          payload: CreateDeploymentBody,
+          success: described(Deployment, "Created deployment"),
+          error: [HttpApiError.BadRequest, HttpApiError.Unauthorized],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "kilo.deployments.create",
+            summary: "Create deployment",
+            description: "Deploy an open-source marketplace model in the currently active Mycelis workspace",
+          }),
+        ),
+        HttpApiEndpoint.delete("deploymentDelete", KiloGatewayPaths.deployment, {
+          query: WorkspaceRoutingQuery,
+          params: { id: Schema.String },
+          success: described(Schema.Boolean, "Deployment deleted"),
+          error: [HttpApiError.BadRequest, HttpApiError.Unauthorized, HttpApiError.NotFound],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "kilo.deployments.delete",
+            summary: "Delete deployment",
+            description: "Permanently delete a deployment",
+          }),
+        ),
+        HttpApiEndpoint.post("deploymentStart", KiloGatewayPaths.deploymentStart, {
+          query: WorkspaceRoutingQuery,
+          params: { id: Schema.String },
+          success: described(Deployment, "Started deployment"),
+          error: [HttpApiError.BadRequest, HttpApiError.Unauthorized, HttpApiError.NotFound],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "kilo.deployments.start",
+            summary: "Start deployment",
+            description: "Start a previously stopped deployment",
+          }),
+        ),
+        HttpApiEndpoint.post("deploymentStop", KiloGatewayPaths.deploymentStop, {
+          query: WorkspaceRoutingQuery,
+          params: { id: Schema.String },
+          success: described(Schema.Boolean, "Deployment stopping"),
+          error: [HttpApiError.BadRequest, HttpApiError.Unauthorized, HttpApiError.NotFound],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "kilo.deployments.stop",
+            summary: "Stop deployment",
+            description: "Stop a running deployment (scale-to-zero)",
+          }),
+        ),
+        HttpApiEndpoint.get("deploymentMarketplaceModels", KiloGatewayPaths.deploymentMarketplaceModels, {
+          query: { ...WorkspaceRoutingQueryFields, search: Schema.optional(Schema.String) },
+          success: described(Schema.Array(MarketplaceModel), "Open-source marketplace models"),
+          error: [HttpApiError.BadRequest, HttpApiError.Unauthorized],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "kilo.deployments.marketplaceModels",
+            summary: "List marketplace models",
+            description: "List open-source models available to deploy",
+          }),
+        ),
+        HttpApiEndpoint.get("deploymentGpuEstimate", KiloGatewayPaths.deploymentGpuEstimate, {
+          query: {
+            ...WorkspaceRoutingQueryFields,
+            modelId: Schema.String,
+            concurrentUsers: Schema.optional(Schema.String),
+          },
+          success: described(GpuEstimate, "Estimated GPU and cost for the model"),
+          error: [HttpApiError.BadRequest, HttpApiError.Unauthorized, HttpApiError.NotFound],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "kilo.deployments.gpuEstimate",
+            summary: "Estimate deployment cost",
+            description: "Estimate the GPU and hourly cost for deploying a marketplace model",
+          }),
+        ),
+        // mycelis_change end
       )
       .annotateMerge(
         OpenApi.annotations({

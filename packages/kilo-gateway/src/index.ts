@@ -37,6 +37,20 @@ export {
   promptOrganizationSelection,
 } from "./api/profile.js"
 export { fetchKiloPassState } from "./api/kilo-pass.js"
+// mycelis_change start
+export {
+  fetchDeployments,
+  createDeployment,
+  startDeployment,
+  stopDeployment,
+  deleteDeployment,
+  fetchMarketplaceModels,
+  fetchGpuEstimate,
+  type Deployment,
+  type MarketplaceModel,
+  type GpuEstimate,
+} from "./api/deployments.js"
+// mycelis_change end
 export {
   fetchKiloModels,
   type KiloModelsResult,
@@ -46,6 +60,8 @@ export {
   fetchKiloTranscriptionModels,
   type KiloTranscriptionModel,
   type KiloTranscriptionModelsResult,
+  fetchMycelisModels, // mycelis_change
+  type MycelisModelsResult, // mycelis_change
 } from "./api/models.js"
 export {
   EMPTY_KILO_EMBEDDING_MODEL_CATALOG,
@@ -147,6 +163,7 @@ export {
   ENV_MYCELIS_WEB_URL, // mycelis_change
   DEFAULT_MYCELIS_WEB_URL, // mycelis_change
   MYCELIS_WEB_URL, // mycelis_change
+  MYCELIS_GATEWAY_BASE, // mycelis_change
   MYCELIS_CLI_CLIENT_ID, // mycelis_change
   POLL_INTERVAL_MS,
   DEFAULT_MODEL,

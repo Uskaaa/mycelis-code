@@ -25,6 +25,13 @@ import {
   fetchOrganizationModes,
   fetchProfile,
   fetchMycelisProfile, // mycelis_change
+  fetchDeployments, // mycelis_change
+  createDeployment, // mycelis_change
+  startDeployment, // mycelis_change
+  stopDeployment, // mycelis_change
+  deleteDeployment, // mycelis_change
+  fetchMarketplaceModels, // mycelis_change
+  fetchGpuEstimate, // mycelis_change
 } from "@kilocode/kilo-gateway"
 import { DIRECT_FIM_ENV, requestMistralFim, resolveFimTarget } from "@kilocode/kilo-gateway/fim"
 import { DIRECT_EDIT_ENV, extractFencedBody, resolveEditTarget } from "@kilocode/kilo-gateway/edit"
@@ -100,7 +107,7 @@ export const kiloGatewayHandlers = HttpApiBuilder.group(InstanceHttpApi, "kilo",
           // actually lets someone diagnose e.g. "Mycelis backend unreachable".
           return HttpServerResponse.jsonUnsafe({ error: outcome.message }, { status: 502 })
         }
-        return { ...outcome.value, kiloPass: null, currentOrgId: null }
+        return { ...outcome.value, kiloPass: null, currentOrgId: getOrganizationId(info) ?? null } // mycelis_change
       }
 
       if (info.type !== "oauth") return yield* Effect.fail(new HttpApiError.Unauthorized({}))
@@ -374,23 +381,94 @@ export const kiloGatewayHandlers = HttpApiBuilder.group(InstanceHttpApi, "kilo",
 
     const organization = Effect.fn("KiloGatewayHttpApi.organization")(function* (ctx) {
       const info = yield* auth.get("kilo").pipe(Effect.mapError(() => new HttpApiError.Unauthorized({})))
-      if (!info || info.type !== "oauth") return yield* Effect.fail(new HttpApiError.Unauthorized({}))
+      if (!info) return yield* Effect.fail(new HttpApiError.Unauthorized({}))
 
-      yield* auth
-        .set("kilo", {
-          type: "oauth",
-          refresh: info.refresh,
-          access: info.access,
-          expires: info.expires,
-          ...(ctx.payload.organizationId && { accountId: ctx.payload.organizationId }),
-        })
-        .pipe(Effect.mapError(() => new HttpApiError.Unauthorized({})))
+      // mycelis_change - the browser-login flow stores a PAT as "api" auth, which has no
+      // refresh/access token to reattach like oauth does. The selected workspace just rides
+      // along on the credential's own metadata bag instead (read back via getOrganizationId,
+      // which already feeds the "kilo" provider's per-request org header - see provider.ts).
+      if (info.type === "api") {
+        yield* auth
+          .set("kilo", {
+            type: "api",
+            key: info.key,
+            metadata: { ...info.metadata, ...(ctx.payload.organizationId ? { organizationId: ctx.payload.organizationId } : {}) },
+          })
+          .pipe(Effect.mapError(() => new HttpApiError.Unauthorized({})))
+      } else if (info.type === "oauth") {
+        yield* auth
+          .set("kilo", {
+            type: "oauth",
+            refresh: info.refresh,
+            access: info.access,
+            expires: info.expires,
+            ...(ctx.payload.organizationId && { accountId: ctx.payload.organizationId }),
+          })
+          .pipe(Effect.mapError(() => new HttpApiError.Unauthorized({})))
+      } else {
+        return yield* Effect.fail(new HttpApiError.Unauthorized({}))
+      }
 
       yield* cache.clear("kilo")
       clearModesCache()
       yield* store.disposeAll().pipe(Effect.mapError(() => new HttpApiError.Unauthorized({})))
       return true
     })
+
+    // mycelis_change start - /deployments
+    // Only "api" (PAT) auth can reach Mycelis's deployment proxy - "oauth" (legacy Kilo) accounts
+    // have no Mycelis workspace to deploy into.
+    const requirePat = Effect.fn("KiloGatewayHttpApi.deployments.requirePat")(function* () {
+      const info = yield* auth.get("kilo").pipe(Effect.mapError(() => new HttpApiError.Unauthorized({})))
+      if (!info || info.type !== "api") return yield* Effect.fail(new HttpApiError.Unauthorized({}))
+      return { pat: info.key, organizationId: getOrganizationId(info) }
+    })
+
+    function callDeployments<T>(run: (pat: string, organizationId: string | undefined) => Promise<T>) {
+      return Effect.gen(function* () {
+        const { pat, organizationId } = yield* requirePat()
+        const outcome = yield* Effect.promise(() =>
+          run(pat, organizationId).then(
+            (value) => ({ ok: true as const, value }),
+            (error: unknown) => ({ ok: false as const, message: error instanceof Error ? error.message : String(error) }),
+          ),
+        )
+        if (!outcome.ok) return yield* Effect.fail(new HttpApiError.BadRequest({}))
+        return outcome.value
+      })
+    }
+
+    const deploymentsList = Effect.fn("KiloGatewayHttpApi.deployments.list")(function* () {
+      return yield* callDeployments((pat, org) => fetchDeployments(pat, org))
+    })
+
+    const deploymentsCreate = Effect.fn("KiloGatewayHttpApi.deployments.create")(function* (ctx) {
+      return yield* callDeployments((pat, org) => createDeployment(pat, ctx.payload, org))
+    })
+
+    const deploymentDelete = Effect.fn("KiloGatewayHttpApi.deployments.delete")(function* (ctx) {
+      yield* callDeployments((pat, org) => deleteDeployment(pat, ctx.params.id, org))
+      return true
+    })
+
+    const deploymentStart = Effect.fn("KiloGatewayHttpApi.deployments.start")(function* (ctx) {
+      return yield* callDeployments((pat, org) => startDeployment(pat, ctx.params.id, org))
+    })
+
+    const deploymentStop = Effect.fn("KiloGatewayHttpApi.deployments.stop")(function* (ctx) {
+      yield* callDeployments((pat, org) => stopDeployment(pat, ctx.params.id, org))
+      return true
+    })
+
+    const deploymentMarketplaceModels = Effect.fn("KiloGatewayHttpApi.deployments.marketplaceModels")(function* (ctx) {
+      return yield* callDeployments((pat, org) => fetchMarketplaceModels(pat, ctx.query.search, org))
+    })
+
+    const deploymentGpuEstimate = Effect.fn("KiloGatewayHttpApi.deployments.gpuEstimate")(function* (ctx) {
+      const concurrentUsers = ctx.query.concurrentUsers ? Number(ctx.query.concurrentUsers) : 1
+      return yield* callDeployments((pat, org) => fetchGpuEstimate(pat, ctx.query.modelId, concurrentUsers, org))
+    })
+    // mycelis_change end
 
     const clawStatus = Effect.fn("KiloGatewayHttpApi.clawStatus")(function* () {
       const info = yield* auth.get("kilo").pipe(Effect.mapError(() => new HttpApiError.ServiceUnavailable({})))
@@ -676,6 +754,15 @@ export const kiloGatewayHandlers = HttpApiBuilder.group(InstanceHttpApi, "kilo",
       .handle("transcriptionModels", transcriptionModels)
       .handle("notifications", notifications)
       .handle("organization", organization)
+      // mycelis_change start
+      .handle("deployments", deploymentsList)
+      .handle("deploymentsCreate", deploymentsCreate)
+      .handle("deploymentDelete", deploymentDelete)
+      .handle("deploymentStart", deploymentStart)
+      .handle("deploymentStop", deploymentStop)
+      .handle("deploymentMarketplaceModels", deploymentMarketplaceModels)
+      .handle("deploymentGpuEstimate", deploymentGpuEstimate)
+      // mycelis_change end
       .handle("clawStatus", clawStatus)
       .handle("clawChatCredentials", clawChatCredentials)
       .handle("cloudSessions", cloudSessions)

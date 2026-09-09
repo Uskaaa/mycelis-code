@@ -27,13 +27,14 @@ export function DialogKiloProfile(props: DialogKiloProfileProps) {
     }
   })
 
-  // Get current organization info
+  // mycelis_change - default to the owned workspace when no selection has ever been made; there's
+  // no separate "personal account" fallback anymore, everything runs through workspaces.
   const currentOrg =
-    props.currentOrgId && props.profile.organizations
-      ? props.profile.organizations.find((org) => org.id === props.currentOrgId)
-      : null
+    props.profile.organizations?.find((org) => org.id === props.currentOrgId) ??
+    props.profile.organizations?.find((org) => org.role === "Owner") ??
+    props.profile.organizations?.[0]
 
-  const teamDisplay = currentOrg ? `${currentOrg.name} (${currentOrg.role})` : "Personal"
+  const workspaceDisplay = currentOrg ? `${currentOrg.name} (${currentOrg.role})` : "—"
 
   const balanceDisplay =
     props.balance && props.balance.balance !== undefined && props.balance.balance !== null
@@ -56,7 +57,7 @@ export function DialogKiloProfile(props: DialogKiloProfileProps) {
       <box paddingBottom={1}>
         {props.profile.name && <text fg={theme.text}>Name: {props.profile.name}</text>}
         {props.profile.email && <text fg={theme.text}>Email: {props.profile.email}</text>}
-        <text fg={theme.text}>Team: {teamDisplay}</text>
+        <text fg={theme.text}>Workspace: {workspaceDisplay}</text>
         {balanceDisplay && <text fg={theme.text}>Balance: {balanceDisplay}</text>}
         <box marginTop={1}>
           <box flexDirection="row">

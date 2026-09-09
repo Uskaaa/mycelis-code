@@ -64,6 +64,12 @@ export const ConfigOverlayPatch = Schema.Struct({
   // Optional: clients that did not read a revision (anything but the settings
   // page) still write unconditionally instead of failing the request.
   expected: Schema.optional(Schema.Struct({ path: Schema.String, revision: Schema.String })),
+  // mycelis_change - skip re-resolving the full effective config (config.get/getGlobal +
+  // KilocodeConfigSources.list, which forces a full cold config/provider reload right after the
+  // invalidate() a few lines above it) for callers that only check whether the write succeeded
+  // and refetch state themselves afterward - every current caller does. That reload was the
+  // actual multi-second delay behind "/privacy takes forever to show its notification".
+  skipResponse: Schema.optional(Schema.Boolean),
 })
 export class ConfigOverlayConflictError extends Schema.ErrorClass<ConfigOverlayConflictError>(
   "ConfigOverlayConflictError",
@@ -97,17 +103,22 @@ export const ConfigRulesPatch = Schema.Struct({
 })
 export const ConfigOverlayResponse = Schema.Struct({
   scope: Scope,
-  effective: Config.Info,
-  global: Config.Info,
-  project: Config.Info,
-  sources: Schema.Array(Source),
-  targets: Schema.Struct({
-    global: ConfigTarget,
-    project: ConfigTarget,
-    active: ConfigTarget,
-  }),
-  fields: Schema.Record(Schema.String, Resolved),
-  collections: Schema.Record(Schema.String, Schema.Array(Resolved)),
+  // mycelis_change - optional: omitted when the request set `skipResponse` (see
+  // ConfigOverlayPatch) to skip re-resolving the full effective config just to fill a response
+  // body every current caller (CLI /privacy, indexing settings, the Kilo Console) discards anyway.
+  effective: Schema.optional(Config.Info),
+  global: Schema.optional(Config.Info),
+  project: Schema.optional(Config.Info),
+  sources: Schema.optional(Schema.Array(Source)),
+  targets: Schema.optional(
+    Schema.Struct({
+      global: ConfigTarget,
+      project: ConfigTarget,
+      active: ConfigTarget,
+    }),
+  ),
+  fields: Schema.optional(Schema.Record(Schema.String, Resolved)),
+  collections: Schema.optional(Schema.Record(Schema.String, Schema.Array(Resolved))),
 }).annotate({ identifier: "ConfigOverlayResponse" })
 export const ConfigSourcesResponse = Schema.Struct({ sources: Schema.Array(Source) }).annotate({
   identifier: "ConfigSourcesResponse",

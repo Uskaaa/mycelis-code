@@ -1826,6 +1826,7 @@ export class Config2 extends HeyApiClient {
         path: string
         revision: string
       }
+      skipResponse?: boolean
     },
     options?: Options<never, ThrowOnError>,
   ) {
@@ -1840,6 +1841,7 @@ export class Config2 extends HeyApiClient {
             { in: "body", key: "set" },
             { in: "body", key: "unset" },
             { in: "body", key: "expected" },
+            { in: "body", key: "skipResponse" },
           ],
         },
       ],

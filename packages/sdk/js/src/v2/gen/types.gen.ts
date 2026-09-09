@@ -3908,10 +3908,10 @@ export type CommitMessageFailedError = {
 
 export type ConfigOverlayResponse = {
   scope: "global" | "project"
-  effective: Config
-  global: Config
-  project: Config
-  sources: Array<{
+  effective?: Config
+  global?: Config
+  project?: Config
+  sources?: Array<{
     order: number | "NaN" | "Infinity" | "-Infinity" | "Infinity" | "-Infinity" | "NaN"
     kind: string
     scope: string
@@ -3922,7 +3922,7 @@ export type ConfigOverlayResponse = {
     editable: boolean
     reason?: string
   }>
-  targets: {
+  targets?: {
     global: {
       scope: "global" | "project"
       path: string
@@ -3954,7 +3954,7 @@ export type ConfigOverlayResponse = {
       }
     }
   }
-  fields: {
+  fields?: {
     [key: string]: {
       key: string
       path: Array<string>
@@ -3968,7 +3968,7 @@ export type ConfigOverlayResponse = {
       reason?: string
     }
   }
-  collections: {
+  collections?: {
     [key: string]: Array<{
       key: string
       path: Array<string>
@@ -15282,6 +15282,7 @@ export type ConfigOverlayUpdateData = {
       path: string
       revision: string
     }
+    skipResponse?: boolean
   }
   path?: never
   query?: {

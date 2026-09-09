@@ -105,7 +105,11 @@ export const configConsoleHandlers = HttpApiBuilder.group(InstanceHttpApi, "conf
         )
       }
       const patch = KilocodeConfigOverlay.patch(body)
-      const hot = body.scope === "global" && Object.keys(patch).every((key) => key === "console")
+      // mycelis_change - privacy_mode is a pure display setting (see /privacy) with no effect on
+      // providers, LSP, plugins, or indexing, same as "console" - neither needs the full instance
+      // disposal below.
+      const HOT_GLOBAL_KEYS = new Set(["console", "privacy_mode"])
+      const hot = body.scope === "global" && Object.keys(patch).every((key) => HOT_GLOBAL_KEYS.has(key))
       if (body.scope === "global") {
         yield* config.invalidate()
         if (result.changed) {
@@ -134,6 +138,19 @@ export const configConsoleHandlers = HttpApiBuilder.group(InstanceHttpApi, "conf
         }
         yield* markInstanceForDisposal(instance)
       }
+      if (body.scope === "global" && result.changed && !hot) {
+        yield* disposeAllInstancesAndEmitGlobalDisposed({ swallowErrors: true }).pipe(
+          Effect.catchCause(() => Effect.void),
+        )
+      }
+
+      // mycelis_change - see ConfigOverlayPatch.skipResponse: the block below forces a full cold
+      // config/provider reload (config.get/getGlobal right after invalidate()) plus a filesystem
+      // source-inventory scan, purely to fill a response body every current caller discards.
+      if (body.skipResponse) {
+        return { scope: body.scope }
+      }
+
       const all = yield* auth.all().pipe(Effect.orElseSucceed(() => ({})))
       const active = yield* account.active().pipe(
         Effect.map(Option.getOrUndefined),
@@ -164,11 +181,6 @@ export const configConsoleHandlers = HttpApiBuilder.group(InstanceHttpApi, "conf
           sources: sources.sources,
         }),
       )
-      if (body.scope === "global" && result.changed && !hot) {
-        yield* disposeAllInstancesAndEmitGlobalDisposed({ swallowErrors: true }).pipe(
-          Effect.catchCause(() => Effect.void),
-        )
-      }
       return output
     })
 

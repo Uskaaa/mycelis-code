@@ -122,6 +122,7 @@ async function saveScopedIndexing(
     scope,
     set: { indexing: patch.indexing },
     unset: patch.unset,
+    skipResponse: true, // mycelis_change - the response is never used; see ConfigOverlayPatch.skipResponse
   })
   if (response.error) {
     toast.show({ message: "Failed to save indexing config", variant: "error" })

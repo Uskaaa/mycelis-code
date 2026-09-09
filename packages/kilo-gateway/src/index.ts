@@ -164,6 +164,7 @@ export {
   DEFAULT_MYCELIS_WEB_URL, // mycelis_change
   MYCELIS_WEB_URL, // mycelis_change
   MYCELIS_GATEWAY_BASE, // mycelis_change
+  HEADER_MYCELIS_ORGANIZATIONID, // mycelis_change
   MYCELIS_CLI_CLIENT_ID, // mycelis_change
   POLL_INTERVAL_MS,
   DEFAULT_MODEL,

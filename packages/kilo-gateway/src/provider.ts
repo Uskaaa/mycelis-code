@@ -5,7 +5,12 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible"
 import type { KiloProvider, KiloProviderOptions } from "./types.js"
 import { getApiKey } from "./auth/token.js"
 import { buildKiloHeaders, getDefaultHeaders } from "./headers.js"
-import { ANONYMOUS_API_KEY, MYCELIS_GATEWAY_BASE } from "./api/constants.js" // mycelis_change
+import {
+  ANONYMOUS_API_KEY,
+  MYCELIS_GATEWAY_BASE,
+  HEADER_MYCELIS_ORGANIZATIONID,
+  HEADER_ORGANIZATIONID,
+} from "./api/constants.js" // mycelis_change
 import { resolveKiloOpenRouterBaseUrl } from "./api/url.js"
 import { transformRequestBody } from "./responses.js"
 import * as GatewayMetadata from "./gateway-metadata.js"
@@ -52,20 +57,34 @@ export function createKilo(options: KiloProviderOptions = {}): KiloProvider {
   const gatewayUrl = options.baseURL ?? MYCELIS_GATEWAY_BASE
   // mycelis_change end
 
-  // Merge custom headers with defaults
-  const customHeaders = {
+  // Merge custom headers with defaults - built WITHOUT an org header, since which one applies
+  // depends on which backend the actual request is going to (see wrappedFetch below).
+  const baseHeaders = {
     ...getDefaultHeaders(),
-    ...buildKiloHeaders(undefined, {
-      kilocodeOrganizationId: options.kilocodeOrganizationId,
-      kilocodeTesterWarningsDisabledUntil: undefined,
-    }),
+    ...buildKiloHeaders(undefined, { kilocodeTesterWarningsDisabledUntil: undefined }),
     ...options.headers,
+  }
+
+  // mycelis_change - Kilo's real API (still used here for embeddings/images via openRouterUrl)
+  // and Mycelis's own gateway (chat, via gatewayUrl) each expect their own org/workspace header
+  // name - kilo-gateway.ts's clawStatus and the indexing embedder still send the Kilo one to
+  // kilocode.ai, so it can't just be renamed everywhere; Mycelis's proxy controllers
+  // (YarpGatewayController etc.) only ever understand HEADER_MYCELIS_ORGANIZATIONID.
+  const kiloHeaders = {
+    ...baseHeaders,
+    ...(options.kilocodeOrganizationId ? { [HEADER_ORGANIZATIONID]: options.kilocodeOrganizationId } : {}),
+  }
+  const mycelisHeaders = {
+    ...baseHeaders,
+    ...(options.kilocodeOrganizationId ? { [HEADER_MYCELIS_ORGANIZATIONID]: options.kilocodeOrganizationId } : {}),
   }
 
   // Create custom fetch wrapper to add dynamic headers
   const originalFetch = options.fetch ?? fetch
   const wrappedFetch = async (input: string | URL | Request, init?: RequestInit) => {
-    const headers = buildRequestHeaders(customHeaders, init?.headers)
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+    const defaults = url.startsWith(gatewayUrl) ? mycelisHeaders : kiloHeaders // mycelis_change
+    const headers = buildRequestHeaders(defaults, init?.headers)
     const body = transformRequestBody(input, init?.body, options.dataCollection)
 
     // Add authorization if API key exists
@@ -83,13 +102,13 @@ export function createKilo(options: KiloProviderOptions = {}): KiloProvider {
   const sdkOptions = {
     baseURL: openRouterUrl,
     apiKey: apiKey ?? ANONYMOUS_API_KEY,
-    headers: customHeaders,
+    headers: kiloHeaders, // mycelis_change
     fetch: wrappedFetch as typeof fetch,
   }
 
   // mycelis_change - chat requests go to Mycelis's OpenAI-compatible gateway; embedding/image
   // models below still use `sdkOptions` (Kilo's OpenRouter endpoint), untouched for now.
-  const gatewaySdkOptions = { ...sdkOptions, baseURL: gatewayUrl }
+  const gatewaySdkOptions = { ...sdkOptions, baseURL: gatewayUrl, headers: mycelisHeaders } // mycelis_change
 
   const openrouter = createOpenRouter(sdkOptions)
   const anthropic = createAnthropic(gatewaySdkOptions) // mycelis_change

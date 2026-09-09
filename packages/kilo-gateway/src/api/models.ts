@@ -9,6 +9,7 @@ import {
   PROMPTS,
   AI_SDK_PROVIDERS,
   MYCELIS_GATEWAY_BASE, // mycelis_change
+  HEADER_MYCELIS_ORGANIZATIONID, // mycelis_change
 } from "./constants.js"
 
 export type KiloModelsResult = {
@@ -149,7 +150,13 @@ export async function fetchMycelisModels(options?: {
 
   const baseURL = (options?.baseURL ?? MYCELIS_GATEWAY_BASE).replace(/\/+$/, "")
   const response = await fetch(`${baseURL}/models`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      // mycelis_change - without this, the model list stayed pinned to the PAT's own home
+      // workspace regardless of what /workspace switched to, even though the chat/deployments
+      // paths already honored it (see ModelsProxyController in orchestration).
+      ...(options?.kilocodeOrganizationId ? { [HEADER_MYCELIS_ORGANIZATIONID]: options.kilocodeOrganizationId } : {}),
+    },
     signal: AbortSignal.timeout(MODELS_FETCH_TIMEOUT_MS),
   }).catch((err: unknown) => err as Error)
 

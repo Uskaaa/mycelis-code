@@ -65,6 +65,14 @@ export const MYCELIS_CLI_CLIENT_ID = "mycelis-cli"
  * Authenticated via `Authorization: Bearer <PAT>` - the same PAT minted by the browser-login flow.
  */
 export const MYCELIS_GATEWAY_BASE = `${MYCELIS_WEB_URL}/api/proxy/v1`
+
+/**
+ * Header carrying the active workspace id for requests that hit Mycelis's own backend
+ * (YarpGatewayController / ModelsProxyController / DeploymentsProxyController) - deliberately
+ * separate from HEADER_ORGANIZATIONID below, which is Kilo's own real-API header and stays
+ * unchanged for requests that still go to kilocode.ai (embeddings, images, kiloclaw status).
+ */
+export const HEADER_MYCELIS_ORGANIZATIONID = "X-MYCELIS-ORGANIZATIONID"
 // mycelis_change end
 
 /** Device auth polling interval in milliseconds */

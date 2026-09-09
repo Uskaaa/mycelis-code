@@ -1,5 +1,5 @@
 // mycelis_change - new file
-import { MYCELIS_WEB_URL, HEADER_ORGANIZATIONID } from "./constants.js"
+import { MYCELIS_WEB_URL, HEADER_MYCELIS_ORGANIZATIONID, MODELS_FETCH_TIMEOUT_MS } from "./constants.js"
 
 export interface Deployment {
   id: string
@@ -34,7 +34,7 @@ function headers(pat: string, organizationId?: string): Record<string, string> {
   return {
     Authorization: `Bearer ${pat}`,
     "Content-Type": "application/json",
-    ...(organizationId ? { [HEADER_ORGANIZATIONID]: organizationId } : {}),
+    ...(organizationId ? { [HEADER_MYCELIS_ORGANIZATIONID]: organizationId } : {}),
   }
 }
 
@@ -50,9 +50,18 @@ async function parseJsonError(response: Response): Promise<string> {
 async function request<T>(path: string, init: RequestInit): Promise<T> {
   let response: Response
   try {
-    response = await fetch(`${MYCELIS_WEB_URL}${path}`, init)
+    // mycelis_change - without a timeout, a stalled connection (proxy/firewall dropping packets
+    // silently instead of refusing the connection, or a genuinely slow backend) left the CLI's
+    // /deployments dialog stuck on "Loading..." forever with nothing to show or catch.
+    response = await fetch(`${MYCELIS_WEB_URL}${path}`, { ...init, signal: AbortSignal.timeout(MODELS_FETCH_TIMEOUT_MS) })
   } catch (cause) {
-    throw new Error(`Could not reach Mycelis backend at ${MYCELIS_WEB_URL} - is it running?`, { cause })
+    const timedOut = cause instanceof Error && cause.name === "TimeoutError"
+    throw new Error(
+      timedOut
+        ? `Timed out reaching Mycelis backend at ${MYCELIS_WEB_URL} after ${MODELS_FETCH_TIMEOUT_MS / 1000}s`
+        : `Could not reach Mycelis backend at ${MYCELIS_WEB_URL} - is it running?`,
+      { cause },
+    )
   }
   if (!response.ok) throw new Error(await parseJsonError(response))
   if (response.status === 204) return undefined as T

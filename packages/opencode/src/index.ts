@@ -54,6 +54,15 @@ function show(out: string) {
 }
 
 let cli = yargs(args) // kilocode_change
+  // mycelis_change - yargs (via y18n) auto-detects the OS locale and tries "<locale>.json"
+  // before falling back to "en.json". Only "en.json" ships in yargs' locales/ dir, so a Windows
+  // machine reporting "en-US"/"en_US" makes y18n try to read a bundled "en_US.json" that never
+  // existed - which fails outright (rather than silently falling back) once compiled into a
+  // single Bun executable, because Bun's own internal "B:\~BUN\" virtual-drive prefix for
+  // --compile binaries can collide with a real B: drive letter on the host (see
+  // github.com/Kilo-Org/kilocode/issues/9197). Forcing the locale here means y18n only ever
+  // looks up "en.json", which does exist, so this file read never happens at all.
+  .locale("en")
   .parserConfiguration({ "populate--": true })
   .scriptName("kilo") // kilocode_change
   .wrap(100)

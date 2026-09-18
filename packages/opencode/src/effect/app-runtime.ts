@@ -13,7 +13,16 @@ import { Ripgrep } from "@opencode-ai/core/ripgrep"
 import { Storage } from "@/storage/storage"
 import { Snapshot } from "@/snapshot"
 import { Plugin } from "@/plugin"
-import { ModelsDev } from "@opencode-ai/core/models-dev"
+// mycelis_change - was "@opencode-ai/core/models-dev": that upstream node has no notion of
+// Mycelis auth-gating, so registering it here made it the app-wide default resolution for the
+// "@opencode/ModelsDev" tag (both services share that exact tag string) - every consumer of
+// ModelsDev.Service got the real, live "kilo" catalog (hundreds of models) regardless of login
+// state, EXCEPT Provider.Service, which happens to list the local (gated) ModelsDev.node in its
+// own deps and so got its own correctly-scoped instance. `@/provider/models` re-exports the
+// identical Model/Provider/Service shape (see its own `export * as ModelsDev from "./models"`)
+// wrapping "kilo" with the auth-gated fetch from models.ts - this makes that the one global
+// instance for the tag instead of leaving two competing nodes in the same graph.
+import { ModelsDev } from "@/provider/models"
 import { ModelCache } from "@/provider/model-cache" // kilocode_change
 import { Provider } from "@/provider/provider"
 import { ProviderAuth } from "@/provider/auth"

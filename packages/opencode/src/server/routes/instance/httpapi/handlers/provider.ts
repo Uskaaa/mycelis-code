@@ -1,6 +1,12 @@
 import { ProviderAuth } from "@/provider/auth"
 import { Config } from "@/config/config"
-import { ModelsDev } from "@opencode-ai/core/models-dev"
+// mycelis_change - was "@opencode-ai/core/models-dev": that upstream service has no notion of
+// Mycelis auth-gating, so `all` below always carried the real, live "kilo" catalog (hundreds of
+// models) regardless of login state. `@/provider/models` re-exports the exact same
+// Model/Provider/Service shape (see its own `export * as ModelsDev from "./models"`) but wraps
+// "kilo" with the auth-gated fetch (see models.ts) that Provider.Service below already uses for
+// `connected` - this was the one remaining call site still on the upstream, ungated service.
+import { ModelsDev } from "@/provider/models"
 import { Provider } from "@/provider/provider"
 
 import { mapValues, pickBy } from "remeda" // kilocode_change

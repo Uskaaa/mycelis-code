@@ -44,7 +44,8 @@ export const layer: Layer.Layer<Service, never, Core.Service | Config.Service | 
 
       const get = Effect.fn("ModelsDev.get")(function* () {
         const providers = overlay(yield* core.get())
-        const fallback = providers.kilo
+        // mycelis_change - the static models.dev "kilo" entry (~366 generic OpenRouter-style
+        // models) is discarded outright now, not kept as a fallback - see the comment below.
         delete providers.kilo
 
         const cfg = yield* config.get()
@@ -77,14 +78,28 @@ export const layer: Layer.Layer<Service, never, Core.Service | Config.Service | 
 
         const opts = cfg.provider?.kilo?.options
         const info = yield* auth.get("kilo").pipe(Effect.catch(() => Effect.succeed(undefined)))
-        const org = opts?.kilocodeOrganizationId ?? (info?.type === "oauth" ? info.accountId : undefined)
+        // mycelis_change - PAT ("api") auth has no accountId (that's oauth-only); the selected
+        // workspace rides along on its metadata bag instead (see model-cache.ts's authOptions,
+        // which already resolves this correctly and wins here since org ends up undefined and
+        // this object omits the key entirely rather than setting it - kept for consistency/
+        // defense in depth, not because it's currently reachable through a different path).
+        const org =
+          opts?.kilocodeOrganizationId ??
+          (info?.type === "oauth" ? info.accountId : info?.type === "api" ? info.metadata?.organizationId : undefined)
         const url = baseURL(opts?.baseURL, org)
         const fetch = {
           ...(url ? { baseURL: url } : {}),
           ...(org ? { kilocodeOrganizationId: org } : {}),
         }
         const fetched = yield* cache.fetch("kilo", fetch).pipe(Effect.catch(() => Effect.succeed({})))
-        const models = Object.keys(fetched).length > 0 ? fetched : (fallback?.models ?? {})
+        // mycelis_change - was: fall back to the static models.dev catalog for "kilo" (366
+        // generic OpenRouter-style models) whenever Mycelis returns zero models. That fallback
+        // made sense for real Kilo Code (network hiccup => show the known catalog anyway) but is
+        // actively wrong for Mycelis: a workspace with no deployments legitimately has zero
+        // models, and none of that static catalog's model IDs work against Mycelis's own gateway
+        // anyway - showing them just looked like "all these other providers are back" once
+        // grouped under the Mycelis category. An empty list is the correct, honest result.
+        const models = fetched
         providers.kilo = {
           id: "kilo",
           name: "Kilo Gateway",

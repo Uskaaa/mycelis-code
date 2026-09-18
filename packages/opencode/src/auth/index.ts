@@ -5,6 +5,9 @@ import { NonNegativeInt } from "@opencode-ai/core/schema"
 import { Global } from "@opencode-ai/core/global"
 import { FSUtil } from "@opencode-ai/core/fs-util"
 import { Telemetry } from "@kilocode/kilo-telemetry" // kilocode_change
+import * as Log from "@opencode-ai/core/util/log" // mycelis_change
+
+const log = Log.create({ service: "auth" }) // mycelis_change
 
 export const OAUTH_DUMMY_KEY = "kilo-oauth-dummy-key" // kilocode_change
 
@@ -64,7 +67,20 @@ const layer = Layer.effect(
       }
 
       const data = (yield* fsys.readJson(file).pipe(Effect.orElseSucceed(() => ({})))) as Record<string, unknown>
-      return Record.filterMap(data, (value) => Result.fromOption(decode(value), () => undefined))
+      // mycelis_change - Record.filterMap used to drop entries that fail to decode against the
+      // current Info schema completely silently. That's indistinguishable from "never logged in"
+      // from every caller's point of view - auth.get(id) just returns undefined either way, and
+      // since auth.json isn't rewritten just by being read, the entry stays permanently
+      // undecodable (and thus permanently "logged out") until the next explicit auth.set for
+      // that id. Logging what got dropped turns a silent, persistent, unexplained logout into a
+      // diagnosable one.
+      return Record.filterMap(data, (value, key) => {
+        const result = decode(value)
+        if (result._tag === "None") {
+          log.warn("dropping undecodable stored auth entry - will read back as logged out", { key, value })
+        }
+        return Result.fromOption(result, () => undefined)
+      })
     })
 
     const get = Effect.fn("Auth.get")(function* (providerID: string) {
@@ -76,6 +92,19 @@ const layer = Layer.effect(
       const data = yield* all()
       if (norm !== key) delete data[key]
       delete data[norm + "/"]
+      // mycelis_change - trace every write to the "kilo" credential (type + presence of the
+      // fields the schema requires) so a future silent/persistent logout can be correlated with
+      // exactly which write produced it, instead of only seeing the eventual dropped-entry
+      // warning above with no record of what wrote the bad shape in the first place.
+      if (norm === "kilo") {
+        log.info("writing kilo auth", {
+          type: info.type,
+          hasKey: info.type === "api" || info.type === "wellknown" ? !!info.key : undefined,
+          hasMetadata: info.type === "api" ? !!info.metadata : undefined,
+          hasRefresh: info.type === "oauth" ? !!info.refresh : undefined,
+          hasAccess: info.type === "oauth" ? !!info.access : undefined,
+        })
+      }
       yield* fsys
         .writeJson(file, { ...data, [norm]: info }, 0o600)
         .pipe(Effect.mapError(fail("Failed to write auth data")))
@@ -86,6 +115,7 @@ const layer = Layer.effect(
       const data = yield* all()
       delete data[key]
       delete data[norm]
+      if (norm === "kilo") log.info("removing kilo auth") // mycelis_change
       yield* fsys.writeJson(file, data, 0o600).pipe(Effect.mapError(fail("Failed to write auth data")))
 
       // kilocode_change start - Track logout and reset telemetry identity for Kilo

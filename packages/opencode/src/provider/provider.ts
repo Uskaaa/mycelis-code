@@ -1743,7 +1743,16 @@ const layer = Layer.effect(
             }
           }
 
-          if (Object.keys(provider.models).length === 0) {
+          // mycelis_change - "kilo" (Mycelis) legitimately has zero models whenever the
+          // currently selected workspace has no deployments yet - that's a real, authenticated
+          // connection, not "disconnected". Dropping it here regardless of source made it vanish
+          // from provider_next entirely on every workspace with no models, which
+          // isKiloConnected() (use-connected.tsx) then read back as a full logout - even though
+          // the stored credential itself was never touched. Every other provider, and an
+          // unauthenticated/anonymous "kilo" entry (source "custom"), keep the original
+          // drop-when-empty behavior.
+          const authenticatedKilo = providerID === ProviderV2.ID.kilo && provider.source === "api"
+          if (Object.keys(provider.models).length === 0 && !authenticatedKilo) {
             delete providers[providerID]
             continue
           }

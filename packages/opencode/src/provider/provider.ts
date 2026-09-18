@@ -1747,16 +1747,19 @@ const layer = Layer.effect(
             }
           }
 
-          // mycelis_change - "kilo" (Mycelis) legitimately has zero models whenever the
-          // currently selected workspace has no deployments yet - that's a real, authenticated
-          // connection, not "disconnected". Dropping it here regardless of source made it vanish
-          // from provider_next entirely on every workspace with no models, which
-          // isKiloConnected() (use-connected.tsx) then read back as a full logout - even though
-          // the stored credential itself was never touched. Every other provider, and an
-          // unauthenticated/anonymous "kilo" entry (source "custom"), keep the original
-          // drop-when-empty behavior.
-          const authenticatedKilo = providerID === ProviderV2.ID.kilo && provider.source === "api"
-          if (Object.keys(provider.models).length === 0 && !authenticatedKilo) {
+          // mycelis_change - "kilo" (Mycelis) is the only supported sign-in path, and Mycelis has
+          // no anonymous tier (see fetchMycelisModels), so it legitimately has zero models both
+          // when disconnected AND when connected to a workspace with no deployments yet. Dropping
+          // it here regardless of source used to make it vanish from provider_next entirely
+          // whenever it had no models - which (a) isKiloConnected() (use-connected.tsx) then read
+          // back as a full logout even though the stored credential itself was never touched, and
+          // (b) meant a never-before-connected user couldn't even find "kilo" in /connect's
+          // provider list to sign in with in the first place. isKiloConnected() still keys off
+          // `source !== "custom"`, so always keeping "kilo" here doesn't turn a genuinely
+          // disconnected session into a false "connected" reading. Every other provider keeps the
+          // original drop-when-empty behavior.
+          const isKilo = providerID === ProviderV2.ID.kilo
+          if (Object.keys(provider.models).length === 0 && !isKilo) {
             delete providers[providerID]
             continue
           }

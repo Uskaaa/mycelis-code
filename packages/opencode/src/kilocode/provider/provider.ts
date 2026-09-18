@@ -240,7 +240,14 @@ export function kiloCustomLoaders(dep: CustomDep): Record<string, CustomLoader> 
       }
 
       return {
-        autoload: Object.keys(input.models).length > 0,
+        // mycelis_change - "kilo" is Mycelis's only sign-in path, and Mycelis has no anonymous
+        // tier (fetchMycelisModels returns zero models without a token), so gating autoload on
+        // having models - fine for real Kilo Code, which always has an anonymous free tier - kept
+        // "kilo" out of `providers` entirely whenever disconnected. That's exactly the state a
+        // user needs to see it in to run /connect in the first place, so it always autoloads here
+        // regardless of model count; see provider.ts's zero-model-deletion exemption for the
+        // matching fix on the other side of the pipeline.
+        autoload: true, // was: Object.keys(input.models).length > 0
         options,
         async getModel(sdk: KiloProvider, modelID: string) {
           const provider = input.models[modelID]?.ai_sdk_provider

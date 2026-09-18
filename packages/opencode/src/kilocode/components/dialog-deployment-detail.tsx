@@ -93,7 +93,11 @@ export function DialogDeploymentDetail(props: DialogDeploymentDetailProps) {
             <text fg={theme.text} attributes={TextAttributes.BOLD}>
               {props.deployment.name}
             </text>
-            <span style={{ fg: statusColor(status()) }}>{status()}</span>
+            {/* mycelis_change - a <span> needs a <text> parent, not a <box> sibling of one -
+            this crashed the whole TUI session ("orphan text error") until wrapped. */}
+            <text>
+              <span style={{ fg: statusColor(status()) }}>{status()}</span>
+            </text>
           </box>
           <text fg={theme.textMuted}>
             {props.deployment.modelName} · {usd.format(props.deployment.costPerHour)}/hr

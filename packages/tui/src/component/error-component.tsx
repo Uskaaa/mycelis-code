@@ -124,8 +124,8 @@ export function ErrorComponent(props: { error: Error; reset: () => void; mode?: 
         {/* Headline */}
         <box flexDirection="column" alignItems="center" flexShrink={0}>
           <text attributes={TextAttributes.BOLD} fg={colors.text}>
-            {/* kilocode_change */}
-            Kilo crashed
+            {/* mycelis_change */}
+            Mycelis crashed
           </text>
           <Show when={showSubtext()}>
             <text fg={colors.muted}>An unexpected error stopped the session.</text>
@@ -210,8 +210,8 @@ export function ErrorComponent(props: { error: Error; reset: () => void; mode?: 
                 : "Copy the report and open a GitHub issue to help us fix this."}
             </text>
             <text fg={colors.muted}>
-              {/* kilocode_change */}
-              Kilo {InstallationVersion}
+              {/* mycelis_change */}
+              Mycelis {InstallationVersion}
             </text>
           </box>
         </Show>

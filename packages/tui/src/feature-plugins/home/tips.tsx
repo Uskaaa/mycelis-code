@@ -42,7 +42,11 @@ const tui: TuiPlugin = async (api) => {
         const hidden = createMemo(() => api.kv.get("tips_hidden", false))
         const first = createMemo(() => api.state.session.count() === 0)
         const connected = useConnected() // mycelis_change - shared Mycelis-specific check instead of a local near-duplicate
-        const show = createMemo(() => !hidden()) // kilocode_change - always show tips regardless of first-time status
+        // mycelis_change - home-onboarding.tsx already owns this exact moment (first session,
+        // not yet connected) with its own dedicated "/connect" tip; without this both plugins'
+        // home_bottom slots rendered at once, showing two near-identical "run /connect" tips
+        // stacked on top of each other.
+        const show = createMemo(() => !hidden() && !(first() && !connected()))
         return <View api={api} hidden={hidden()} show={show()} connected={connected()} />
       },
     },

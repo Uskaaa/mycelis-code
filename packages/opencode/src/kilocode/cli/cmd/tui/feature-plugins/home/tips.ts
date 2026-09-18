@@ -78,7 +78,6 @@ export const KILO_TIPS: Tip[] = [
   (shortcuts) => `Use ${commandText("/export", shortcuts.sessionExport())} to save the conversation as Markdown`,
   (shortcuts) => press(shortcuts.messagesCopy(), "to copy the assistant's last message to clipboard"),
   "Type {highlight}/{/highlight} to see all available actions and commands", // mycelis_change
-  "Run {highlight}/connect{/highlight} to add API keys for 75+ supported LLM providers",
   (shortcuts) => `The leader key is ${shortcutText(shortcuts.leader())}; combine with other keys for quick actions`,
   (shortcuts) => press(shortcuts.modelCycleRecent(), "to quickly switch between recently used models"),
   (shortcuts) => press(shortcuts.sessionSidebarToggle(), "in a session to show or hide the sidebar panel"),
@@ -136,8 +135,8 @@ export const KILO_TIPS: Tip[] = [
   "Run {highlight}kilo upgrade{/highlight} to update to the latest version",
   "Run {highlight}kilo auth list{/highlight} to see all configured providers",
   "Run {highlight}kilo agent create{/highlight} for guided agent creation",
-  "Run {highlight}kilo github install{/highlight} to set up the GitHub workflow",
-  "Comment {highlight}/kilo fix this{/highlight} on issues to auto-create PRs",
+  // mycelis_change - dropped: "kilo github install" / "/kilo fix this" advertised Kilo Code's
+  // own GitHub App integration (api.kilo.ai), which Mycelis has no access to and doesn't run.
   'Use {highlight}"theme": "system"{/highlight} to match your terminal\'s colors',
   "Create JSON theme files in {highlight}.kilo/themes/{/highlight} directory",
   "Themes support dark/light variants for both modes",
@@ -162,7 +161,8 @@ export const KILO_TIPS: Tip[] = [
   (shortcuts) => `Use ${commandText("/status", shortcuts.statusView())} to see system status info`,
   "Enable {highlight}scroll_acceleration{/highlight} in {highlight}tui.json{/highlight} for smooth macOS-style scrolling",
   // mycelis_change - dropped: referenced a "toggle username display" action with no backing command
-  "Run {highlight}docker run -it --rm ghcr.io/kilo-org/kilocode{/highlight} for containerized use",
+  // mycelis_change - dropped: "docker run ghcr.io/kilo-org/kilocode" pointed at Kilo Code's own
+  // public image, which this fork doesn't build or publish.
   "Use {highlight}/connect{/highlight} with Mycelis for curated, tested models", // mycelis_change
   "Commit your project's {highlight}AGENTS.md{/highlight} file to Git for team sharing",
   "Use {highlight}/review{/highlight} to review uncommitted changes, commits, branches, or PRs",

@@ -322,7 +322,28 @@ export function registerKiloCommands(useSDK: () => UseSDK) {
                     // selected model reactively once sync.data.provider updates (see
                     // isModelValid/currentModel in tui/context/local.tsx), so there's nothing
                     // else to wait for here.
-                    void sync.bootstrap().then(() => refreshBalance())
+                    // mycelis_change - fatal:false: bootstrap()'s default (fatal:true) exits the
+                    // whole TUI process on failure, which is fine for the initial app-startup
+                    // bootstrap but far too destructive for a background refresh after switching
+                    // workspaces - a transient failure here should surface as a toast, not kill
+                    // the user's session.
+                    void sync
+                      .bootstrap({ fatal: false })
+                      .then(() => refreshBalance())
+                      .catch((error: unknown) => {
+                        // mycelis_change - this used to be awaited inline, so a failure here
+                        // surfaced through the outer catch below; now that it's a background
+                        // fire-and-forget call, an unhandled rejection would silently leave
+                        // sync.data.provider/provider_next on stale (pre-switch) data with no
+                        // feedback at all - e.g. still showing every other configured BYOK
+                        // provider in /models instead of just Mycelis's, if bootstrap never
+                        // gets to overwrite that stale state.
+                        if (error instanceof DOMException && error.name === "AbortError") return
+                        toast.show({
+                          message: `Switched workspace, but refreshing models failed: ${error}`,
+                          variant: "warning",
+                        })
+                      })
                   } catch (error) {
                     if (error instanceof DOMException && error.name === "AbortError") return
                     toast.show({

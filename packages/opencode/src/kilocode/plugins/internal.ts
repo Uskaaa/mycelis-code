@@ -1,5 +1,4 @@
 import type { BuiltinTuiPlugin } from "@opencode-ai/tui/builtins"
-import HomeNews from "@/kilocode/plugins/home-news"
 import HomeOnboarding from "@/kilocode/plugins/home-onboarding"
 import Attention from "@/kilocode/plugins/attention"
 import HomeFooter from "@/kilocode/plugins/home-footer"
@@ -18,7 +17,6 @@ import SessionV2Debug from "@/kilocode/plugins/session-v2-debug"
 import type { RuntimeFlags } from "@/effect/runtime-flags"
 
 const plugins = [
-  HomeNews,
   HomeOnboarding,
   Attention,
   HomeFooter,

@@ -194,6 +194,7 @@ const ProfileView: Component<ProfileViewProps> = (props) => {
                   verificationUrl={props.deviceAuth.verificationUrl}
                   expiresIn={props.deviceAuth.expiresIn}
                   error={props.deviceAuth.error}
+                  auto={props.deviceAuth.auto}
                   onCancel={handleCancelLogin}
                   onRetry={handleLogin}
                 />

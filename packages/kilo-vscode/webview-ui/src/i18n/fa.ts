@@ -206,7 +206,7 @@ export const dict = {
   "prompt.action.resetModel": "بازنشانی مدل به حالت پیش‌فرض",
   "prompt.action.enhanceDescription":
     "دکمه «بهبود پرامپت» با ارائه زمینه بیشتر، توضیح یا بازنویسی، به بهتر کردن پرامپت شما کمک می‌کند. یک پرامپت تایپ کنید و دوباره روی دکمه کلیک کنید تا نحوه عملکرد آن را ببینید.",
-  "speechToText.tooltip.start": "شروع ورودی صوتی با Kilo Gateway",
+  "speechToText.tooltip.start": "شروع ورودی صوتی با Mycelis Gateway",
   "speechToText.tooltip.shortcut":
     "برای شروع یا توقف ضبط، روی دکمه ضربه بزنید یا Cmd/Ctrl+K را فشار دهید؛ هنگام صحبت دکمه را نگه دارید و سپس رها کنید تا گفتار به متن تبدیل و ارسال شود.",
   "speechToText.tooltip.starting": "در حال راه‌اندازی میکروفون... منتظر بمانید.",
@@ -538,7 +538,7 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "کد در کلیپ‌بورد کپی شد",
   "deviceAuth.toast.errorCopied": "خطا در کلیپ‌بورد کپی شد",
   "deviceAuth.status.initiating": "در حال شروع ورود...",
-  "deviceAuth.title": "ورود به Kilo Code",
+  "deviceAuth.title": "ورود به Mycelis",
   "deviceAuth.step1": "مرحله ۱: این URL را باز کنید",
   "deviceAuth.action.copyUrl": "کپی URL",
   "deviceAuth.action.openBrowser": "باز کردن مرورگر",
@@ -561,7 +561,7 @@ export const dict = {
 
   "profile.title": "پروفایل",
   "profile.notLoggedIn": "وارد نشده‌اید",
-  "profile.action.login": "ورود با Kilo Code",
+  "profile.action.login": "ورود با Mycelis",
   "profile.balance.title": "موجودی",
   "profile.balance.refresh": "بازخوانی موجودی",
   "profile.usage.title": "طرح‌ها و میزان استفاده",
@@ -576,7 +576,7 @@ export const dict = {
   "profile.usage.plan.unknown": "طرح: وضعیت نامشخص",
   "profile.usage.action.manage": "مدیریت",
   "profile.usage.action.managePlan": "مدیریت {{plan}}",
-  "profile.usage.routing": "صورتحساب طرح فعال است. مسیریابی Kilo Gateway {{state}} است.",
+  "profile.usage.routing": "صورتحساب طرح فعال است. مسیریابی Mycelis Gateway {{state}} است.",
   "profile.usage.routingState.disabled": "غیرفعال",
   "profile.usage.routingState.missing": "ناموجود",
   "profile.usage.routingState.replaced": "جایگزین‌شده",
@@ -665,10 +665,10 @@ export const dict = {
   "settings.indexing.tuning.description": "پارامتر پیشرفته جستجو و دسته‌بندی.",
   "settings.experimental.title": "آزمایشی",
   "settings.language.title": "زبان",
-  "settings.aboutKiloCode.title": "درباره Kilo Code",
+  "settings.aboutKiloCode.title": "درباره Mycelis",
 
   "session.messages.welcome":
-    "Kilo Code یک دستیار هوش مصنوعی برای کدنویسی است. از آن بخواهید ویژگی‌ها بسازد، باگ‌ها را رفع کند یا کدبیس شما را توضیح دهد.",
+    "Mycelis یک دستیار هوش مصنوعی برای کدنویسی است. از آن بخواهید ویژگی‌ها بسازد، باگ‌ها را رفع کند یا کدبیس شما را توضیح دهد.",
   "session.messages.scrollToBottom": "رفتن به پایین",
   "session.messages.initializing": "در حال راه‌اندازی...",
   "session.messages.taskStarting": "در حال شروع...",
@@ -696,7 +696,7 @@ export const dict = {
   "session.costAlert.continue": "ادامه",
   "session.costAlert.question": "هزینه این جلسه از آستانه هشدار {{limit}} شما فراتر رفت و {{cost}} شد. ادامه می‌دهید؟",
   "session.costAlert.stop": "توقف",
-  "sidebar.topBar.label": "پیمایش Kilo Code",
+  "sidebar.topBar.label": "پیمایش Mycelis",
   "sidebar.topBar.newTask": "وظیفه جدید",
   "sidebar.topBar.history": "تاریخچه",
   "sidebar.topBar.agentManager": "مدیر عامل‌ها",
@@ -803,7 +803,7 @@ export const dict = {
   "settings.browser.headless.description": "در حالت headless اجرا شود (بدون پنجره مرورگر قابل مشاهده).",
 
   "settings.language.description":
-    "زبان رابط کاربری Kilo Code را انتخاب کنید. «Auto» از زبان نمایشی VS Code شما استفاده می‌کند.",
+    "زبان رابط کاربری Mycelis را انتخاب کنید. «Auto» از زبان نمایشی VS Code شما استفاده می‌کند.",
   "settings.language.auto": "خودکار (زبان VS Code)",
   "settings.language.current": "فعلی:",
 
@@ -846,9 +846,9 @@ export const dict = {
   "settings.experimental.imageGenerationModel.placeholder": "پیش‌فرض (مسیریاب خودکار)",
 
   "settings.models.speechToText.disabledDescription":
-    "برای استفاده از تبدیل گفتار به متن، ارائه‌دهنده Kilo را فعال کرده و وارد شوید. تبدیل گفتار به متن در حال حاضر فقط از طریق Kilo Gateway پشتیبانی می‌شود.",
+    "برای استفاده از تبدیل گفتار به متن، ارائه‌دهنده Kilo را فعال کرده و وارد شوید. تبدیل گفتار به متن در حال حاضر فقط از طریق Mycelis Gateway پشتیبانی می‌شود.",
   "settings.models.speechToTextModel.title": "مدل تبدیل گفتار به متن",
-  "settings.models.speechToTextModel.description": "مدل رونویسی Kilo Gateway را برای ورودی صوتی انتخاب کنید.",
+  "settings.models.speechToTextModel.description": "مدل رونویسی Mycelis Gateway را برای ورودی صوتی انتخاب کنید.",
   "settings.experimental.nativeNotebookTools.title": "ابزارهای بومی Notebook",
   "settings.experimental.nativeNotebookTools.description":
     "ابزارهای آزمایشی برای خواندن، ویرایش و اجرای VS Code notebooks را فعال کنید",
@@ -1131,7 +1131,7 @@ export const dict = {
     "مدل پیش‌فرض و میزان استدلال برای زیرعامل‌های ابزار-وظیفه. برای به ارث بردن مدل عامل فراخواننده، خالی بگذارید.",
   "settings.models.hidePromptTraining.title": "پنهان کردن مدل‌های آموزش پرامپت",
   "settings.models.hidePromptTraining.description":
-    "مدل‌های Kilo Gateway را که ارائه‌دهندگانشان ممکن است از پرامپت‌های شما برای آموزش استفاده کنند پنهان کنید.",
+    "مدل‌های Mycelis Gateway را که ارائه‌دهندگانشان ممکن است از پرامپت‌های شما برای آموزش استفاده کنند پنهان کنید.",
   "settings.providers.modeModels": "مدل به ازای حالت",
   "settings.providers.modeModels.description":
     "مدل پیش‌فرض را برای حالت‌های خاص بازنویسی کنید. در صورت عدم تنظیم، از مدل پیش‌فرض سراسری استفاده می‌شود.",
@@ -1155,12 +1155,12 @@ export const dict = {
   "settings.legacyMigration.link": "انتقال از نسخه قدیمی",
   "settings.aboutKiloCode.legacyMigration.title": "انتقال از نسخه قدیمی",
   "settings.aboutKiloCode.legacyMigration.description":
-    "تنظیمات را از نصب قبلی Kilo Code منتقل کنید، از جمله کلیدهای API ارائه‌دهنده و مدل پیش‌فرض.",
+    "تنظیمات را از نصب قبلی Mycelis منتقل کنید، از جمله کلیدهای API ارائه‌دهنده و مدل پیش‌فرض.",
   "settings.aboutKiloCode.rooImport.description": "تاریخچه مکالمات را از یک نصب Roo Code وارد کنید.",
   "settings.aboutKiloCode.rooImport.button": "وارد کردن جلسات از Roo Code",
 
   // Screen 1 — What's New
-  "migration.whatsNew.title": "تازه‌های Kilo Code",
+  "migration.whatsNew.title": "تازه‌های Mycelis",
   "migration.whatsNew.subtitle": "افزونه را بر پایه‌ای سریع‌تر و کارآمدتر بازسازی کرده‌ایم.",
   "migration.whatsNew.features.performance.title": "عملکرد سریع‌تر عامل",
   "migration.whatsNew.features.performance.detail":

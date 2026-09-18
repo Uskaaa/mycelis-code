@@ -109,7 +109,7 @@ internal class KiloBackendProviderSettingsManager(
         val provider = current.providers.firstOrNull { it.id == input.providerId }
         val cfg = current.config[input.providerId]
         if (input.providerId == "kilo") {
-            return ProviderActionResultDto(current, error = "Kilo Gateway cannot be disconnected from provider settings.")
+            return ProviderActionResultDto(current, error = "Mycelis cannot be disconnected from provider settings.")
         }
         if (provider?.source == "env") {
             return ProviderActionResultDto(current, error = "Provider is configured by environment variables.")

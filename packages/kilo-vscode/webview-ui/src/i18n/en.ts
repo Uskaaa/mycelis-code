@@ -535,6 +535,7 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "Code copied to clipboard",
   "deviceAuth.toast.errorCopied": "Error copied to clipboard",
   "deviceAuth.status.initiating": "Starting login...",
+  "deviceAuth.autoHint": "We opened Mycelis in your browser. Finish signing in there to continue.",
   "deviceAuth.title": "Sign in to Mycelis",
   "deviceAuth.step1": "Step 1: Open this URL",
   "deviceAuth.action.copyUrl": "Copy URL",

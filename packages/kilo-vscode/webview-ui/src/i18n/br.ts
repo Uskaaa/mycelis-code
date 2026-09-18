@@ -211,7 +211,7 @@ export const dict = {
   "prompt.action.sandbox.description.disabledNetworkAllowed":
     "Clique para restringir as operações de escrita no sistema de arquivos. O acesso à rede continua permitido pelas configurações do sandbox.",
 
-  "speechToText.tooltip.start": "Iniciar entrada de voz com o Kilo Gateway",
+  "speechToText.tooltip.start": "Iniciar entrada de voz com o Mycelis Gateway",
   "speechToText.tooltip.shortcut":
     "Toque ou pressione Cmd/Ctrl+K para iniciar ou parar a gravação; mantenha o botão pressionado enquanto fala e solte-o para transcrever e enviar.",
   "speechToText.tooltip.starting": "Iniciando o microfone... Aguarde antes de falar.",
@@ -297,7 +297,7 @@ export const dict = {
   "session.messages.loadEarlier": "Carregar mensagens anteriores",
   "session.messages.loading": "Carregando mensagens...",
 
-  "sidebar.topBar.label": "Navegação do Kilo Code",
+  "sidebar.topBar.label": "Navegação do Mycelis",
   "sidebar.topBar.newTask": "Nova Tarefa",
   "sidebar.topBar.history": "Histórico",
   "sidebar.topBar.agentManager": "Agent Manager",
@@ -408,7 +408,7 @@ export const dict = {
     "Modelo padrão e esforço de raciocínio para subagentes do task-tool. Deixe em branco para herdar o modelo do agente chamador.",
   "settings.models.hidePromptTraining.title": "Ocultar modelos que treinam com prompts",
   "settings.models.hidePromptTraining.description":
-    "Oculte os modelos do Kilo Gateway cujos provedores podem usar seus prompts para treinamento.",
+    "Oculte os modelos do Mycelis Gateway cujos provedores podem usar seus prompts para treinamento.",
   "settings.providers.modeModels": "Modelo por Modo",
   "settings.providers.modeModels.description":
     "Substitua o modelo padrão para modos específicos. Se não definido, o modelo padrão global é usado.",
@@ -586,7 +586,7 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "Código copiado para a área de transferência",
   "deviceAuth.toast.errorCopied": "Erro copiado para a área de transferência",
   "deviceAuth.status.initiating": "Iniciando login...",
-  "deviceAuth.title": "Entrar no Kilo Code",
+  "deviceAuth.title": "Entrar no Mycelis",
   "deviceAuth.step1": "Passo 1: Abra esta URL",
   "deviceAuth.action.copyUrl": "Copiar URL",
   "deviceAuth.action.openBrowser": "Abrir Navegador",
@@ -609,7 +609,7 @@ export const dict = {
 
   "profile.title": "Perfil",
   "profile.notLoggedIn": "Não conectado",
-  "profile.action.login": "Entrar com Kilo Code",
+  "profile.action.login": "Entrar com Mycelis",
   "profile.balance.title": "Saldo",
   "profile.balance.refresh": "Atualizar saldo",
   "profile.usage.title": "Planos e uso",
@@ -624,7 +624,7 @@ export const dict = {
   "profile.usage.plan.unknown": "Plano: Status desconhecido",
   "profile.usage.action.manage": "Gerenciar",
   "profile.usage.action.managePlan": "Gerenciar {{plan}}",
-  "profile.usage.routing": "A cobrança do plano está ativa. O roteamento do Kilo Gateway está {{state}}.",
+  "profile.usage.routing": "A cobrança do plano está ativa. O roteamento do Mycelis Gateway está {{state}}.",
   "profile.usage.routingState.disabled": "desativado",
   "profile.usage.routingState.missing": "ausente",
   "profile.usage.routingState.replaced": "substituído",
@@ -716,10 +716,10 @@ export const dict = {
   "settings.indexing.status.title": "Status",
   "settings.indexing.tuning.description": "Parâmetro avançado de busca e lote.",
   "settings.indexing.providerField.description": "Configuração de conexão específica do provedor.",
-  "settings.aboutKiloCode.title": "Sobre o Kilo Code",
+  "settings.aboutKiloCode.title": "Sobre o Mycelis",
 
   "session.messages.welcome":
-    "Kilo Code é um assistente de programação com IA. Peça para criar funcionalidades, corrigir bugs ou explicar sua base de código.",
+    "Mycelis é um assistente de programação com IA. Peça para criar funcionalidades, corrigir bugs ou explicar sua base de código.",
   "session.messages.scrollToBottom": "Rolar para o final",
   "session.messages.initializing": "O teraouiñ...",
   "session.messages.taskStarting": "O kregiñ...",
@@ -826,7 +826,7 @@ export const dict = {
   "settings.browser.headless.description": "Executar em modo headless (sem janela do navegador visível).",
 
   "settings.language.description":
-    'Escolha o idioma da interface do Kilo Code. "Auto" usa o idioma de exibição do VS Code.',
+    'Escolha o idioma da interface do Mycelis. "Auto" usa o idioma de exibição do VS Code.',
   "settings.language.auto": "Auto (idioma do VS Code)",
   "settings.language.current": "Atual:",
 
@@ -868,10 +868,10 @@ export const dict = {
   "settings.experimental.imageGenerationModel.placeholder": "Padrão (Auto Router)",
 
   "settings.models.speechToText.disabledDescription":
-    "Ative e faça login no provedor Kilo para usar o Speech to Text. Atualmente, o Speech to Text é compatível apenas com o Kilo Gateway.",
+    "Ative e faça login no provedor Kilo para usar o Speech to Text. Atualmente, o Speech to Text é compatível apenas com o Mycelis Gateway.",
   "settings.models.speechToTextModel.title": "Modelo de fala para texto",
   "settings.models.speechToTextModel.description":
-    "Escolha o modelo de transcrição do Kilo Gateway para entrada de voz.",
+    "Escolha o modelo de transcrição do Mycelis Gateway para entrada de voz.",
   "settings.experimental.nativeNotebookTools.title": "Ferramentas nativas de notebook",
   "settings.experimental.nativeNotebookTools.description":
     "Ativar ferramentas experimentais para ler, editar e executar notebooks do VS Code",
@@ -1172,12 +1172,12 @@ export const dict = {
   "settings.legacyMigration.link": "Migrar da Versão Legada",
   "settings.aboutKiloCode.legacyMigration.title": "Migração Legada",
   "settings.aboutKiloCode.legacyMigration.description":
-    "Migre as configurações de uma instalação anterior do Kilo Code, incluindo chaves de API de provedor e modelo padrão.",
+    "Migre as configurações de uma instalação anterior do Mycelis, incluindo chaves de API de provedor e modelo padrão.",
   "settings.aboutKiloCode.rooImport.description": "Importe o histórico de conversas de uma instalação do Roo Code.",
   "settings.aboutKiloCode.rooImport.button": "Importar sessões do Roo Code",
 
   // Screen 1 — What's New
-  "migration.whatsNew.title": "O Que Há de Novo no Kilo Code",
+  "migration.whatsNew.title": "O Que Há de Novo no Mycelis",
   "migration.whatsNew.subtitle": "Reconstruímos a extensão sobre uma base mais rápida e eficiente.",
   "migration.whatsNew.features.performance.title": "Desempenho de Agente Mais Rápido",
   "migration.whatsNew.features.performance.detail":

@@ -152,6 +152,7 @@ export const ServerProvider: ParentComponent = (props) => {
             code: message.code,
             verificationUrl: message.verificationUrl,
             expiresIn: message.expiresIn,
+            auto: message.auto,
           })
           break
 

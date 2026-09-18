@@ -215,6 +215,13 @@ internal class ProvidersSettingsUi(
                                 code = oauthCode(ready.instructions),
                                 expiresIn = (KiloProviderService.OAUTH_RPC_TIMEOUT_MS / 1000).toInt(),
                                 started = System.currentTimeMillis(),
+                                // mycelis_change - method == "auto" only means the callback takes no
+                                // code argument (see AuthOAuthResult in packages/plugin) - it does NOT
+                                // mean every such provider skips the URL/QR/code UI the way Mycelis's
+                                // browser-login does. Only Mycelis gets the simplified panel; every
+                                // other provider (e.g. a device-flow BYOK provider that still shows a
+                                // code here) keeps the full UI, same as before this field existed.
+                                auto = provider.id == "kilo",
                             ),
                         )
                     }

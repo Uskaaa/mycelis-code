@@ -208,7 +208,7 @@ export const dict = {
   "prompt.action.sandbox.description.disabledNetworkAllowed":
     "Натисніть, щоб обмежити запис у файлову систему. Доступ до мережі залишиться дозволеним відповідно до налаштувань пісочниці.",
 
-  "speechToText.tooltip.start": "Почати голосове введення з Kilo Gateway",
+  "speechToText.tooltip.start": "Почати голосове введення з Mycelis Gateway",
   "speechToText.tooltip.shortcut":
     "Торкніться кнопки або натисніть Cmd/Ctrl+K, щоб почати чи зупинити запис; утримуйте кнопку під час мовлення, а потім відпустіть її, щоб транскрибувати й надіслати.",
   "speechToText.tooltip.starting": "Запуск мікрофона... Поки що не говоріть.",
@@ -298,7 +298,7 @@ export const dict = {
   "session.messages.loadEarlier": "Завантажити попередні повідомлення",
   "session.messages.loading": "Завантаження повідомлень...",
 
-  "sidebar.topBar.label": "Навігація Kilo Code",
+  "sidebar.topBar.label": "Навігація Mycelis",
   "sidebar.topBar.newTask": "Нове завдання",
   "sidebar.topBar.history": "Історія",
   "sidebar.topBar.agentManager": "Agent Manager",
@@ -576,7 +576,7 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "Код скопійовано до буфера обміну",
   "deviceAuth.toast.errorCopied": "Помилку скопійовано до буфера обміну",
   "deviceAuth.status.initiating": "Ініціалізація входу...",
-  "deviceAuth.title": "Увійти до Kilo Code",
+  "deviceAuth.title": "Увійти до Mycelis",
   "deviceAuth.step1": "Крок 1: Відкрийте цей URL",
   "deviceAuth.action.copyUrl": "Копіювати URL",
   "deviceAuth.action.openBrowser": "Відкрити браузер",
@@ -599,7 +599,7 @@ export const dict = {
 
   "profile.title": "Профіль",
   "profile.notLoggedIn": "Не увійшов",
-  "profile.action.login": "Увійти через Kilo Code",
+  "profile.action.login": "Увійти через Mycelis",
   "profile.balance.title": "Баланс",
   "profile.balance.refresh": "Оновити баланс",
   "profile.usage.title": "Плани та використання",
@@ -614,7 +614,7 @@ export const dict = {
   "profile.usage.plan.unknown": "План: Статус невідомий",
   "profile.usage.action.manage": "Керувати",
   "profile.usage.action.managePlan": "Керування {{plan}}",
-  "profile.usage.routing": "Оплата плану активна. Маршрутизація через Kilo Gateway {{state}}.",
+  "profile.usage.routing": "Оплата плану активна. Маршрутизація через Mycelis Gateway {{state}}.",
   "profile.usage.routingState.disabled": "вимкнена",
   "profile.usage.routingState.missing": "відсутня",
   "profile.usage.routingState.replaced": "замінена",
@@ -702,10 +702,10 @@ export const dict = {
 
   "settings.experimental.title": "Експериментальне",
   "settings.language.title": "Мова",
-  "settings.aboutKiloCode.title": "Про Kilo Code",
+  "settings.aboutKiloCode.title": "Про Mycelis",
 
   "session.messages.welcome":
-    "Kilo Code — це асистент з кодування на базі ШІ. Попросіть його розробити функцію, виправити помилку або пояснити вашу кодову базу.",
+    "Mycelis — це асистент з кодування на базі ШІ. Попросіть його розробити функцію, виправити помилку або пояснити вашу кодову базу.",
   "session.messages.scrollToBottom": "Прокрутити до низу",
   "session.messages.initializing": "Ініціалізація...",
   "session.messages.taskStarting": "Запуск...",
@@ -810,7 +810,7 @@ export const dict = {
   "settings.browser.headless.description": "Запускати в безголовому режимі (без видимого вікна браузера).",
 
   "settings.language.description":
-    '"Автоматично" використовує мову відображення VS Code. Виберіть мову для інтерфейсу Kilo Code.',
+    '"Автоматично" використовує мову відображення VS Code. Виберіть мову для інтерфейсу Mycelis.',
   "settings.language.auto": "Автоматично (мова VS Code)",
   "settings.language.current": "Поточна:",
 
@@ -853,9 +853,9 @@ export const dict = {
   "settings.experimental.imageGenerationModel.placeholder": "За замовчуванням (Auto Router)",
 
   "settings.models.speechToText.disabledDescription":
-    "Увімкніть провайдер Kilo та виконайте вхід, щоб використовувати Speech to Text. Наразі Speech to Text підтримується лише з Kilo Gateway.",
+    "Увімкніть провайдер Kilo та виконайте вхід, щоб використовувати Speech to Text. Наразі Speech to Text підтримується лише з Mycelis Gateway.",
   "settings.models.speechToTextModel.title": "Модель мовлення в текст",
-  "settings.models.speechToTextModel.description": "Виберіть модель транскрипції Kilo Gateway для голосового введення.",
+  "settings.models.speechToTextModel.description": "Виберіть модель транскрипції Mycelis Gateway для голосового введення.",
   "settings.experimental.nativeNotebookTools.title": "Власні інструменти для блокнотів",
   "settings.experimental.nativeNotebookTools.description":
     "Увімкнути експериментальні інструменти для читання, редагування та виконання блокнотів VS Code",
@@ -1106,7 +1106,7 @@ export const dict = {
     "Модель за замовчуванням та рівень міркування для субагентів task-tool. Залиште порожнім, щоб успадкувати модель агента, що викликає.",
   "settings.models.hidePromptTraining.title": "Приховувати моделі, що навчаються на запитах",
   "settings.models.hidePromptTraining.description":
-    "Приховувати моделі Kilo Gateway, постачальники яких можуть використовувати ваші запити для навчання.",
+    "Приховувати моделі Mycelis Gateway, постачальники яких можуть використовувати ваші запити для навчання.",
   "settings.providers.modeModels": "Модель для кожного режиму",
   "settings.providers.modeModels.description":
     "Перевизначити стандартну модель для певних режимів. Якщо не встановлено, використовується загальна стандартна модель.",
@@ -1129,12 +1129,12 @@ export const dict = {
   "settings.legacyMigration.link": "Перенести зі старої версії",
   "settings.aboutKiloCode.legacyMigration.title": "Перенесення зі старої версії",
   "settings.aboutKiloCode.legacyMigration.description":
-    "Перенести налаштування з попередньої версії Kilo Code, включаючи API-ключі провайдерів та стандартну модель.",
+    "Перенести налаштування з попередньої версії Mycelis, включаючи API-ключі провайдерів та стандартну модель.",
   "settings.aboutKiloCode.rooImport.description": "Імпортувати історію розмов з інсталяції Roo Code.",
   "settings.aboutKiloCode.rooImport.button": "Імпортувати сесії з Roo Code",
 
   // Screen 1 — What's New
-  "migration.whatsNew.title": "Що нового в Kilo Code",
+  "migration.whatsNew.title": "Що нового в Mycelis",
   "migration.whatsNew.badge": "Бета",
   "migration.whatsNew.subtitle": "Ми відбудували розширення на більш швидкій та ефективній основі.",
   "migration.whatsNew.features.performance.title": "Швидша продуктивність агента",

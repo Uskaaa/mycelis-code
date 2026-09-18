@@ -207,7 +207,7 @@ export const dict = {
   "prompt.action.sandbox.description.disabledNetworkAllowed":
     "Dosya sistemi yazma işlemlerini kısıtlamak için tıklayın. Sandbox ayarlarınız ağ erişimine izin vermeye devam ediyor.",
 
-  "speechToText.tooltip.start": "Kilo Gateway ile sesli girişi başlatın",
+  "speechToText.tooltip.start": "Mycelis Gateway ile sesli girişi başlatın",
   "speechToText.tooltip.shortcut":
     "Kaydı başlatmak veya durdurmak için dokunun ya da Cmd/Ctrl+K tuşlarına basın; konuşurken basılı tutun, ardından metne dönüştürüp göndermek için bırakın.",
   "speechToText.tooltip.starting": "Mikrofon başlatılıyor... Henüz konuşmayın.",
@@ -295,7 +295,7 @@ export const dict = {
   "session.messages.loadEarlier": "Önceki mesajları yükle",
   "session.messages.loading": "Mesajlar yükleniyor...",
 
-  "sidebar.topBar.label": "Kilo Code Gezinme",
+  "sidebar.topBar.label": "Mycelis Gezinme",
   "sidebar.topBar.newTask": "Yeni Görev",
   "sidebar.topBar.history": "Geçmiş",
   "sidebar.topBar.agentManager": "Agent Manager",
@@ -575,7 +575,7 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "Kod panoya kopyalandı",
   "deviceAuth.toast.errorCopied": "Hata panoya kopyalandı",
   "deviceAuth.status.initiating": "Giriş başlatılıyor...",
-  "deviceAuth.title": "Kilo Code'a giriş yap",
+  "deviceAuth.title": "Mycelis'a giriş yap",
   "deviceAuth.step1": "Adım 1: Bu URL'yi açın",
   "deviceAuth.action.copyUrl": "URL'yi Kopyala",
   "deviceAuth.action.openBrowser": "Tarayıcıyı Aç",
@@ -598,7 +598,7 @@ export const dict = {
 
   "profile.title": "Profil",
   "profile.notLoggedIn": "Giriş yapılmadı",
-  "profile.action.login": "Kilo Code ile giriş yap",
+  "profile.action.login": "Mycelis ile giriş yap",
   "profile.balance.title": "Bakiye",
   "profile.balance.refresh": "Bakiyeyi yenile",
   "profile.usage.title": "Planlar ve kullanım",
@@ -613,7 +613,7 @@ export const dict = {
   "profile.usage.plan.unknown": "Plan: Durum bilinmiyor",
   "profile.usage.action.manage": "Yönet",
   "profile.usage.action.managePlan": "{{plan}} planını yönet",
-  "profile.usage.routing": "Plan faturalandırması etkin. Kilo Gateway yönlendirmesi {{state}}.",
+  "profile.usage.routing": "Plan faturalandırması etkin. Mycelis Gateway yönlendirmesi {{state}}.",
   "profile.usage.routingState.disabled": "devre dışı",
   "profile.usage.routingState.missing": "eksik",
   "profile.usage.routingState.replaced": "değiştirildi",
@@ -702,10 +702,10 @@ export const dict = {
 
   "settings.experimental.title": "Deneysel",
   "settings.language.title": "Dil",
-  "settings.aboutKiloCode.title": "Kilo Code Hakkında",
+  "settings.aboutKiloCode.title": "Mycelis Hakkında",
 
   "session.messages.welcome":
-    "Kilo Code bir yapay zeka kodlama asistanıdır. Özellik geliştirmesini, hata düzeltmesini veya kod tabanınızı açıklamasını isteyin.",
+    "Mycelis bir yapay zeka kodlama asistanıdır. Özellik geliştirmesini, hata düzeltmesini veya kod tabanınızı açıklamasını isteyin.",
   "session.messages.scrollToBottom": "En alta kaydır",
   "session.messages.initializing": "Başlatılıyor...",
   "session.messages.taskStarting": "Başlıyor...",
@@ -809,7 +809,7 @@ export const dict = {
   "settings.browser.headless.description": "Başsız modda çalıştır (görünür tarayıcı penceresi yok).",
 
   "settings.language.description":
-    '"Otomatik" VS Code görüntüleme dilinizi kullanır. Kilo Code arayüzü için dil seçin.',
+    '"Otomatik" VS Code görüntüleme dilinizi kullanır. Mycelis arayüzü için dil seçin.',
   "settings.language.auto": "Otomatik (VS Code dili)",
   "settings.language.current": "Mevcut:",
 
@@ -852,9 +852,9 @@ export const dict = {
   "settings.experimental.imageGenerationModel.placeholder": "Varsayılan (Auto Router)",
 
   "settings.models.speechToText.disabledDescription":
-    "Speech to Text kullanmak için Kilo sağlayıcısını etkinleştirin ve giriş yapın. Speech to Text şu anda yalnızca Kilo Gateway ile desteklenmektedir.",
+    "Speech to Text kullanmak için Kilo sağlayıcısını etkinleştirin ve giriş yapın. Speech to Text şu anda yalnızca Mycelis Gateway ile desteklenmektedir.",
   "settings.models.speechToTextModel.title": "Sesten metne modeli",
-  "settings.models.speechToTextModel.description": "Sesli giriş için Kilo Gateway transkripsiyon modelini seçin.",
+  "settings.models.speechToTextModel.description": "Sesli giriş için Mycelis Gateway transkripsiyon modelini seçin.",
   "settings.experimental.nativeNotebookTools.title": "Yerel Not Defteri Araçları",
   "settings.experimental.nativeNotebookTools.description":
     "VS Code not defterlerini okumak, düzenlemek ve çalıştırmak için deneysel araçları etkinleştir",
@@ -1107,7 +1107,7 @@ export const dict = {
     "task-tool alt aracıları için varsayılan model ve akıl yürütme çabası. Çağıran aracının modelini devralmak için boş bırakın.",
   "settings.models.hidePromptTraining.title": "İstemlerle eğitilen modelleri gizle",
   "settings.models.hidePromptTraining.description":
-    "Sağlayıcıları istemlerinizi eğitim için kullanabilecek Kilo Gateway modellerini gizleyin.",
+    "Sağlayıcıları istemlerinizi eğitim için kullanabilecek Mycelis Gateway modellerini gizleyin.",
   "settings.providers.modeModels": "Mod Başına Model",
   "settings.providers.modeModels.description":
     "Belirli modlar için varsayılan modeli geçersiz kılın. Ayarlanmadıysa genel varsayılan model kullanılır.",
@@ -1130,12 +1130,12 @@ export const dict = {
   "settings.legacyMigration.link": "Eski Sürümden Taşı",
   "settings.aboutKiloCode.legacyMigration.title": "Eski Sürüm Taşıma",
   "settings.aboutKiloCode.legacyMigration.description":
-    "Sağlayıcı API anahtarları ve varsayılan model dahil olmak üzere Kilo Code'un önceki yüklemesinden ayarları taşıyın.",
+    "Sağlayıcı API anahtarları ve varsayılan model dahil olmak üzere Mycelis'un önceki yüklemesinden ayarları taşıyın.",
   "settings.aboutKiloCode.rooImport.description": "Bir Roo Code yüklemesinden konuşma geçmişini içe aktarın.",
   "settings.aboutKiloCode.rooImport.button": "Roo Code'dan Oturumları İçe Aktar",
 
   // Screen 1 — What's New
-  "migration.whatsNew.title": "Kilo Code'daki Yenilikler",
+  "migration.whatsNew.title": "Mycelis'daki Yenilikler",
   "migration.whatsNew.badge": "Beta",
   "migration.whatsNew.subtitle": "Uzantıyı daha hızlı ve daha verimli bir temel üzerine yeniden inşa ettik.",
   "migration.whatsNew.features.performance.title": "Daha Hızlı Ajan Performansı",

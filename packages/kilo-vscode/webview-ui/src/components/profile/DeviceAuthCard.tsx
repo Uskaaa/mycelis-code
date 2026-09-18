@@ -16,6 +16,8 @@ interface DeviceAuthCardProps {
   verificationUrl?: string
   expiresIn?: number
   error?: string
+  /** Mycelis's browser-login method: the extension host already opened the browser. */
+  auto?: boolean
   onCancel: () => void
   onRetry: () => void
 }
@@ -70,10 +72,10 @@ const DeviceAuthCard: Component<DeviceAuthCardProps> = (props) => {
     onCleanup(() => clearInterval(interval))
   })
 
-  // QR code generation
+  // QR code generation — skipped for the auto (browser-login) method, which has no manual URL/code UI
   createEffect(() => {
     const url = props.verificationUrl
-    if (url) {
+    if (url && !props.auto) {
       generateQRCode(url).then(setQrDataUrl).catch(console.error)
     }
   })
@@ -177,81 +179,31 @@ const DeviceAuthCard: Component<DeviceAuthCardProps> = (props) => {
             {language.t("deviceAuth.title")}
           </h3>
 
-          {/* Step 1: URL */}
-          <div style={{ "margin-bottom": "12px" }}>
+          {/* Mycelis's browser-login method opens the browser itself; no URL/QR/code UI needed. */}
+          <Show when={props.auto}>
             <p
               style={{
-                "font-size": "var(--kilo-font-size-12)",
-                "font-weight": "600",
+                "font-size": "var(--kilo-font-size-13)",
                 color: "var(--vscode-descriptionForeground)",
-                margin: "0 0 6px 0",
-                "text-transform": "uppercase",
-                "letter-spacing": "0.5px",
+                margin: "0 0 12px 0",
+                "text-align": "center",
               }}
             >
-              {language.t("deviceAuth.step1")}
+              {language.t("deviceAuth.autoHint")}
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "4px",
-                "align-items": "center",
-              }}
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={handleOpenBrowser}
+              style={{ width: "100%", "margin-bottom": "12px" }}
             >
-              <div
-                style={{
-                  flex: "1",
-                  background: "var(--vscode-input-background)",
-                  border: "1px solid var(--vscode-input-border, var(--vscode-panel-border))",
-                  "border-radius": "3px",
-                  padding: "6px 8px",
-                  "font-size": "var(--kilo-font-size-12)",
-                  color: "var(--vscode-input-foreground)",
-                  overflow: "hidden",
-                  "text-overflow": "ellipsis",
-                  "white-space": "nowrap",
-                }}
-              >
-                {props.verificationUrl}
-              </div>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={handleCopyUrl}
-                title={language.t("deviceAuth.action.copyUrl")}
-              >
-                📋
-              </Button>
-              <Button variant="secondary" size="small" onClick={handleOpenBrowser}>
-                {language.t("deviceAuth.action.openBrowser")}
-              </Button>
-            </div>
-          </div>
-
-          {/* QR Code */}
-          <Show when={qrDataUrl()}>
-            <div
-              style={{
-                display: "flex",
-                "justify-content": "center",
-                "margin-bottom": "12px",
-              }}
-            >
-              <img
-                src={qrDataUrl()}
-                alt={language.t("deviceAuth.qrCode.alt")}
-                style={{
-                  width: "160px",
-                  height: "160px",
-                  "border-radius": "4px",
-                }}
-              />
-            </div>
+              {language.t("deviceAuth.action.openBrowser")}
+            </Button>
           </Show>
 
-          {/* Step 2: Verification code */}
-          <Show when={props.code}>
-            <div style={{ "margin-bottom": "16px" }}>
+          <Show when={!props.auto}>
+            {/* Step 1: URL */}
+            <div style={{ "margin-bottom": "12px" }}>
               <p
                 style={{
                   "font-size": "var(--kilo-font-size-12)",
@@ -262,42 +214,116 @@ const DeviceAuthCard: Component<DeviceAuthCardProps> = (props) => {
                   "letter-spacing": "0.5px",
                 }}
               >
-                {language.t("deviceAuth.step2")}
+                {language.t("deviceAuth.step1")}
               </p>
               <div
-                onClick={handleCopyCode}
                 style={{
-                  background: "var(--vscode-input-background)",
-                  border: "2px solid var(--vscode-focusBorder, var(--vscode-panel-border))",
-                  "border-radius": "4px",
-                  padding: "12px",
-                  "text-align": "center",
-                  cursor: "pointer",
+                  display: "flex",
+                  gap: "4px",
+                  "align-items": "center",
                 }}
-                title={language.t("deviceAuth.action.clickToCopy")}
               >
-                <span
+                <div
                   style={{
-                    "font-size": "var(--kilo-font-size-24)",
-                    "font-weight": "700",
-                    "font-family": "var(--vscode-editor-font-family, monospace)",
-                    "letter-spacing": "4px",
-                    color: "var(--vscode-foreground)",
+                    flex: "1",
+                    background: "var(--vscode-input-background)",
+                    border: "1px solid var(--vscode-input-border, var(--vscode-panel-border))",
+                    "border-radius": "3px",
+                    padding: "6px 8px",
+                    "font-size": "var(--kilo-font-size-12)",
+                    color: "var(--vscode-input-foreground)",
+                    overflow: "hidden",
+                    "text-overflow": "ellipsis",
+                    "white-space": "nowrap",
                   }}
                 >
-                  {props.code}
-                </span>
-                <p
-                  style={{
-                    "font-size": "var(--kilo-font-size-11)",
-                    color: "var(--vscode-descriptionForeground)",
-                    margin: "4px 0 0 0",
-                  }}
+                  {props.verificationUrl}
+                </div>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={handleCopyUrl}
+                  title={language.t("deviceAuth.action.copyUrl")}
                 >
-                  {language.t("deviceAuth.action.clickToCopy")}
-                </p>
+                  📋
+                </Button>
+                <Button variant="secondary" size="small" onClick={handleOpenBrowser}>
+                  {language.t("deviceAuth.action.openBrowser")}
+                </Button>
               </div>
             </div>
+
+            {/* QR Code */}
+            <Show when={qrDataUrl()}>
+              <div
+                style={{
+                  display: "flex",
+                  "justify-content": "center",
+                  "margin-bottom": "12px",
+                }}
+              >
+                <img
+                  src={qrDataUrl()}
+                  alt={language.t("deviceAuth.qrCode.alt")}
+                  style={{
+                    width: "160px",
+                    height: "160px",
+                    "border-radius": "4px",
+                  }}
+                />
+              </div>
+            </Show>
+
+            {/* Step 2: Verification code */}
+            <Show when={props.code}>
+              <div style={{ "margin-bottom": "16px" }}>
+                <p
+                  style={{
+                    "font-size": "var(--kilo-font-size-12)",
+                    "font-weight": "600",
+                    color: "var(--vscode-descriptionForeground)",
+                    margin: "0 0 6px 0",
+                    "text-transform": "uppercase",
+                    "letter-spacing": "0.5px",
+                  }}
+                >
+                  {language.t("deviceAuth.step2")}
+                </p>
+                <div
+                  onClick={handleCopyCode}
+                  style={{
+                    background: "var(--vscode-input-background)",
+                    border: "2px solid var(--vscode-focusBorder, var(--vscode-panel-border))",
+                    "border-radius": "4px",
+                    padding: "12px",
+                    "text-align": "center",
+                    cursor: "pointer",
+                  }}
+                  title={language.t("deviceAuth.action.clickToCopy")}
+                >
+                  <span
+                    style={{
+                      "font-size": "var(--kilo-font-size-24)",
+                      "font-weight": "700",
+                      "font-family": "var(--vscode-editor-font-family, monospace)",
+                      "letter-spacing": "4px",
+                      color: "var(--vscode-foreground)",
+                    }}
+                  >
+                    {props.code}
+                  </span>
+                  <p
+                    style={{
+                      "font-size": "var(--kilo-font-size-11)",
+                      color: "var(--vscode-descriptionForeground)",
+                      margin: "4px 0 0 0",
+                    }}
+                  >
+                    {language.t("deviceAuth.action.clickToCopy")}
+                  </p>
+                </div>
+              </div>
+            </Show>
           </Show>
 
           {/* Timer + waiting */}

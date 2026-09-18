@@ -150,7 +150,7 @@ internal class LoggedOutProfileUi(
 
         if (target == OutMode.AUTH && login is LoginState.Pending) {
             val auth = login.auth
-            this.auth.update(DeviceOAuthInfo(auth.verificationUrl, auth.code, auth.expiresIn, login.started))
+            this.auth.update(DeviceOAuthInfo(auth.verificationUrl, auth.code, auth.expiresIn, login.started, auth.auto))
         }
 
         if (target == OutMode.LOGIN_ERROR && login is LoginState.Error) {

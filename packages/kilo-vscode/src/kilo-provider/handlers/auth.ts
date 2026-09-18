@@ -41,8 +41,13 @@ export async function handleLogin(ctx: AuthContext, attempt: number, getAttempt:
     )
     console.log("[Kilo New] KiloProvider: 🔐 Got auth URL:", auth.url)
 
+    // Mycelis's browser-login method opens the browser itself (see callback() below) and never
+    // hands back a manual entry code — the webview shows a plain waiting state for it instead of
+    // the QR/code UI built for the old device-authorization flow.
+    const auto = auth.method === "auto"
+
     // Parse code from instructions (format: "Open URL and enter code: ABCD-1234")
-    const match = auth.instructions?.match(/code:\s*(\S+)/i)
+    const match = auto ? undefined : auth.instructions?.match(/code:\s*(\S+)/i)
     const code = match ? match[1] : undefined
 
     // Send device auth details to webview
@@ -50,7 +55,8 @@ export async function handleLogin(ctx: AuthContext, attempt: number, getAttempt:
       type: "deviceAuthStarted",
       code,
       verificationUrl: auth.url,
-      expiresIn: 900, // 15 minutes default
+      expiresIn: auto ? 300 : 900, // auto (browser-login) callback times out after 5 minutes; device-code flow defaults to 15
+      auto,
     })
 
     // Step 2: Wait for callback (blocks until polling completes)

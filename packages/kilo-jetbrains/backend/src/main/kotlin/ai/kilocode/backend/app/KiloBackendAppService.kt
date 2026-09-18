@@ -17,6 +17,7 @@ import ai.kilocode.jetbrains.api.infrastructure.ServerException
 import ai.kilocode.jetbrains.api.model.ConfigWarnings200ResponseInner
 import ai.kilocode.jetbrains.api.model.KiloNotifications200ResponseInner
 import ai.kilocode.jetbrains.api.model.KiloProfile200Response
+import ai.kilocode.jetbrains.api.model.ProviderAuthAuthorization
 import ai.kilocode.jetbrains.api.model.ProviderOauthAuthorizeRequest
 import ai.kilocode.jetbrains.api.model.ProviderOauthCallbackRequest
 import ai.kilocode.rpc.dto.ConfigDto
@@ -913,11 +914,15 @@ class KiloBackendAppService private constructor(
         val client = connection.api ?: throw IllegalStateException("Not connected")
         val body = ProviderOauthAuthorizeRequest(method = 0.0)
         val response = client.providerOauthAuthorize(providerID = "kilo", directory = directory, providerOauthAuthorizeRequest = body)
-        val match = response.instructions.let { Regex("""code:\s*(\S+)""", RegexOption.IGNORE_CASE).find(it) }
+        // mycelis_change - Mycelis's browser-login method opens the browser itself (see
+        // completeLogin below) and never hands back a manual entry code.
+        val auto = response.method == ProviderAuthAuthorization.Method.AUTO
+        val match = if (auto) null else response.instructions.let { Regex("""code:\s*(\S+)""", RegexOption.IGNORE_CASE).find(it) }
         return DeviceAuthDto(
             code = match?.groupValues?.get(1),
             verificationUrl = response.url,
-            expiresIn = 900,
+            expiresIn = if (auto) 300 else 900, // mycelis_change - auto callback times out after 5 minutes server-side
+            auto = auto,
         )
     }
 

@@ -27,4 +27,6 @@ export interface DeviceAuthState {
   verificationUrl?: string
   expiresIn?: number
   error?: string
+  /** True for Mycelis's browser-login method: the browser was already opened automatically. */
+  auto?: boolean
 }

@@ -37,6 +37,10 @@ internal data class DeviceOAuthInfo(
     val code: String?,
     val expiresIn: Int,
     val started: Long,
+    // mycelis_change - true for Mycelis's browser-login method: the host already opened the
+    // browser, so the panel shows a plain waiting state instead of the URL/QR/code UI built for
+    // the old device-authorization flow.
+    val auto: Boolean = false,
 )
 
 internal data class DeviceOAuthText(
@@ -97,7 +101,13 @@ internal class DeviceOAuthPanel(
     private val waitLabel = JBLabel().apply {
         foreground = UiStyle.Colors.weak()
     }
+    private val autoHintLabel = JBLabel(KiloBundle.message("profile.login.autoHint")).apply {
+        foreground = UiStyle.Colors.weak()
+        horizontalAlignment = SwingConstants.CENTER
+    }
+    private var step1: SimpleColoredComponent? = null
     private var step2: SimpleColoredComponent? = null
+    private var urlRowPanel: JPanel? = null
     private var code: String? = null
     private var started = 0L
     private var expires = 900
@@ -117,9 +127,14 @@ internal class DeviceOAuthPanel(
             font = UiStyle.Fonts.heading()
             horizontalAlignment = SwingConstants.CENTER
         }, gbc(row++))
-        add(stepLabel(KiloBundle.message("profile.login.step.one"), KiloBundle.message("profile.login.step.url")), gbc(row++, UiStyle.Gap.md()))
-        add(urlRow(), gbc(row++, UiStyle.Gap.sm()))
+        val s1 = stepLabel(KiloBundle.message("profile.login.step.one"), KiloBundle.message("profile.login.step.url"))
+        step1 = s1
+        add(s1, gbc(row++, UiStyle.Gap.md()))
+        val urlRow = urlRow()
+        urlRowPanel = urlRow
+        add(urlRow, gbc(row++, UiStyle.Gap.sm()))
         add(qrLabel, gbc(row++, UiStyle.Gap.md()).centered())
+        add(autoHintLabel, gbc(row++, UiStyle.Gap.md()))
         val s2 = stepLabel(KiloBundle.message("profile.login.step.two"), KiloBundle.message("profile.login.step.code"))
         step2 = s2
         add(s2, gbc(row++, UiStyle.Gap.md()))
@@ -159,14 +174,21 @@ internal class DeviceOAuthPanel(
             openBtn.addActionListener { browse(info.url) }
             copyUrlBtn.actionListeners.toList().forEach { copyUrlBtn.removeActionListener(it) }
             copyUrlBtn.addActionListener { copyToClipboard(info.url, KiloBundle.message("profile.login.urlCopied"), copyUrlBtn) }
-            qrLabel.icon = try {
+            // mycelis_change - skip QR generation for the auto (browser-login) method, which has no manual URL/code UI
+            qrLabel.icon = if (info.auto) null else try {
                 QrCode.icon(info.url, JBUI.scale(160))
             } catch (_: Exception) {
                 null
             }
         }
-        codePanel.isVisible = info.code != null
-        step2?.isVisible = info.code != null
+        // mycelis_change - Mycelis's browser-login method opens the browser itself; show only the
+        // auto hint instead of the step 1 (URL/QR) and step 2 (code) UI built for the old flow.
+        step1?.isVisible = !info.auto
+        urlRowPanel?.isVisible = !info.auto
+        qrLabel.isVisible = !info.auto
+        autoHintLabel.isVisible = info.auto
+        codePanel.isVisible = !info.auto && info.code != null
+        step2?.isVisible = !info.auto && info.code != null
         if (info.code != null) codeLabel.text = spaced(info.code)
         started = info.started
         expires = info.expiresIn

@@ -379,6 +379,8 @@ export interface DeviceAuthStartedMessage {
   code?: string
   verificationUrl: string
   expiresIn: number
+  /** True for Mycelis's browser-login method: the extension host already opened the browser, so the webview shouldn't show a QR/code entry screen — just a waiting state. */
+  auto?: boolean
 }
 
 export interface DeviceAuthCompleteMessage {

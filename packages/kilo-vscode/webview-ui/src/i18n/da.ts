@@ -208,7 +208,7 @@ export const dict = {
   "prompt.action.sandbox.description.disabledNetworkAllowed":
     "Klik for at begrænse skriveadgang til filsystemet. Netværksadgang er fortsat tilladt ifølge dine sandboxindstillinger.",
 
-  "speechToText.tooltip.start": "Start stemmeinput med Kilo Gateway",
+  "speechToText.tooltip.start": "Start stemmeinput med Mycelis Gateway",
   "speechToText.tooltip.shortcut":
     "Tryk på knappen eller brug Cmd/Ctrl+K til at starte eller stoppe optagelsen; hold knappen nede, mens du taler, og slip den for at transskribere og sende.",
   "speechToText.tooltip.starting": "Starter mikrofonen... Vent med at tale.",
@@ -294,7 +294,7 @@ export const dict = {
   "session.messages.loadEarlier": "Indlæs tidligere beskeder",
   "session.messages.loading": "Indlæser beskeder...",
 
-  "sidebar.topBar.label": "Kilo Code-navigation",
+  "sidebar.topBar.label": "Mycelis-navigation",
   "sidebar.topBar.newTask": "Ny Opgave",
   "sidebar.topBar.history": "Historik",
   "sidebar.topBar.agentManager": "Agent Manager",
@@ -448,7 +448,7 @@ export const dict = {
     "Standardmodel og ræsonnementsindsats for task-tool-underagenter. Lad den være tom for at nedarve den kaldende agents model.",
   "settings.models.hidePromptTraining.title": "Skjul modeller, der træner på prompts",
   "settings.models.hidePromptTraining.description":
-    "Skjul Kilo Gateway-modeller, hvis udbydere muligvis bruger dine prompts til træning.",
+    "Skjul Mycelis Gateway-modeller, hvis udbydere muligvis bruger dine prompts til træning.",
   "settings.providers.modeModels": "Model pr. tilstand",
   "settings.providers.modeModels.description":
     "Tilsidesæt standardmodellen for bestemte tilstande. Hvis ikke angivet, bruges den globale standardmodel.",
@@ -624,7 +624,7 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "Kode kopieret til udklipsholder",
   "deviceAuth.toast.errorCopied": "Fejl kopieret til udklipsholder",
   "deviceAuth.status.initiating": "Starter login...",
-  "deviceAuth.title": "Log ind på Kilo Code",
+  "deviceAuth.title": "Log ind på Mycelis",
   "deviceAuth.step1": "Trin 1: Åbn denne URL",
   "deviceAuth.action.copyUrl": "Kopiér URL",
   "deviceAuth.action.openBrowser": "Åbn browser",
@@ -647,7 +647,7 @@ export const dict = {
 
   "profile.title": "Profil",
   "profile.notLoggedIn": "Ikke logget ind",
-  "profile.action.login": "Log ind med Kilo Code",
+  "profile.action.login": "Log ind med Mycelis",
   "profile.balance.title": "Saldo",
   "profile.balance.refresh": "Opdatér saldo",
   "profile.usage.title": "Abonnementer og forbrug",
@@ -662,7 +662,7 @@ export const dict = {
   "profile.usage.plan.unknown": "Abonnement: Status ukendt",
   "profile.usage.action.manage": "Administrer",
   "profile.usage.action.managePlan": "Administrer {{plan}}",
-  "profile.usage.routing": "Abonnementsfakturering er aktiv. Kilo Gateway-routing er {{state}}.",
+  "profile.usage.routing": "Abonnementsfakturering er aktiv. Mycelis Gateway-routing er {{state}}.",
   "profile.usage.routingState.disabled": "deaktiveret",
   "profile.usage.routingState.missing": "fraværende",
   "profile.usage.routingState.replaced": "erstattet",
@@ -714,10 +714,10 @@ export const dict = {
 
   "settings.experimental.title": "Eksperimentelt",
   "settings.language.title": "Sprog",
-  "settings.aboutKiloCode.title": "Om Kilo Code",
+  "settings.aboutKiloCode.title": "Om Mycelis",
 
   "session.messages.welcome":
-    "Kilo Code er en AI-kodningsassistent. Bed den om at bygge funktioner, rette fejl eller forklare din kodebase.",
+    "Mycelis er en AI-kodningsassistent. Bed den om at bygge funktioner, rette fejl eller forklare din kodebase.",
   "session.messages.scrollToBottom": "Rul til bunden",
   "session.messages.initializing": "Initialiserer...",
   "session.messages.taskStarting": "Starter...",
@@ -821,7 +821,7 @@ export const dict = {
   "settings.browser.headless.title": "Headless-tilstand",
   "settings.browser.headless.description": "Kør i headless-tilstand (intet synligt browservindue).",
 
-  "settings.language.description": 'Vælg sproget til Kilo Code-brugerfladen. "Auto" bruger VS Codes visningssprog.',
+  "settings.language.description": 'Vælg sproget til Mycelis-brugerfladen. "Auto" bruger VS Codes visningssprog.',
   "settings.language.auto": "Auto (VS Code-sprog)",
   "settings.language.current": "Nuværende:",
 
@@ -862,9 +862,9 @@ export const dict = {
   "settings.experimental.imageGenerationModel.placeholder": "Standard (Auto Router)",
 
   "settings.models.speechToText.disabledDescription":
-    "Aktivér og log ind på Kilo-udbyderen for at bruge Speech to Text. Speech to Text understøttes i øjeblikket kun med Kilo Gateway.",
+    "Aktivér og log ind på Kilo-udbyderen for at bruge Speech to Text. Speech to Text understøttes i øjeblikket kun med Mycelis Gateway.",
   "settings.models.speechToTextModel.title": "Model til tale til tekst",
-  "settings.models.speechToTextModel.description": "Vælg Kilo Gateway-transskriptionsmodellen til stemmeinput.",
+  "settings.models.speechToTextModel.description": "Vælg Mycelis Gateway-transskriptionsmodellen til stemmeinput.",
   "settings.experimental.nativeNotebookTools.title": "Indbyggede notebook-værktøjer",
   "settings.experimental.nativeNotebookTools.description":
     "Aktivér eksperimentelle værktøjer til at læse, redigere og køre VS Code-notebooks",
@@ -1157,12 +1157,12 @@ export const dict = {
   "settings.legacyMigration.link": "Migrer fra legacy-version",
   "settings.aboutKiloCode.legacyMigration.title": "Legacy-migrering",
   "settings.aboutKiloCode.legacyMigration.description":
-    "Migrer indstillinger fra en tidligere installation af Kilo Code, herunder udbyder API-nøgler og standardmodel.",
+    "Migrer indstillinger fra en tidligere installation af Mycelis, herunder udbyder API-nøgler og standardmodel.",
   "settings.aboutKiloCode.rooImport.description": "Importer samtalehistorik fra en installation af Roo Code.",
   "settings.aboutKiloCode.rooImport.button": "Importer sessioner fra Roo Code",
 
   // Screen 1 — What's New
-  "migration.whatsNew.title": "Nyheder i Kilo Code",
+  "migration.whatsNew.title": "Nyheder i Mycelis",
   "migration.whatsNew.subtitle": "Vi har genopbygget udvidelsen på et hurtigere og mere effektivt fundament.",
   "migration.whatsNew.features.performance.title": "Hurtigere agentydelse",
   "migration.whatsNew.features.performance.detail":

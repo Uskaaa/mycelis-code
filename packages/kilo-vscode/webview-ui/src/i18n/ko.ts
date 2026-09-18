@@ -209,7 +209,7 @@ export const dict = {
   "prompt.action.sandbox.description.disabledNetworkAllowed":
     "클릭하면 파일 시스템 쓰기를 제한합니다. 샌드박스 설정에 따라 네트워크 액세스는 계속 허용됩니다.",
 
-  "speechToText.tooltip.start": "Kilo Gateway로 음성 입력 시작",
+  "speechToText.tooltip.start": "Mycelis Gateway로 음성 입력 시작",
   "speechToText.tooltip.shortcut":
     "탭하거나 Cmd/Ctrl+K를 눌러 녹음을 시작하거나 중지하고, 말하는 동안에는 누르고 있다가 놓으면 음성을 텍스트로 변환해 제출합니다.",
   "speechToText.tooltip.starting": "마이크를 시작하는 중... 잠시 후 말씀해 주세요.",
@@ -295,7 +295,7 @@ export const dict = {
   "session.messages.loadEarlier": "이전 메시지 로드",
   "session.messages.loading": "메시지 로드 중...",
 
-  "sidebar.topBar.label": "Kilo Code 탐색",
+  "sidebar.topBar.label": "Mycelis 탐색",
   "sidebar.topBar.newTask": "새 작업",
   "sidebar.topBar.history": "기록",
   "sidebar.topBar.agentManager": "에이전트 관리자",
@@ -405,7 +405,7 @@ export const dict = {
     "task-tool 하위 에이전트의 기본 모델 및 추론 수준입니다. 호출하는 에이전트의 모델을 상속하려면 비워 두세요.",
   "settings.models.hidePromptTraining.title": "프롬프트를 학습에 사용하는 모델 숨기기",
   "settings.models.hidePromptTraining.description":
-    "제공업체가 사용자의 프롬프트를 학습에 사용할 수 있는 Kilo Gateway 모델을 숨깁니다.",
+    "제공업체가 사용자의 프롬프트를 학습에 사용할 수 있는 Mycelis Gateway 모델을 숨깁니다.",
   "settings.providers.modeModels": "모드별 모델",
   "settings.providers.modeModels.description":
     "특정 모드의 기본 모델을 재정의합니다. 설정하지 않으면 전역 기본 모델이 사용됩니다.",
@@ -579,7 +579,7 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "코드가 클립보드에 복사되었습니다",
   "deviceAuth.toast.errorCopied": "오류가 클립보드에 복사되었습니다",
   "deviceAuth.status.initiating": "로그인 시작 중...",
-  "deviceAuth.title": "Kilo Code에 로그인",
+  "deviceAuth.title": "Mycelis에 로그인",
   "deviceAuth.step1": "1단계: 이 URL을 여세요",
   "deviceAuth.action.copyUrl": "URL 복사",
   "deviceAuth.action.openBrowser": "브라우저 열기",
@@ -602,7 +602,7 @@ export const dict = {
 
   "profile.title": "프로필",
   "profile.notLoggedIn": "로그인하지 않음",
-  "profile.action.login": "Kilo Code로 로그인",
+  "profile.action.login": "Mycelis로 로그인",
   "profile.balance.title": "잔액",
   "profile.balance.refresh": "잔액 새로고침",
   "profile.usage.title": "요금제 및 사용량",
@@ -617,7 +617,7 @@ export const dict = {
   "profile.usage.plan.unknown": "요금제: 상태 알 수 없음",
   "profile.usage.action.manage": "관리",
   "profile.usage.action.managePlan": "{{plan}} 관리",
-  "profile.usage.routing": "요금제 결제가 활성화되어 있습니다. Kilo Gateway 라우팅은 {{state}}입니다.",
+  "profile.usage.routing": "요금제 결제가 활성화되어 있습니다. Mycelis Gateway 라우팅은 {{state}}입니다.",
   "profile.usage.routingState.disabled": "비활성화 상태",
   "profile.usage.routingState.missing": "누락된 상태",
   "profile.usage.routingState.replaced": "대체된 상태",
@@ -669,7 +669,7 @@ export const dict = {
 
   "settings.experimental.title": "실험적",
   "settings.language.title": "언어",
-  "settings.aboutKiloCode.title": "Kilo Code 정보",
+  "settings.aboutKiloCode.title": "Mycelis 정보",
 
   "prompt.action.indexing": "인덱싱 설정",
   "settings.indexing.dimension.description": "비워두면 모델에서 임베딩 차원을 자동으로 감지합니다.",
@@ -713,7 +713,7 @@ export const dict = {
   "settings.indexing.vectorStore.title": "벡터 저장소",
 
   "session.messages.welcome":
-    "Kilo Code는 AI 코딩 어시스턴트입니다. 기능 구축, 버그 수정 또는 코드베이스 설명을 요청하세요.",
+    "Mycelis는 AI 코딩 어시스턴트입니다. 기능 구축, 버그 수정 또는 코드베이스 설명을 요청하세요.",
   "session.messages.scrollToBottom": "하단으로 스크롤",
   "session.messages.initializing": "초기화 중...",
   "session.messages.taskStarting": "시작 중...",
@@ -813,7 +813,7 @@ export const dict = {
   "settings.browser.headless.title": "헤드리스 모드",
   "settings.browser.headless.description": "헤드리스 모드로 실행합니다 (브라우저 창이 표시되지 않음).",
 
-  "settings.language.description": 'Kilo Code UI의 언어를 선택하세요. "자동"은 VS Code 표시 언어를 사용합니다.',
+  "settings.language.description": 'Mycelis UI의 언어를 선택하세요. "자동"은 VS Code 표시 언어를 사용합니다.',
   "settings.language.auto": "자동 (VS Code 언어)",
   "settings.language.current": "현재:",
 
@@ -853,9 +853,9 @@ export const dict = {
   "settings.experimental.imageGenerationModel.placeholder": "기본값 (Auto Router)",
 
   "settings.models.speechToText.disabledDescription":
-    "Speech to Text를 사용하려면 Kilo 제공자를 활성화하고 로그인하세요. 현재 Speech to Text는 Kilo Gateway에서만 지원됩니다.",
+    "Speech to Text를 사용하려면 Kilo 제공자를 활성화하고 로그인하세요. 현재 Speech to Text는 Mycelis Gateway에서만 지원됩니다.",
   "settings.models.speechToTextModel.title": "음성 텍스트 변환 모델",
-  "settings.models.speechToTextModel.description": "음성 입력에 사용할 Kilo Gateway 변환 모델을 선택하세요.",
+  "settings.models.speechToTextModel.description": "음성 입력에 사용할 Mycelis Gateway 변환 모델을 선택하세요.",
   "settings.experimental.nativeNotebookTools.title": "네이티브 노트북 도구",
   "settings.experimental.nativeNotebookTools.description":
     "VS Code 노트북을 읽고, 편집하고, 실행하는 실험적 도구를 활성화합니다",
@@ -1137,12 +1137,12 @@ export const dict = {
   "settings.legacyMigration.link": "레거시 버전에서 마이그레이션",
   "settings.aboutKiloCode.legacyMigration.title": "레거시 마이그레이션",
   "settings.aboutKiloCode.legacyMigration.description":
-    "공급자 API 키 및 기본 모델을 포함하여 이전 Kilo Code 설치에서 설정을 마이그레이션합니다.",
+    "공급자 API 키 및 기본 모델을 포함하여 이전 Mycelis 설치에서 설정을 마이그레이션합니다.",
   "settings.aboutKiloCode.rooImport.description": "Roo Code 설치에서 대화 기록을 가져옵니다.",
   "settings.aboutKiloCode.rooImport.button": "Roo Code에서 세션 가져오기",
 
   // Screen 1 — What's New
-  "migration.whatsNew.title": "Kilo Code의 새로운 기능",
+  "migration.whatsNew.title": "Mycelis의 새로운 기능",
   "migration.whatsNew.subtitle": "더 빠르고 효율적인 기반 위에 확장 프로그램을 재구축했습니다.",
   "migration.whatsNew.features.performance.title": "더 빠른 에이전트 성능",
   "migration.whatsNew.features.performance.detail":

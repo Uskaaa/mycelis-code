@@ -184,7 +184,9 @@ intellijPlatform {
 
     pluginConfiguration {
         id = "ai.kilocode.jetbrains"
-        name = "Kilo Code"
+        name = "Mycelis" // mycelis_change - this Gradle-generated plugin.xml overrides the static <name> in
+        // src/main/resources/META-INF/plugin.xml at build time, so that file's own "Mycelis" edit was a no-op
+        // until this was fixed to match.
         version = provider { ver }
         changeNotes = notes
 
@@ -193,8 +195,8 @@ intellijPlatform {
         }
 
         vendor {
-            name = "Kilo Code"
-            url = "https://kilo.ai"
+            name = "Mycelis" // mycelis_change
+            url = "https://mycelis.ai" // mycelis_change
         }
     }
 

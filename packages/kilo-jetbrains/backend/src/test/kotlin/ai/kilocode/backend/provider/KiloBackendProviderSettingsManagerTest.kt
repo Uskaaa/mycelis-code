@@ -278,7 +278,7 @@ class KiloBackendProviderSettingsManagerTest {
         mock.resetCounts()
         val result = manager.disconnect(ProviderDisconnectDto("/test", "kilo"))
 
-        assertEquals("Kilo Gateway cannot be disconnected from provider settings.", result.error)
+        assertEquals("Mycelis cannot be disconnected from provider settings.", result.error)
         assertFalse(result.profileCleared)
         assertNull(mock.lastAuthDeletePath)
         assertEquals(0, mock.requestCount("/auth/kilo"))

@@ -198,6 +198,10 @@ data class DeviceAuthDto(
     val code: String?,
     val verificationUrl: String,
     val expiresIn: Int = 900,
+    // mycelis_change - true for Mycelis's browser-login method: the backend already opened the
+    // browser (see KiloBackendAppService.completeLogin), so the frontend shows a plain waiting
+    // state instead of the QR/code UI built for the old device-authorization flow.
+    val auto: Boolean = false,
 )
 
 @Serializable

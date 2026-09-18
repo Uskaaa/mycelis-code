@@ -467,7 +467,7 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "Codice copiato negli appunti",
   "deviceAuth.toast.errorCopied": "Errore copiato negli appunti",
   "deviceAuth.status.initiating": "Avvio accesso...",
-  "deviceAuth.title": "Accedi a Kilo Code",
+  "deviceAuth.title": "Accedi a Mycelis",
   "deviceAuth.step1": "Passaggio 1: apri questo URL",
   "deviceAuth.action.copyUrl": "Copia URL",
   "deviceAuth.action.openBrowser": "Apri browser",
@@ -488,7 +488,7 @@ export const dict = {
   "common.reloadDescription": "Ricarica configurazione, competenze, agenti e comandi dal disco",
   "profile.title": "Profilo",
   "profile.notLoggedIn": "Accesso non effettuato",
-  "profile.action.login": "Accedi con Kilo Code",
+  "profile.action.login": "Accedi con Mycelis",
   "profile.balance.title": "Saldo",
   "profile.balance.refresh": "Aggiorna saldo",
   "profile.usage.title": "Piani e utilizzo",
@@ -503,7 +503,7 @@ export const dict = {
   "profile.usage.plan.unknown": "Piano: Stato sconosciuto",
   "profile.usage.action.manage": "Gestisci",
   "profile.usage.action.managePlan": "Gestisci {{plan}}",
-  "profile.usage.routing": "La fatturazione del piano è attiva. L'instradamento tramite Kilo Gateway è {{state}}.",
+  "profile.usage.routing": "La fatturazione del piano è attiva. L'instradamento tramite Mycelis Gateway è {{state}}.",
   "profile.usage.routingState.disabled": "disabilitato",
   "profile.usage.routingState.missing": "mancante",
   "profile.usage.routingState.replaced": "sostituito",
@@ -582,9 +582,9 @@ export const dict = {
   "settings.indexing.tuning.description": "Parametro avanzato per ricerca e batching.",
   "settings.experimental.title": "Sperimentale",
   "settings.language.title": "Lingua",
-  "settings.aboutKiloCode.title": "Informazioni su Kilo Code",
+  "settings.aboutKiloCode.title": "Informazioni su Mycelis",
   "session.messages.welcome":
-    "Kilo Code è un assistente AI per il coding. Chiedigli di creare feature, correggere bug o spiegare il codebase.",
+    "Mycelis è un assistente AI per il coding. Chiedigli di creare feature, correggere bug o spiegare il codebase.",
   "session.messages.scrollToBottom": "Scorri in fondo",
   "session.messages.initializing": "Inizializzazione...",
   "session.messages.taskStarting": "Avvio...",
@@ -599,7 +599,7 @@ export const dict = {
   "session.status.retry": "Riprovo...",
   "session.status.working": "Al lavoro...",
   "session.status.offline": "Rete disconnessa - riconnessione...",
-  "sidebar.topBar.label": "Navigazione Kilo Code",
+  "sidebar.topBar.label": "Navigazione Mycelis",
   "sidebar.topBar.newTask": "Nuova Attività",
   "sidebar.topBar.history": "Cronologia",
   "sidebar.topBar.agentManager": "Agent Manager",
@@ -694,7 +694,7 @@ export const dict = {
     "Usa il browser Chrome installato invece di un'istanza Chromium separata.",
   "settings.browser.headless.title": "Modalità headless",
   "settings.browser.headless.description": "Esegui in modalità headless (senza finestra browser visibile).",
-  "settings.language.description": 'Scegli la lingua dell\'interfaccia Kilo Code. "Auto" usa la lingua di VS Code.',
+  "settings.language.description": 'Scegli la lingua dell\'interfaccia Mycelis. "Auto" usa la lingua di VS Code.',
   "settings.language.auto": "Auto (lingua VS Code)",
   "settings.language.current": "Corrente:",
   "common.add": "Aggiungi",
@@ -1040,11 +1040,11 @@ export const dict = {
   "settings.legacyMigration.link": "Migra dalla versione legacy",
   "settings.aboutKiloCode.legacyMigration.title": "Migrazione legacy",
   "settings.aboutKiloCode.legacyMigration.description":
-    "Migra le impostazioni da una precedente installazione di Kilo Code, incluse API key dei provider e modello predefinito.",
+    "Migra le impostazioni da una precedente installazione di Mycelis, incluse API key dei provider e modello predefinito.",
   "settings.aboutKiloCode.rooImport.description":
     "Importa la cronologia delle conversazioni da una installazione di Roo Code.",
   "settings.aboutKiloCode.rooImport.button": "Importa sessioni da Roo Code",
-  "migration.whatsNew.title": "Novità in Kilo Code",
+  "migration.whatsNew.title": "Novità in Mycelis",
   "migration.whatsNew.subtitle": "Abbiamo ricostruito l'estensione su fondamenta più veloci ed efficienti.",
   "migration.whatsNew.features.performance.title": "Prestazioni agente più rapide",
   "migration.whatsNew.features.performance.detail":
@@ -1199,9 +1199,9 @@ export const dict = {
 
   // Speech to Text
   "settings.models.speechToText.disabledDescription":
-    "Abilita e accedi al provider Kilo per usare Da voce a testo. Da voce a testo è attualmente supportato solo tramite Kilo Gateway.",
+    "Abilita e accedi al provider Kilo per usare Da voce a testo. Da voce a testo è attualmente supportato solo tramite Mycelis Gateway.",
   "settings.models.speechToTextModel.title": "Modello Da voce a testo",
-  "settings.models.speechToTextModel.description": "Scegli il modello di trascrizione Kilo Gateway per l'input vocale.",
+  "settings.models.speechToTextModel.description": "Scegli il modello di trascrizione Mycelis Gateway per l'input vocale.",
 
   // Compaction limit
   "settings.context.compactionLimit.title": "Limite compattazione automatica",
@@ -1214,7 +1214,7 @@ export const dict = {
     "Modello e sforzo di ragionamento predefiniti per i sub-agent del tool task. Lascia non impostato per ereditare il modello dell'agente chiamante.",
   "settings.models.hidePromptTraining.title": "Nascondi i modelli che usano i prompt per l'addestramento",
   "settings.models.hidePromptTraining.description":
-    "Nascondi i modelli Kilo Gateway i cui provider potrebbero usare i tuoi prompt per l'addestramento.",
+    "Nascondi i modelli Mycelis Gateway i cui provider potrebbero usare i tuoi prompt per l'addestramento.",
 
   // Autocomplete hint
   "settings.autocomplete.modelsHint":
@@ -1265,7 +1265,7 @@ export const dict = {
     "Accedi di nuovo con ChatGPT, quindi invia di nuovo il tuo messaggio per continuare a usare i modelli Codex.",
 
   // Speech to Text tooltips and errors
-  "speechToText.tooltip.start": "Avvia input vocale con Kilo Gateway",
+  "speechToText.tooltip.start": "Avvia input vocale con Mycelis Gateway",
   "speechToText.tooltip.shortcut":
     "Tocca o premi Cmd/Ctrl+K per avviare o interrompere la registrazione; tieni premuto mentre parli e rilascia per trascrivere e inviare.",
   "speechToText.tooltip.starting": "Avvio del microfono... Attendi prima di parlare.",

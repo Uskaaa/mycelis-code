@@ -630,13 +630,13 @@ export class WorktreeManager {
     const gitDir = await this.resolveGitDir()
     const excludePath = path.join(gitDir, "info", "exclude")
     const items = [
-      [".kilo/worktrees/", "Kilo Code agent worktrees"],
-      [".kilo/agent-manager.json", "Kilo Agent Manager state"],
-      [".kilo/setup-script", "Kilo Code worktree setup script"],
-      [".kilo/setup-script.sh", "Kilo Code worktree setup script"],
-      [".kilo/setup-script.ps1", "Kilo Code worktree setup script"],
-      [".kilo/setup-script.cmd", "Kilo Code worktree setup script"],
-      [".kilo/setup-script.bat", "Kilo Code worktree setup script"],
+      [".kilo/worktrees/", "Mycelis agent worktrees"],
+      [".kilo/agent-manager.json", "Mycelis Agent Manager state"],
+      [".kilo/setup-script", "Mycelis worktree setup script"],
+      [".kilo/setup-script.sh", "Mycelis worktree setup script"],
+      [".kilo/setup-script.ps1", "Mycelis worktree setup script"],
+      [".kilo/setup-script.cmd", "Mycelis worktree setup script"],
+      [".kilo/setup-script.bat", "Mycelis worktree setup script"],
       [".kilocode/worktrees/", "Kilo Code legacy agent worktrees"],
       [".kilocode/agent-manager.json", "Kilo Agent Manager legacy state"],
       [".kilocode/setup-script", "Kilo Code legacy worktree setup script"],

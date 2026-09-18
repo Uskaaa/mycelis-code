@@ -32,7 +32,6 @@ import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { homedir, tmpdir } from "node:os"
 import { delimiter, join, resolve } from "node:path"
-import { spawn } from "node:child_process"
 
 const win = process.platform === "win32"
 const root = join(import.meta.dir, "..")
@@ -414,12 +413,20 @@ async function launch() {
     return
   }
 
-  const child = spawn(app, args, {
+  // mycelis_change - was node:child_process's spawn(app, args, { shell: true }) on Windows: with
+  // an args array (not a single command string), Node's shell:true no longer quotes anything
+  // itself (see its own DEP0190 warning) - it just concatenates app + args and hands the raw
+  // string to cmd.exe. The default per-user VS Code install path always contains a space
+  // ("...\Programs\Microsoft VS Code\Code.exe"), so cmd.exe split on it and tried to run
+  // "...\Programs\Microsoft" as the command. That failed instantly, but stdio was "ignore" and
+  // nothing checked the exit code, so the script still printed "VS Code launched (pid ...)" with
+  // no window ever appearing and no error anywhere. Bun.spawn (already used by the --wait branch
+  // above) invokes the executable directly - no shell, so no quoting/splitting hazard - and its
+  // Subprocess also supports unref(), so the fire-and-forget behavior is unchanged.
+  const child = Bun.spawn([app, ...args], {
     cwd: workspace,
-    detached: !win,
     env,
-    stdio: "ignore",
-    ...(win ? { shell: true } : {}),
+    stdio: ["ignore", "ignore", "inherit"],
   })
   child.unref()
 

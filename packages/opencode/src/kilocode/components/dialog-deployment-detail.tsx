@@ -13,6 +13,7 @@ import { useToast } from "@tui/ui/toast"
 import { useTheme } from "@tui/context/theme"
 import { DialogSelect } from "@tui/ui/dialog-select"
 import { DialogConfirm } from "@tui/ui/dialog-confirm"
+import { useBindings } from "@tui/keymap"
 
 // These types are OpenCode-internal and imported at runtime
 type UseSDK = any
@@ -40,6 +41,12 @@ export function DialogDeploymentDetail(props: DialogDeploymentDetailProps) {
   const sdk = props.useSDK()
   const [status, setStatus] = createSignal(props.deployment.status)
   const [busy, setBusy] = createSignal(false)
+
+  // mycelis_change - lets backspace (the key right above enter) back out to the list, matching
+  // dialog-process-list.tsx's back binding, instead of only the "← Back to list" row.
+  useBindings(() => ({
+    bindings: [{ key: "backspace", desc: "Back", group: "Deployment", cmd: () => !busy() && props.onBack() }],
+  }))
 
   function statusColor(value: string) {
     if (value === "Running") return theme.success

@@ -144,6 +144,8 @@ export function DialogDeploymentCreate(props: DialogDeploymentCreateProps) {
       dialog,
       stepTitle(4, "Auto-stop on inactivity?"),
       "Stop the deployment automatically when nobody is using it. Saves cost while idle.",
+      "No", // mycelis_change - "Cancel" read as "abort the wizard", not "answer no to this question"
+      "Yes", // mycelis_change
     )
     if (enable === undefined) {
       props.onDone()
@@ -185,6 +187,8 @@ export function DialogDeploymentCreate(props: DialogDeploymentCreateProps) {
       dialog,
       stepTitle(5, "Show in workspace Web-UI?"),
       "If shown, this model appears in the workspace Web-UI's model dropdown and users can chat with it directly. If not, it's only reachable via API.",
+      "No", // mycelis_change - "Cancel" read as "abort the wizard", not "answer no to this question"
+      "Yes", // mycelis_change
     )
     if (expose === undefined) {
       props.onDone()
@@ -215,6 +219,8 @@ export function DialogDeploymentCreate(props: DialogDeploymentCreateProps) {
       `Name: ${state.name}\nModel: ${state.modelName}\nConcurrent users: ${state.maxConcurrentUsers}\n${autoStopLine}\nWeb-UI: ${
         state.isExposedToWebUi ? "visible" : "API only"
       }\n${costLine}\n\nDeploy now?`,
+      undefined, // mycelis_change - "Cancel" here is accurate (it does abort), keep the default
+      "Deploy", // mycelis_change - clearer than the generic "Confirm" for the actual action taken
     )
     if (confirmed !== true) {
       props.onDone()

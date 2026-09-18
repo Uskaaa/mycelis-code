@@ -12,6 +12,10 @@ export type DialogConfirmProps = {
   onConfirm?: () => void
   onCancel?: () => void
   label?: string
+  // mycelis_change - lets a yes/no-style prompt (e.g. "auto-stop on inactivity?") say "Yes"
+  // instead of the generic "Confirm", which read as "confirm this whole flow" rather than
+  // "answer yes to this one question" and made "Cancel" look like it would abort the flow.
+  confirmLabel?: string
 }
 
 export type DialogConfirmResult = boolean | undefined
@@ -80,7 +84,7 @@ export function DialogConfirm(props: DialogConfirmProps) {
               }}
             >
               <text fg={key === store.active ? theme.selectedListItemText : theme.textMuted}>
-                {Locale.titlecase(key === "cancel" ? (props.label ?? key) : key)}
+                {Locale.titlecase(key === "cancel" ? (props.label ?? key) : (props.confirmLabel ?? key))}
               </text>
             </box>
           )}
@@ -90,7 +94,7 @@ export function DialogConfirm(props: DialogConfirmProps) {
   )
 }
 
-DialogConfirm.show = (dialog: DialogContext, title: string, message: string, label?: string) => {
+DialogConfirm.show = (dialog: DialogContext, title: string, message: string, label?: string, confirmLabel?: string) => {
   return new Promise<DialogConfirmResult>((resolve) => {
     dialog.replace(
       () => (
@@ -100,6 +104,7 @@ DialogConfirm.show = (dialog: DialogContext, title: string, message: string, lab
           onConfirm={() => resolve(true)}
           onCancel={() => resolve(false)}
           label={label}
+          confirmLabel={confirmLabel}
         />
       ),
       () => resolve(undefined),

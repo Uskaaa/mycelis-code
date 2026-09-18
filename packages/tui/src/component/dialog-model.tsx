@@ -38,7 +38,7 @@ export function DialogModel(props: { providerID?: string }) {
   // mycelis_change - while Mycelis is the only supported sign-in path, the model picker should
   // only ever offer Mycelis's own models, not the full generic models.dev catalog for every
   // other BYOK provider (same filter already applied to the "connect a provider" list).
-  const visibleProviders = createMemo(() => sync.data.provider.filter((p) => !KiloProvider.isProviderHidden(p.id)))
+  const visibleProviders = createMemo(() => sync.data.provider.filter((p) => !KiloProvider.isProviderHidden(p)))
 
   // kilocode_change start
   const wide = createMemo(() => dimensions().width >= 108)

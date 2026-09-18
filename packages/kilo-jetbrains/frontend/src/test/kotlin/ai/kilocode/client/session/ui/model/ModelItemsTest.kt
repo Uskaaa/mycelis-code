@@ -23,13 +23,16 @@ class ModelItemsTest : BasePlatformTestCase() {
         defaults = emptyMap(),
     )
 
-    fun `test drops small models and providers that are not connected`() {
-        assertEquals(listOf("kilo/gpt-5", "openai/o3"), modelItems(providers()).map { it.key })
+    // mycelis_change - was "test drops small models and providers that are not connected": BYOK
+    // providers (openai here, even though connected) are now always excluded, not just
+    // unconnected ones - Mycelis is the only supported sign-in path.
+    fun `test drops small models and every non-kilo provider`() {
+        assertEquals(listOf("kilo/gpt-5"), modelItems(providers()).map { it.key })
     }
 
     fun `test keeps small models when requested`() {
         assertEquals(
-            setOf("kilo/gpt-5", "kilo/auto-small", "openai/o3"),
+            setOf("kilo/gpt-5", "kilo/auto-small"),
             modelItems(providers(), includeSmall = true).map { it.key }.toSet(),
         )
     }
@@ -42,5 +45,28 @@ class ModelItemsTest : BasePlatformTestCase() {
 
     fun `test null providers yields no items`() {
         assertTrue(modelItems(null).isEmpty())
+    }
+
+    // mycelis_change - a provider the user explicitly set up in their own kilo.jsonc (source
+    // "config") is exempt from the Mycelis-only filter, unlike auto-discovered "openai" above.
+    fun `test keeps a provider explicitly configured by the user`() {
+        val configured = ProvidersDto(
+            providers = listOf(
+                ProviderDto("kilo", "Kilo", models = mapOf("gpt-5" to ModelDto("gpt-5", "GPT-5"))),
+                ProviderDto(
+                    "custom-anthropic",
+                    "Custom Anthropic",
+                    source = "config",
+                    models = mapOf("claude" to ModelDto("claude", "Claude")),
+                ),
+                ProviderDto("openai", "OpenAI", models = mapOf("o3" to ModelDto("o3", "o3"))),
+            ),
+            connected = listOf("openai"),
+            defaults = emptyMap(),
+        )
+        assertEquals(
+            setOf("kilo/gpt-5", "custom-anthropic/claude"),
+            modelItems(configured).map { it.key }.toSet(),
+        )
     }
 }

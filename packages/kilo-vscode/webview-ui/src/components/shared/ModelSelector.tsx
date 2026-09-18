@@ -141,7 +141,7 @@ export interface ModelSelectorBaseProps {
 }
 
 export const ModelSelectorBase: Component<ModelSelectorBaseProps> = (props) => {
-  const { connected, models, findModel } = useProvider()
+  const { models, findModel } = useProvider()
   const language = useLanguage()
   const vscode = useVSCode()
   // Session context is optional — ModelSelectorBase is also used in Settings
@@ -217,14 +217,18 @@ export const ModelSelectorBase: Component<ModelSelectorBaseProps> = (props) => {
     window.addEventListener("mouseup", onUp)
   }
 
-  // Only show models from Kilo Gateway or connected providers.
+  // mycelis_change - Mycelis is the only supported sign-in path, so every other (BYOK) provider
+  // is hidden from the model picker regardless of connection state, matching the CLI/TUI's
+  // isProviderHidden filter (see kilocode/cli/cmd/tui/component/dialog-provider.tsx). A provider
+  // the user explicitly set up themselves in their own config (source "config") is exempt -
+  // that's deliberate user intent, not stray auto-discovery. Nothing is removed, so re-enabling
+  // BYOK providers later is just restoring the `|| c.includes(...)` this replaced.
   // kilo-auto/small is excluded unless includeAutoSmall is explicitly true.
   const visibleModels = createMemo(() => {
     if (props.models) return props.models
-    const c = connected()
     return models().filter((m) => {
       if (!props.includeAutoSmall && isSmall(m)) return false
-      return m.providerID === KILO_GATEWAY_ID || c.includes(m.providerID)
+      return m.providerID === KILO_GATEWAY_ID || m.providerSource === "config"
     })
   })
 

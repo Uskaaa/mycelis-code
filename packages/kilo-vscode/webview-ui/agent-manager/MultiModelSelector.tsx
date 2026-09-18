@@ -36,16 +36,18 @@ export const MultiModelSelector: Component<{
   allocations: ModelAllocations
   onChange: (allocations: ModelAllocations) => void
 }> = (props) => {
-  const { connected, models } = useProvider()
+  const { models } = useProvider()
   const { t } = useLanguage()
   const [search, setSearch] = createSignal("")
   let searchRef: HTMLInputElement | undefined
   const freeLabel = () => t("model.tag.free")
   const dataLabel = () => freeDataLabel(t("model.tag.free"), t("model.tag.dataCollected"))
 
+  // mycelis_change - Mycelis is the only supported sign-in path, so every other (BYOK) provider
+  // is hidden here too, matching ModelSelector.tsx and the CLI/TUI's isProviderHidden filter.
+  // A provider explicitly configured by the user (source "config") is exempt.
   const visibleModels = createMemo(() => {
-    const c = connected()
-    return models().filter((m) => m.providerID === KILO_GATEWAY_ID || c.includes(m.providerID))
+    return models().filter((m) => m.providerID === KILO_GATEWAY_ID || m.providerSource === "config")
   })
 
   const filtered = createMemo(() => {

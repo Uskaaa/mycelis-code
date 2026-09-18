@@ -1,6 +1,9 @@
 import type { Provider, ProviderModel, ModelSelection } from "../types/messages"
 
-export type EnrichedModel = ProviderModel & { providerID: string; providerName: string }
+// mycelis_change - carries the parent provider's `source` so callers can tell a provider the
+// user explicitly configured (source "config") apart from an auto-discovered one, without
+// re-looking the provider up by id.
+export type EnrichedModel = ProviderModel & { providerID: string; providerName: string; providerSource?: string }
 
 /**
  * Flatten a provider map into a list of models enriched with provider info.
@@ -15,6 +18,7 @@ export function flattenModels(providers: Record<string, Provider>): EnrichedMode
         id: modelID,
         providerID,
         providerName: provider.name,
+        providerSource: provider.source, // mycelis_change
       })
     }
   }

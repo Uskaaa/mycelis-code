@@ -72,12 +72,15 @@ export const PROVIDER_TITLES: Record<string, string> = {
 
 // mycelis_change start
 /**
- * While Mycelis is the only supported sign-in path, every other connectable provider is
- * hidden from the "Connect a provider" list and the unauthenticated /models fallback -
- * nothing is removed, so re-enabling BYOK providers later is just deleting this filter.
+ * While Mycelis is the only supported sign-in path, every other auto-discovered/connectable
+ * provider is hidden from the "Connect a provider" list and the unauthenticated /models
+ * fallback - nothing is removed, so re-enabling BYOK providers later is just deleting this
+ * filter. A provider the user explicitly set up themselves in their own config (source
+ * "config") is exempt: that's deliberate user intent, not stray auto-discovery, and hiding it
+ * meant a user's own kilo.jsonc-configured provider silently vanished from /models.
  */
-export function isProviderHidden(providerID: string) {
-  return providerID !== "kilo"
+export function isProviderHidden(provider: { id: string; source?: string }) {
+  return provider.id !== "kilo" && provider.source !== "config"
 }
 // mycelis_change end
 

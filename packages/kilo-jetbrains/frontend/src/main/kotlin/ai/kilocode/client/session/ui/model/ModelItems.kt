@@ -5,14 +5,23 @@ import ai.kilocode.rpc.dto.ProvidersDto
 private const val KILO_PROVIDER = "kilo"
 
 /**
- * Builds the model picker item list from workspace [providers], filtered to the Kilo provider and
- * any connected providers. Small models are dropped unless [includeSmall] is set. Shared by the
- * models settings page and the New Worktree dialog so the mapping stays in one place.
+ * Builds the model picker item list from workspace [providers], filtered to the Kilo (Mycelis)
+ * provider and any provider the user explicitly configured themselves. Small models are dropped
+ * unless [includeSmall] is set. Shared by the models settings page and the New Worktree dialog so
+ * the mapping stays in one place.
+ *
+ * mycelis_change - every other (BYOK) provider used to also pass through when connected
+ * (`it.id in cfg.connected`); Mycelis is the only supported sign-in path, so this now matches the
+ * CLI/TUI's isProviderHidden filter (kilocode/cli/cmd/tui/component/dialog-provider.tsx) and
+ * kilo-vscode's ModelSelector.tsx. A provider with source "config" (set up by the user in their
+ * own kilo.jsonc) is exempt - that's deliberate user intent, not stray auto-discovery. Nothing is
+ * removed, so re-enabling BYOK providers later is just restoring the `|| it.id in cfg.connected`
+ * this replaced.
  */
 internal fun modelItems(providers: ProvidersDto?, includeSmall: Boolean = false): List<ModelPicker.Item> {
     val cfg = providers ?: return emptyList()
     return cfg.providers
-        .filter { it.id == KILO_PROVIDER || it.id in cfg.connected }
+        .filter { it.id == KILO_PROVIDER || it.source == "config" }
         .flatMap { provider ->
             provider.models.mapNotNull { (id, model) ->
                 val item = ModelPicker.Item(

@@ -2,18 +2,23 @@
  * Mycelis Deployments Overview
  *
  * mycelis_change - new file. Compact list of the active workspace's deployments (see
- * DeploymentsController/DeploymentsProxyController in orchestration) with start/stop/delete, plus
- * an action to launch the create flow (dialog-deployment-create.tsx).
+ * DeploymentsController/DeploymentsProxyController in orchestration), plus a permanently visible
+ * "+ New deployment" row that launches the create flow (dialog-deployment-create.tsx).
+ *
+ * mycelis_change - selecting an existing deployment used to immediately toggle start/stop, and
+ * "create" was only reachable when the list was empty (or via a DialogSelect `actions` entry that
+ * never actually surfaced - see dialog-deployment-detail.tsx's sibling PR notes). Both are now
+ * regular, always-visible rows: "+ New deployment" pinned first, and selecting a deployment opens
+ * a detail view (dialog-deployment-detail.tsx) to start/stop/delete instead of acting instantly.
  */
 
-import { createSignal, Show } from "solid-js"
+import { createSignal } from "solid-js"
 import { useDialog } from "@tui/ui/dialog"
 import { useToast } from "@tui/ui/toast"
 import { useTheme } from "@tui/context/theme"
 import { DialogSelect, type DialogSelectOption } from "@tui/ui/dialog-select"
-import { DialogConfirm } from "@tui/ui/dialog-confirm"
-import { DialogAlert } from "@tui/ui/dialog-alert"
 import { DialogDeploymentCreate } from "./dialog-deployment-create.js"
+import { DialogDeploymentDetail } from "./dialog-deployment-detail.js"
 
 // These types are OpenCode-internal and imported at runtime
 type UseSDK = any
@@ -25,6 +30,8 @@ interface Deployment {
   status: string
   costPerHour: number
 }
+
+type Row = { kind: "create" } | { kind: "open"; deployment: Deployment }
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
 
@@ -44,28 +51,6 @@ export function DialogDeployments(props: DialogDeploymentsProps) {
   const { theme } = useTheme()
   const sdk = props.useSDK()
   const [deployments, setDeployments] = createSignal<Deployment[]>(props.initialDeployments)
-  const [busy, setBusy] = createSignal(false)
-  let refreshInFlight = false // mycelis_change - guard against re-entrant/duplicate refresh() calls
-
-  // mycelis_change - only called explicitly after a mutating action (toggle/delete/create), never
-  // from onMount - see the initialDeployments note above.
-  async function refresh() {
-    if (refreshInFlight) return
-    refreshInFlight = true
-    try {
-      const response = await sdk.client.kilo.deployments.list()
-      if (response.error || !response.data) {
-        const err = response.error as { error?: string } | undefined
-        toast.show({ message: err?.error ?? "Failed to refresh deployments", variant: "error" })
-        return
-      }
-      setDeployments(response.data as Deployment[])
-    } catch (error) {
-      toast.show({ message: `Failed to refresh deployments: ${error}`, variant: "error" })
-    } finally {
-      refreshInFlight = false
-    }
-  }
 
   function statusColor(status: string) {
     if (status === "Running") return theme.success
@@ -73,109 +58,53 @@ export function DialogDeployments(props: DialogDeploymentsProps) {
     return theme.textMuted
   }
 
-  function row(item: Deployment): DialogSelectOption<string> {
-    return {
-      title: item.name,
-      value: item.id,
-      description: `${item.modelName} · ${usd.format(item.costPerHour)}/hr`,
-      footer: <span style={{ fg: statusColor(item.status) }}>{item.status}</span>,
+  function reopen(list: Deployment[]) {
+    dialog.replace(() => <DialogDeployments useSDK={props.useSDK} initialDeployments={list} />)
+  }
+
+  async function refreshAndReopen() {
+    try {
+      const response = await sdk.client.kilo.deployments.list()
+      reopen((response?.data as Deployment[]) ?? deployments())
+    } catch {
+      reopen(deployments())
     }
   }
 
   function openCreate() {
     dialog.replace(() => (
-      <DialogDeploymentCreate
-        useSDK={props.useSDK}
-        onDone={() => {
-          // mycelis_change - re-fetch here (a single explicit call, not onMount) before reopening
-          // so the newly created deployment shows up immediately.
-          void sdk.client.kilo.deployments
-            .list()
-            .then((response: any) =>
-              dialog.replace(() => (
-                <DialogDeployments useSDK={props.useSDK} initialDeployments={response.data ?? []} />
-              )),
-            )
-            .catch(() => dialog.replace(() => <DialogDeployments useSDK={props.useSDK} initialDeployments={[]} />))
-        }}
-      />
+      <DialogDeploymentCreate useSDK={props.useSDK} onDone={() => void refreshAndReopen()} />
     ))
   }
 
-  async function toggle(id: string) {
-    if (busy()) return
-    const item = deployments().find((d) => d.id === id)
-    if (!item) return
-    setBusy(true)
-    const isRunning = item.status === "Running"
-    const result = await (isRunning
-      ? sdk.client.kilo.deployments.stop({ id })
-      : sdk.client.kilo.deployments.start({ id })
-    ).catch((error: unknown) => ({ error }))
-    setBusy(false)
-    if ((result as any).error) {
-      toast.show({ message: `Failed to ${isRunning ? "stop" : "start"} deployment`, variant: "error" })
-    }
-    await refresh()
+  function openDetail(item: Deployment) {
+    dialog.replace(() => (
+      <DialogDeploymentDetail useSDK={props.useSDK} deployment={item} onBack={() => void refreshAndReopen()} />
+    ))
   }
 
-  async function remove(id: string) {
-    if (busy()) return
-    const item = deployments().find((d) => d.id === id)
-    if (!item) return
-    const confirmed = await DialogConfirm.show(
-      dialog,
-      "Delete Deployment?",
-      `This permanently deletes "${item.name}" and its infrastructure. This cannot be undone.`,
-    )
-    if (confirmed !== true) return
-    setBusy(true)
-    const result = await sdk.client.kilo.deployments.delete({ id }).catch((error: unknown) => ({ error }))
-    setBusy(false)
-    if ((result as any).error) {
-      toast.show({ message: "Failed to delete deployment", variant: "error" })
-    } else {
-      toast.show({ message: `Deleted "${item.name}"`, variant: "success" })
+  const createRow: DialogSelectOption<Row> = {
+    title: "+ New deployment",
+    value: { kind: "create" },
+  }
+
+  function row(item: Deployment): DialogSelectOption<Row> {
+    return {
+      title: item.name,
+      value: { kind: "open", deployment: item },
+      description: `${item.modelName} · ${usd.format(item.costPerHour)}/hr`,
+      footer: <span style={{ fg: statusColor(item.status) }}>{item.status}</span>,
     }
-    await refresh()
   }
 
   return (
-    <Show
-      when={deployments().length > 0}
-      fallback={
-        <DialogAlert
-          title="No Deployments"
-          message={"You don't have any deployments in this workspace yet.\nPress enter to create one."}
-          onConfirm={openCreate}
-        />
-      }
-    >
-      <DialogSelect
-        title="Deployments"
-        options={deployments().map(row)}
-        actions={[
-          {
-            title: "toggle start/stop",
-            command: "deployments.toggle",
-            hidden: busy(),
-            onTrigger: (item) => void toggle(item.value),
-          },
-          {
-            title: "delete",
-            command: "deployments.delete",
-            hidden: busy(),
-            onTrigger: (item) => void remove(item.value),
-          },
-          {
-            title: "create",
-            command: "deployments.create",
-            hidden: busy(),
-            onTrigger: openCreate,
-          },
-        ]}
-        onSelect={(item) => void toggle(item.value)}
-      />
-    </Show>
+    <DialogSelect
+      title="Deployments"
+      options={[createRow, ...deployments().map(row)]}
+      onSelect={(option) => {
+        if (option.value.kind === "create") openCreate()
+        else openDetail(option.value.deployment)
+      }}
+    />
   )
 }

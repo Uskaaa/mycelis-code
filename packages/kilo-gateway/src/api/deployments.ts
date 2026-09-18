@@ -76,13 +76,28 @@ export function fetchDeployments(pat: string, organizationId?: string): Promise<
 
 export function createDeployment(
   pat: string,
-  input: { name: string; modelId: string; maxConcurrentUsers?: number },
+  input: {
+    name: string
+    modelId: string
+    maxConcurrentUsers?: number
+    // mycelis_change - see CreateDeploymentBody (httpapi/groups/kilo-gateway.ts) for context
+    autoStopOnInactivity?: boolean
+    inactivityTimeoutMinutes?: number
+    isExposedToWebUi?: boolean
+  },
   organizationId?: string,
 ): Promise<Deployment> {
   return request(BASE, {
     method: "POST",
     headers: headers(pat, organizationId),
-    body: JSON.stringify({ name: input.name, modelId: input.modelId, maxConcurrentUsers: input.maxConcurrentUsers ?? 5 }),
+    body: JSON.stringify({
+      name: input.name,
+      modelId: input.modelId,
+      maxConcurrentUsers: input.maxConcurrentUsers ?? 5,
+      autoStopOnInactivity: input.autoStopOnInactivity ?? false,
+      inactivityTimeoutMinutes: input.inactivityTimeoutMinutes ?? 30,
+      isExposedToWebUi: input.isExposedToWebUi ?? false,
+    }),
   })
 }
 

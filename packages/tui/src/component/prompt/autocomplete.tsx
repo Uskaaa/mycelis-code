@@ -477,10 +477,11 @@ export function Autocomplete(props: {
 
   const commands = createMemo((): AutocompleteOption[] => {
     // mycelis_change start - before sign-in, nothing has a working model behind it yet, so the
-    // only command worth showing (or letting the user reach) is the one that fixes that.
+    // only commands worth showing (or letting the user reach) are the one that fixes that and a
+    // way to leave without signing in.
     if (!connected()) {
       return slashes()
-        .filter((entry) => entry.display === "/connect")
+        .filter((entry) => entry.display === "/connect" || entry.display === "/exit")
         .map((entry) => ({
           display: entry.display,
           description: entry.description,

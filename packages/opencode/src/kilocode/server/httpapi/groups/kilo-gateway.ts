@@ -100,6 +100,12 @@ export const CreateDeploymentBody = Schema.Struct({
   name: Schema.String,
   modelId: Schema.String,
   maxConcurrentUsers: Schema.optional(Schema.Finite),
+  // mycelis_change - wizard options beyond model/name/concurrency: see DeploymentWizard.razor
+  // (orchestration) for the full set. Schedule (daily/one-time), LoRA training, and HuggingFace
+  // import stay out of the CLI wizard for now.
+  autoStopOnInactivity: Schema.optional(Schema.Boolean),
+  inactivityTimeoutMinutes: Schema.optional(Schema.Finite),
+  isExposedToWebUi: Schema.optional(Schema.Boolean),
 })
 // mycelis_change end
 

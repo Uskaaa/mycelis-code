@@ -7,6 +7,7 @@ import { Context, Deferred, Duration, Effect, Exit, Layer, Schema, Scope } from 
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
 import { Config } from "../config/config"
 import { Auth } from "../auth"
+import { compatible, organization, token } from "@/kilocode/provider/catalog"
 import type { Provider } from "@opencode-ai/core/models-dev"
 import * as Log from "@opencode-ai/core/util/log"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
@@ -128,26 +129,9 @@ export const layer: Layer.Layer<
 
       if (providerID === "kilo") {
         const item = config.provider?.[providerID]
-        if (item?.options?.apiKey) options.kilocodeToken = item.options.apiKey
-        if (item?.options?.kilocodeOrganizationId) options.kilocodeOrganizationId = item.options.kilocodeOrganizationId
-
         const info = yield* auth.get(providerID)
-        if (info?.type === "api") {
-          options.kilocodeToken = info.key
-          // mycelis_change - the PAT ("api") auth Mycelis's browser-login issues has no
-          // accountId (that's oauth-only); the selected workspace rides along on its metadata
-          // bag instead (see setOrganization in kilo-gateway/server/handlers.ts). Without this
-          // the model list stayed pinned to the PAT's home workspace no matter what /workspace
-          // switched to.
-          if (info.metadata?.organizationId) options.kilocodeOrganizationId = info.metadata.organizationId
-        }
-        if (info?.type === "oauth") {
-          options.kilocodeToken = info.access
-          if (info.accountId) options.kilocodeOrganizationId = info.accountId
-        }
-
-        if (process.env.KILO_API_KEY) options.kilocodeToken = process.env.KILO_API_KEY
-        if (process.env.KILO_ORG_ID) options.kilocodeOrganizationId = process.env.KILO_ORG_ID
+        options.kilocodeOrganizationId = organization(item?.options, info)
+        options.kilocodeToken = token(item?.options, info)
         log.debug("auth options resolved", {
           providerID,
           hasToken: !!options.kilocodeToken,
@@ -190,7 +174,9 @@ export const layer: Layer.Layer<
           }),
         ),
       )
-      return yield* fetchModels(providerID, { ...resolved, ...options })
+      const input = { ...resolved, ...options }
+      if (providerID === "kilo" && !compatible(input)) return { models: {}, error: { kind: "schema" as const } }
+      return yield* fetchModels(providerID, input)
     })
 
     const key = (providerID: string, options?: Options) => {

@@ -36,6 +36,7 @@ import { delimiter, join, resolve } from "node:path"
 const win = process.platform === "win32"
 const root = join(import.meta.dir, "..")
 const repo = resolve(root, "..", "..")
+const temp = tmpdir().trimEnd()
 
 // ---------------------------------------------------------------------------
 // Argument parsing
@@ -101,7 +102,7 @@ const base =
     ? expand(opts["state-dir"])
     : isolated
       ? join(dev, "vscode")
-      : join(tmpdir(), `kilo-vscode-dev-${hash}`)
+      : join(temp, `kilo-vscode-dev-${hash}`)
 const userDir = join(base, "user-data")
 const extDir = join(base, "extensions")
 const kilo =
@@ -234,11 +235,12 @@ function newest(paths: string[]) {
 // ---------------------------------------------------------------------------
 
 async function compile() {
-  if (!shouldBuild) {
+  if (!shouldBuild && existsSync(join(root, "dist", "extension.js"))) {
     console.log("[launch] Skipping build (--no-build)")
     return
   }
 
+  if (!shouldBuild) console.log("[launch] dist/extension.js is missing in this worktree, building first...")
   await ensureDependencies()
   console.log("[launch] Building extension...")
   await $`bun run build:launch`.cwd(root).env(cleanEnv(process.env))

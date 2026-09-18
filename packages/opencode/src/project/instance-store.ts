@@ -28,6 +28,9 @@ export interface Interface {
   // run something against every *already loaded* instance without disposing any of them - see
   // provider-auth-lifecycle.ts's fast provider-cache refresh for auth.set/auth.remove.
   readonly loaded: () => Effect.Effect<readonly InstanceContext[]>
+  // kilocode_change start
+  readonly list: () => Effect.Effect<InstanceContext[]>
+  // kilocode_change end
 }
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/InstanceStore") {}
@@ -236,11 +239,28 @@ const layer: Layer.Layer<Service, never, Project.Service | InstanceBootstrap.Ser
       return exits.filter(Exit.isSuccess).map((exit) => exit.value)
     })
 
+    // kilocode_change start - loaded instance contexts for project-scoped operations
+    const list = (): Effect.Effect<InstanceContext[]> =>
+      Effect.forEach([...cache.values()], (entry) =>
+        Deferred.isDone(entry.deferred).pipe(
+          Effect.flatMap((done) =>
+            done
+              ? Deferred.await(entry.deferred).pipe(
+                  Effect.exit,
+                  Effect.map((exit) => (Exit.isSuccess(exit) ? exit.value : undefined)),
+                )
+              : Effect.succeed(undefined),
+          ),
+        ),
+      ).pipe(Effect.map((contexts) => contexts.filter((ctx): ctx is InstanceContext => ctx !== undefined)))
+    // kilocode_change end
+
     yield* Effect.addFinalizer(() => disposeAll().pipe(Effect.ignore))
 
     return Service.of({
       load,
       reload,
+      list, // kilocode_change
       dispose,
       disposeDirectory,
       disposeAll,

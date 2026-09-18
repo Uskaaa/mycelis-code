@@ -5,16 +5,25 @@ import { Icon } from "@kilocode/kilo-ui/icon"
 import { IconButton } from "@kilocode/kilo-ui/icon-button"
 import type { LanguageContextValue } from "../src/context/language"
 import type { AgentProjectSnapshot } from "../src/types/messages"
+import { ProjectsFooter } from "./ProjectsFooter"
 import { SidebarSectionHeader } from "./SidebarSectionHeader"
+import { ProjectRowActions } from "./ProjectRowActions"
 
 interface ProjectsSectionProps {
   projects: AgentProjectSnapshot[]
   t: LanguageContextValue["t"]
+  bindings: Record<string, string>
   onAdd: () => void
   onSelect: (id: string) => void
   onRemove: (id: string) => void
   onExpand: (id: string, expanded: boolean) => void
+  onHistory: (id: string) => void
+  onNew: (id: string) => void
+  onCreate: (id: string) => void
+  onSection: (id: string) => void
+  onSettings: (id: string) => void
   count: (id: string) => number | undefined
+  baseBranch: (id: string) => string
   tools?: JSX.Element
   body: (project: AgentProjectSnapshot) => JSX.Element
 }
@@ -33,18 +42,7 @@ export const ProjectsSection: Component<ProjectsSectionProps> = (props) => (
     <SidebarSectionHeader
       class="am-section-header"
       label={<span class="am-section-label">{props.t("agentManager.projects")}</span>}
-      actions={
-        <div class="am-projects-tools">
-          <IconButton
-            icon="plus"
-            size="small"
-            variant="ghost"
-            label={props.t("agentManager.project.add")}
-            onClick={props.onAdd}
-          />
-          {props.tools}
-        </div>
-      }
+      actions={props.tools}
     />
     <div class="am-projects-list">
       <For each={props.projects.map((project) => project.id)}>
@@ -69,18 +67,18 @@ export const ProjectsSection: Component<ProjectsSectionProps> = (props) => (
                   </>
                 }
                 actions={
-                  <Show when={!project().pinned}>
-                    <IconButton
-                      icon="close-small"
-                      size="small"
-                      variant="ghost"
-                      label={props.t("agentManager.project.remove")}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        props.onRemove(project().id)
-                      }}
-                    />
-                  </Show>
+                  <ProjectRowActions
+                    branch={props.baseBranch(project().id)}
+                    bindings={props.bindings}
+                    t={props.t}
+                    pinned={project().pinned}
+                    onCreate={() => props.onCreate(project().id)}
+                    onNew={() => props.onNew(project().id)}
+                    onSection={() => props.onSection(project().id)}
+                    onHistory={() => props.onHistory(project().id)}
+                    onSettings={() => props.onSettings(project().id)}
+                    onRemove={() => props.onRemove(project().id)}
+                  />
                 }
                 onToggle={() => {
                   if (project().missing) return
@@ -100,5 +98,6 @@ export const ProjectsSection: Component<ProjectsSectionProps> = (props) => (
         }}
       </For>
     </div>
+    <ProjectsFooter label={props.t("agentManager.project.add")} onAdd={props.onAdd} />
   </div>
 )

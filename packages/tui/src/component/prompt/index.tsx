@@ -61,6 +61,7 @@ import { MemoryPrompt } from "@/kilocode/cli/cmd/tui/component/memory-prompt"
 import { isAllowEverything } from "@/kilocode/cli/cmd/tui/app"
 import { REDACTED } from "@/kilocode/pii" // mycelis_change
 import { onBalanceRefresh } from "@/kilocode/balance-refresh" // mycelis_change
+import { GoalPrompt } from "@/kilocode/cli/cmd/tui/component/goal"
 // kilocode_change end
 import { KILO_BASE_MODE, useBindings, useCommandShortcut, useLeaderActive, useOpencodeKeymap } from "../../keymap"
 import { useTuiConfig } from "../../config"
@@ -205,6 +206,7 @@ export function Prompt(props: PromptProps) {
     void refreshWorkspace()
     onCleanup(onBalanceRefresh(() => void refreshWorkspace()))
   })
+  const goal = createMemo(() => GoalPrompt.read(sync.session.get(props.sessionID ?? "")?.metadata)) // kilocode_change
   const history = usePromptHistory()
   const stash = usePromptStash()
   const keymap = useOpencodeKeymap()
@@ -263,6 +265,9 @@ export function Prompt(props: PromptProps) {
     bumpCursor: () => setCursorVersion((value) => value + 1),
     cursorVersion: () => cursorVersion(),
   })
+  const interruptible = createMemo(
+    () => status().type !== "idle" || (goal()?.active === true && (!vim.vimEnabled() || vim.vimMode() === "normal")),
+  )
   // kilocode_change end
   const currentProviderLabel = createMemo(() => local.model.parsed().provider)
   const hasRightContent = createMemo(() => Boolean(props.right))
@@ -466,8 +471,9 @@ export function Prompt(props: PromptProps) {
         name: "session.interrupt",
         category: "Session",
         hidden: true,
-        enabled: status().type !== "idle",
+        enabled: interruptible(), // kilocode_change
         run: () => {
+          if (!interruptible()) return // kilocode_change
           if (auto()?.visible) return
           if (!input.focused) return
           // TODO: this should be its own command
@@ -912,7 +918,9 @@ export function Prompt(props: PromptProps) {
     return {
       target: inputTarget,
       enabled: inputTarget() !== undefined && !props.disabled,
-      bindings: tuiConfig.keybinds.get("prompt.paste"),
+      // kilocode_change start
+      bindings: tuiConfig.keybinds.gather("prompt.input", ["prompt.paste", "input.buffer.home", "input.buffer.end"]),
+      // kilocode_change end
     }
   })
 
@@ -1257,7 +1265,7 @@ export function Prompt(props: PromptProps) {
         model: `${selectedModel.providerID}/${selectedModel.modelID}`,
         variant,
         parts: nonTextParts.filter((x) => x.type === "file"),
-      })
+      }).then((result) => GoalPrompt.feedback(command.slice(1), args, result, toast)) // kilocode_change
     } else {
       move.startSubmit()
       sdk.client.session
@@ -1586,7 +1594,7 @@ export function Prompt(props: PromptProps) {
                   return
                 }
                 // kilocode_change start - route keys through the vim layer when enabled
-                if (vim.vimOnKey(e)) {
+                if (!(e.name === "escape" && interruptible()) && vim.vimOnKey(e)) {
                   e.preventDefault()
                   e.stopPropagation()
                   return
@@ -1750,7 +1758,7 @@ export function Prompt(props: PromptProps) {
         </box>
         <box width="100%" flexDirection="row" justifyContent="space-between">
           <Switch>
-            <Match when={status().type !== "idle"}>
+            <Match when={status().type !== "idle" || goal()?.active /* kilocode_change */}>
               <box
                 flexDirection="row"
                 gap={1}

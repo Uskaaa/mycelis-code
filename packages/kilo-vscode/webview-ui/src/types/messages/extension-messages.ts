@@ -1,5 +1,6 @@
 import type { ProviderAuthAuthorization, ProviderAuthMethod } from "@kilocode/sdk/v2/client"
 import type { DiffSourceCapabilities, DiffSourceDescriptor } from "../../../../src/diff/sources/types"
+import type { PRComment, PRReactionContent } from "../../../agent-manager/pr/pr-types"
 import type { PartBatch, PartRemove, PartUpdate } from "../../../../src/shared/stream-messages"
 import type { MarketplaceItem, MarketplaceInstalledMetadata, MarketplaceRelevanceMetadata } from "../marketplace"
 import type { ConnectionState, ServerInfo, SessionStatus } from "./connection"
@@ -17,6 +18,11 @@ import type {
 import type { AgentManagerSidebarTarget } from "./webview-messages"
 import type { PermissionRequest } from "./permissions"
 import type { AnacondaDesktopExtensionMessage } from "../../../../src/shared/anaconda-desktop-messages"
+import type { BrowserFeedbackData, BrowserReference } from "../../../../src/shared/browser-feedback"
+import type { CodeContext } from "../../../../src/shared/code-context"
+import type { PRMergeResult, PRReviewResult } from "../../../../src/shared/pr-comment-actions"
+
+export type { BrowserReference } from "../../../../src/shared/browser-feedback"
 
 export interface BackgroundJobsLoadedMessage {
   type: "backgroundJobsLoaded"
@@ -58,6 +64,7 @@ import type { ProviderUsageLoadedMessage } from "./provider-usage"
 import type {
   AgentManagerApplyWorktreeDiffConflict,
   AgentManagerApplyWorktreeDiffStatus,
+  AgentManagerCaffeinationMessage,
   BranchInfo,
   ContinueInWorktreeStatus,
   LocalGitStats,
@@ -79,9 +86,9 @@ import type {
   MigrationDataMessage,
   MigrationProgressMessage,
   MigrationSessionProgressMessage,
-  MigrationStateMessage,
 } from "./migration"
 import type { MemoryEventMessage, MemoryLoadedMessage, MemoryOperationResultMessage } from "./memory"
+import type { SessionBoardLoadedMessage } from "./board"
 
 // ============================================
 // Messages FROM extension TO webview
@@ -130,6 +137,8 @@ export interface ErrorMessage {
   message: string
   code?: string
   sessionID?: string
+  projectId?: string
+  worktreeId?: string
 }
 
 export interface SendMessageFailedMessage {
@@ -141,6 +150,14 @@ export interface SendMessageFailedMessage {
   messageID?: string
   files?: FileAttachment[]
   review?: import("../../../../src/shared/review-comments").ReviewMessageData
+  browserFeedback?: BrowserFeedbackData
+}
+
+export interface SessionResumeResultMessage {
+  type: "sessionResumeResult"
+  sessionID: string
+  requestID: string
+  error?: string
 }
 
 export interface SessionCommandCompletedMessage {
@@ -167,7 +184,9 @@ export interface SessionStatusMessage {
 export interface SessionTurnClosedMessage {
   type: "sessionTurnClosed"
   sessionID: string
+  eventID: string
   reason: SessionCloseReason
+  parentID?: string
 }
 
 export interface SessionErrorMessage {
@@ -228,6 +247,14 @@ export interface MessageRemovedMessage {
   type: "messageRemoved"
   sessionID: string
   messageID: string
+}
+
+export interface DeleteMessageResultMessage {
+  type: "deleteMessageResult"
+  sessionID: string
+  messageID: string
+  requestID?: string
+  success: boolean
 }
 
 export interface MessagesLoadedMessage {
@@ -298,6 +325,11 @@ export interface OpenCloudSessionMessage {
   sessionId: string
 }
 
+export interface OpenSessionMessage {
+  type: "openSession"
+  sessionID: string
+}
+
 export interface SelectKiloModelMessage {
   type: "selectKiloModel"
   modelID?: string
@@ -307,6 +339,13 @@ export interface SelectKiloModelMessage {
 export interface ActionMessage {
   type: "action"
   action: string
+}
+
+/** Image attachment carried back into the prompt input when restoring a message. */
+export interface RestoredImage {
+  dataUrl: string
+  mime: string
+  filename?: string
 }
 
 export interface SetChatBoxMessage {
@@ -322,17 +361,32 @@ export interface SetChatBoxMessage {
   paths?: string[]
   /** Past chats referenced by the restored message, seeded the same way as paths. */
   sessions?: SessionSearchItem[]
+  /**
+   * Images attached to the restored message. Present means authoritative:
+   * PromptInput replaces its current attachments with this list (an empty
+   * array clears them); absent leaves current attachments untouched.
+   */
+  images?: RestoredImage[]
+  review?: import("../../../../src/shared/review-comments").ReviewCommentEntry[]
+  browser?: BrowserReference[]
 }
 
 export interface AppendChatBoxMessage {
   type: "appendChatBoxMessage"
   text: string
+  browser?: BrowserReference
+}
+
+export interface AppendChatContextMessage {
+  type: "appendChatContext"
+  context: CodeContext
 }
 
 export interface AppendReviewCommentsMessage {
   type: "appendReviewComments"
   comments: ReviewCommentEntry[]
   autoSend?: boolean
+  sessionID?: string
 }
 
 export interface DocumentResultMessage {
@@ -400,6 +454,36 @@ export interface NavigateMessage {
   type: "navigate"
   view: "newTask" | "marketplace" | "history" | "profile" | "settings" | "subAgentViewer"
   tab?: string
+  projectId?: string
+}
+
+export interface AgentManagerSettingsProject {
+  id: string
+  root: string
+  label: string
+  pinned: boolean
+  missing: boolean
+  defaultBaseBranch?: string
+  defaultBranch?: string
+  setupScriptPath?: string
+}
+
+export interface AgentManagerSettingsLoadedMessage {
+  type: "agentManagerSettingsLoaded"
+  projects: AgentManagerSettingsProject[]
+  projectId?: string
+  requestId: string
+}
+
+export interface AgentManagerSettingsBranchesLoadedMessage {
+  type: "agentManagerSettingsBranchesLoaded"
+  projectId: string
+  branches: BranchInfo[]
+  defaultBranch: string
+  requestId: string
+  error?: boolean
+  configuredBaseBranch?: string
+  setupScriptPath?: string
 }
 
 export interface IndexingStatusLoadedMessage {
@@ -438,6 +522,10 @@ export interface ImageModelsLoadedMessage {
 export interface SpeechToTextModelsLoadedMessage {
   type: "speechToTextModelsLoaded"
   models: SpeechToTextModelDef[]
+  source: "gateway" | "custom"
+  // Producer instance id. A new epoch means a restarted host, not a stale reply.
+  epoch: string
+  seq: number
 }
 
 export interface ProvidersLoadedMessage {
@@ -445,6 +533,8 @@ export interface ProvidersLoadedMessage {
   providers: Record<string, Provider>
   connected: string[]
   defaults: Record<string, string>
+  organizationId?: string | null
+  ready?: boolean
   defaultSelection: ModelSelection
   authMethods: Record<string, ProviderAuthMethod[]>
   authStates: Record<string, ProviderAuthState>
@@ -624,6 +714,7 @@ export interface ClaudeCompatSettingLoadedMessage {
 export interface ExtensionSettings {
   maxCost?: number
   multiProject?: boolean
+  claudeMigration?: boolean
   [key: string]: unknown
 }
 
@@ -688,8 +779,17 @@ export interface NotificationSettingsLoadedMessage {
   type: "notificationSettingsLoaded"
   settings: {
     attentionEnabled: boolean
+    attentionNotifications: boolean
+    attentionOSNotifications: boolean
     attentionSound: string
+    osNotificationsAvailable: boolean
   }
+}
+
+export interface OSNotificationTestResultMessage {
+  type: "osNotificationTestResult"
+  ok: boolean
+  error?: string
 }
 
 export interface TimelineSettingLoadedMessage {
@@ -705,6 +805,11 @@ export interface ThroughputSettingLoadedMessage {
 export interface AutoApprovalReasonSettingLoadedMessage {
   type: "autoApprovalReasonSettingLoaded"
   visible: boolean
+}
+
+export interface PushFixesSettingLoadedMessage {
+  type: "pushFixesSettingLoaded"
+  enabled: boolean
 }
 
 export interface WorkStyleLoadedMessage {
@@ -767,10 +872,21 @@ export interface AgentManagerSessionForkedMessage {
   worktreeId?: string
 }
 
+export interface AgentManagerWorktreeActivityMessage {
+  type: "agentManager.worktreeActivity"
+  active: string[]
+}
+
 export interface AgentManagerSessionClosedMessage {
   type: "agentManager.sessionClosed"
   projectId?: string
   sessionId: string
+}
+
+export interface AgentManagerWorktreeDeletedMessage {
+  type: "agentManager.worktreeDeleted"
+  projectId: string
+  worktreeId: string
 }
 
 // Full state push from extension to webview
@@ -780,6 +896,18 @@ export interface AgentManagerStateMessage {
   sessions: ManagedSessionState[]
   sections?: SectionState[]
   staleWorktreeIds?: string[]
+  /** Why each unhealthy worktree is unhealthy; healthy worktrees are omitted. */
+  worktreeHealth?: Record<string, "absent-restorable" | "absent-gone" | "unregistered" | "unavailable">
+  /**
+   * Directories under `.kilo/worktrees/` that no worktree claims.
+   *
+   * `broken` still holds a git checkout, so it can contain work that exists nowhere else; `leftover`
+   * is a bare directory. The notice says which, because the two do not deserve the same warning.
+   *
+   * `sized` is set once the size pass is done with a folder; without `bytes` it means the folder
+   * could not be measured, which is how the UI knows to stop saying it is still calculating.
+   */
+  orphanDirectories?: { path: string; kind: "broken" | "leftover"; bytes?: number; sized?: boolean }[]
   tabOrder?: Record<string, string[]>
   worktreeOrder?: string[]
   sessionsCollapsed?: boolean
@@ -797,6 +925,8 @@ export interface AgentManagerStateMessage {
   activeTarget?: AgentManagerSidebarTarget
   terminalDestination?: TerminalDestination
   terminalFont?: TerminalFont
+  browserAutomation?: boolean
+  restricted?: boolean
 }
 
 // A registered Agent Manager project as shown in the sidebar
@@ -821,6 +951,15 @@ export interface AgentManagerProjectsMessage {
 export interface AgentManagerSelectionActivatedMessage {
   type: "agentManager.selectionActivated"
   target: AgentManagerSidebarTarget
+}
+
+/** Host request to select a managed session and scroll its chat to the latest message. */
+export interface AgentManagerRevealSessionMessage {
+  type: "agentManager.revealSession"
+  projectId: string
+  /** Absent when the session lives in the project's Local tabs. */
+  worktreeId?: string
+  sessionId: string
 }
 
 export interface AgentManagerProjectSessionsMessage {
@@ -986,10 +1125,11 @@ export interface FavoritesLoadedMessage {
   favorites: ModelSelection[]
 }
 
-// Per-mode model selections loaded from model.json (extension → webview)
+// Preferred and per-mode model selections loaded from persisted state (extension → webview)
 export interface ModelSelectionsLoadedMessage {
   type: "modelSelectionsLoaded"
   selections: Record<string, ModelSelection>
+  preferred?: ModelSelection & { variant?: string }
 }
 
 export interface AgentManagerBranchesMessage {
@@ -1043,6 +1183,7 @@ export interface AgentManagerWorktreeDiffLoadingMessage {
   projectId?: string
   sessionId: string
   loading: boolean
+  reset?: boolean
 }
 
 // Agent Manager: Source-level diff notice (extension → webview)
@@ -1113,7 +1254,19 @@ export interface AgentManagerPRStatusMessage {
 
 export interface AgentManagerPRErrorMessage {
   type: "agentManager.prError"
+  projectId?: string
   error: "gh_missing" | "gh_auth" | "fetch_failed"
+}
+
+export interface AgentManagerCommentReactionResultMessage {
+  type: "agentManager.commentReactionResult"
+  projectId?: string
+  worktreeId: string
+  commentId: string
+  reaction: PRReactionContent
+  add: boolean
+  success: boolean
+  error?: string
 }
 
 // Sidebar: Live worktree diff stats (extension → webview)
@@ -1142,11 +1295,15 @@ export interface AgentManagerSendInitialMessage {
   sessionId: string
   worktreeId: string
   text?: string
+  /** When set, run a slash command instead of sending the text as a prompt. */
+  command?: string
+  arguments?: string
   providerID?: string
   modelID?: string
   agent?: string
   variant?: string
   files?: Array<{ mime: string; url: string }>
+  browserFeedback?: BrowserFeedbackData
 }
 
 // Enhance prompt result (extension → webview)
@@ -1167,6 +1324,24 @@ export interface EnhancePromptErrorMessage {
 export interface ViewSubAgentSessionMessage {
   type: "viewSubAgentSession"
   sessionID: string
+}
+
+export interface DiffViewerContextMessage {
+  type: "diffViewer.context"
+  key: string
+}
+
+export interface DiffViewerPRCommentsMessage {
+  type: "diffViewer.prComments"
+  comments: PRComment[]
+  target?: import("../../../../src/shared/pr-comment-actions").PRTarget
+  threads?: string[]
+}
+
+export interface DiffViewerFocusCommentMessage {
+  type: "diffViewer.focusComment"
+  id: string
+  file: string
 }
 
 export interface DiffViewerDiffsMessage {
@@ -1367,16 +1542,78 @@ export interface AgentManagerFocusContextRequestedMessage {
   type: "agentManager.focusContextRequested"
 }
 
+export interface AgentManagerBrowserStateMessage {
+  type: "agentManager.browserState"
+  browserId: string
+  projectId?: string
+  sessionId: string
+  navigation?: number
+  status: "starting" | "ready" | "loading" | "error" | "closed"
+  inspecting?: boolean
+  url?: string
+  title?: string
+  errors: number
+  logs?: string[]
+  error?: string
+  frameError?: string
+}
+
+export interface AgentManagerBrowserInspectionMessage {
+  type: "agentManager.browserInspection"
+  error?: string
+  requestId: string
+  projectId?: string
+  sessionId: string
+  url?: string
+  title?: string
+  element?: {
+    tag: string
+    id?: string
+    classes?: string
+    text?: string
+    selector?: string
+    rect?: { x: number; y: number; width: number; height: number }
+    hierarchy?: string[]
+    html?: string
+    styles?: { color?: string; backgroundColor?: string }
+    source?: { file: string; line?: number; column?: number }
+  }
+  logs: string[]
+  hover?: boolean
+}
+
+export interface AgentManagerBrowserDevtoolsMessage {
+  type: "agentManager.browserDevtools"
+  browserId: string
+  projectId?: string
+  sessionId: string
+  url: string
+}
+
 export type ExtensionMessage =
+  | {
+      type: "agentManager.resolveCommentResult" | "agentManager.unresolveCommentResult"
+      projectId?: string
+      worktreeId: string
+      threadId: string
+      success: boolean
+      error?: string
+    }
+  | { type: "sessionAcknowledged"; sessionID: string; eventID: string }
+  | { type: "webviewActiveChanged"; active: boolean }
   | DocumentResultMessage
   | DocumentOpenMessage
   | AgentManagerFocusContextRequestedMessage
+  | AgentManagerBrowserStateMessage
+  | AgentManagerBrowserInspectionMessage
+  | AgentManagerBrowserDevtoolsMessage
   | ReadyMessage
   | FontSizeChangedMessage
   | GitStatusMessage
   | ConnectionStateMessage
   | ErrorMessage
   | SendMessageFailedMessage
+  | SessionResumeResultMessage
   | SessionCommandCompletedMessage
   | PartUpdatedMessage
   | PartsUpdatedMessage
@@ -1393,6 +1630,7 @@ export type ExtensionMessage =
   | SessionUpdatedMessage
   | SessionDeletedMessage
   | MessageRemovedMessage
+  | DeleteMessageResultMessage
   | MessagesLoadedMessage
   | SessionModelUsageLoadedMessage
   | SessionModelUsageChangedMessage
@@ -1409,6 +1647,8 @@ export type ExtensionMessage =
   | DeviceAuthFailedMessage
   | DeviceAuthCancelledMessage
   | NavigateMessage
+  | AgentManagerSettingsLoadedMessage
+  | AgentManagerSettingsBranchesLoadedMessage
   | IndexingStatusLoadedMessage
   | IndexingSettingsLoadedMessage
   | ChatSettingsLoadedMessage
@@ -1416,6 +1656,7 @@ export type ExtensionMessage =
   | ImageModelsLoadedMessage
   | SpeechToTextModelsLoadedMessage
   | ProvidersLoadedMessage
+  | { type: "providersLoading" }
   | AgentsLoadedMessage
   | SkillsLoadedMessage
   | CommandsLoadedMessage
@@ -1448,9 +1689,11 @@ export type ExtensionMessage =
   | ConfigBindingExpiredMessage
   | GlobalConfigLoadedMessage
   | NotificationSettingsLoadedMessage
+  | OSNotificationTestResultMessage
   | TimelineSettingLoadedMessage
   | ThroughputSettingLoadedMessage
   | AutoApprovalReasonSettingLoadedMessage
+  | PushFixesSettingLoadedMessage
   | WorkStyleLoadedMessage
   | WorkStyleAppliedMessage
   | WorkStyleApplyFailedMessage
@@ -1460,11 +1703,15 @@ export type ExtensionMessage =
   | AgentManagerSessionAddedMessage
   | AgentManagerSessionForkedMessage
   | AgentManagerSessionClosedMessage
+  | AgentManagerWorktreeActivityMessage
   | AgentManagerStateMessage
+  | AgentManagerWorktreeDeletedMessage
   | AgentManagerProjectsMessage
   | AgentManagerSelectionActivatedMessage
+  | AgentManagerRevealSessionMessage
   | AgentManagerProjectSessionsMessage
   | AgentManagerRunStatusMessage
+  | AgentManagerCaffeinationMessage
   | AgentManagerKeybindingsMessage
   | AutoApproveStateMessage
   | SandboxStatusMessage
@@ -1475,6 +1722,7 @@ export type ExtensionMessage =
   | AgentManagerSendInitialMessage
   | SetChatBoxMessage
   | AppendChatBoxMessage
+  | AppendChatContextMessage
   | AppendReviewCommentsMessage
   | AppendReviewCommentsToTerminalMessage
   | TriggerTaskMessage
@@ -1483,6 +1731,7 @@ export type ExtensionMessage =
   | CloudSessionImportedMessage
   | CloudSessionImportFailedMessage
   | OpenCloudSessionMessage
+  | OpenSessionMessage
   | SelectKiloModelMessage
   | AgentManagerBranchesMessage
   | AgentManagerImportResultMessage
@@ -1499,6 +1748,9 @@ export type ExtensionMessage =
   | AgentManagerLocalStatsMessage
   | AgentManagerPRStatusMessage
   | AgentManagerPRErrorMessage
+  | AgentManagerCommentReactionResultMessage
+  | PRMergeResult
+  | PRReviewResult
   | AgentManagerTerminalCreatedMessage
   | AgentManagerTerminalRestartedMessage
   | AgentManagerTerminalFontChangedMessage
@@ -1506,16 +1758,16 @@ export type ExtensionMessage =
   | AgentManagerTerminalErrorMessage
   | AgentManagerTerminalDestinationChangedMessage
   | AgentManagerScriptTerminalsMessage
-  // legacy-migration start
-  | MigrationStateMessage
   | MigrationDataMessage
   | MigrationProgressMessage
   | MigrationSessionProgressMessage
   | MigrationCompleteMessage
-  // legacy-migration end
   | EnhancePromptResultMessage
   | EnhancePromptErrorMessage
   | ViewSubAgentSessionMessage
+  | DiffViewerContextMessage
+  | DiffViewerPRCommentsMessage
+  | DiffViewerFocusCommentMessage
   | DiffViewerDiffsMessage
   | DiffViewerLoadingMessage
   | DiffViewerRevertFileResultMessage
@@ -1555,3 +1807,4 @@ export type ExtensionMessage =
   | MemoryEventMessage
   | MemoryOperationResultMessage
   | BackgroundJobsLoadedMessage
+  | SessionBoardLoadedMessage

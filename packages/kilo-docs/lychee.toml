@@ -77,4 +77,6 @@ exclude = [
    '^https?://platform\.openai\.com/docs/api-reference/responses/create',
    # Telegram deep links reject automated requests from CI runners with connection failures
    '^https?://t\.me/',
+  # mycelis_change - Poolside's docs intermittently return 500 to CI runners (200 from a normal client)
+  '^https?://docs\.poolside\.ai/api/openai-api-examples/?$',
 ]

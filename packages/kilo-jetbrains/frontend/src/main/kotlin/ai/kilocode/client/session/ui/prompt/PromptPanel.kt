@@ -196,6 +196,12 @@ class PromptPanel(
             chrome(ed)
             ed.settings.isUseSoftWraps = true
             ed.settings.isPaintSoftWraps = false
+            // mycelis_change - the platform's default soft-wrap indent tries to align wrapped
+            // continuation lines with the first line's logical/code indent. For a plain chat
+            // prompt (no code structure) that showed up as a stray indent offset on every
+            // wrapped line. Force continuation lines flush with the left edge instead.
+            ed.settings.isUseCustomSoftWrapIndent = true
+            ed.settings.customSoftWrapIndent = 0
             ed.settings.isAdditionalPageAtBottom = false
             ed.settings.setBlockCursor(false)
             SpellCheckingEditorCustomizationProvider.getInstance().getDisabledCustomization()?.customize(ed)

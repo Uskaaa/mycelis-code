@@ -8,6 +8,7 @@ import com.intellij.ide.actions.UndoRedoAction
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.actionSystem.DataSink
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.command.undo.UndoManager
@@ -27,6 +28,9 @@ import com.intellij.util.textCompletion.TextCompletionUtil
 import com.intellij.util.ui.update.UiNotifyConnector
 import java.awt.Component
 import java.awt.Container
+import java.awt.event.InputEvent
+import java.awt.event.KeyEvent
+import javax.swing.KeyStroke
 
 // The toolbar class is internal; match by name to avoid linking against internal API.
 private const val TOOLBAR = "com.intellij.openapi.editor.toolbar.floating.EditorFloatingToolbar"
@@ -90,6 +94,16 @@ internal open class SessionEditorTextField(
         }
         manager.getAction(IdeActions.ACTION_REDO)?.shortcutSet?.let {
             redo.registerCustomShortcutSet(it, editor.contentComponent)
+        }
+        // mycelis_change - the platform's own $default keymap binds shift+ENTER to
+        // "EditorStartNewLine" (see keymaps/$default.xml), but that global binding doesn't reach
+        // this embedded, supplementary editor - same class of gap as undo/redo above. Bind the
+        // platform's own newline action locally instead of reimplementing newline insertion.
+        manager.getAction(IdeActions.ACTION_EDITOR_START_NEW_LINE)?.let {
+            it.registerCustomShortcutSet(
+                CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK)),
+                editor.contentComponent,
+            )
         }
     }
 

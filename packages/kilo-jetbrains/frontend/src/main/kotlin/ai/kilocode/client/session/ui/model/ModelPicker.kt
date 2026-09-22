@@ -14,7 +14,9 @@ import ai.kilocode.rpc.dto.ModelTerminalBenchDto
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ui.CollectionListModel
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.SwingTextTrimmer
 import java.awt.Cursor
+import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.SwingConstants
@@ -23,6 +25,13 @@ private const val MODEL_PICKER_MIN_WIDTH = 420
 private const val MODEL_PICKER_MAX_WIDTH = 760
 private const val MODEL_PICKER_MAX_VISIBLE_ROWS = 10
 private const val MODEL_PICKER_EMPTY_LIST_HEIGHT = 120
+
+// mycelis_change - the prompt bar's BoxLayout only shrinks components below their preferred size
+// down to their reported minimum size; a plain label's minimum size is its full, untruncated
+// text width. Without a smaller floor here, narrowing the window left the label unable to
+// shrink at all, so BoxLayout ran out of room and pushed the send/enhance buttons past the
+// bar's right edge instead. This is the floor width that lets BoxLayout actually shrink it.
+private const val MODEL_PICKER_LABEL_MIN_WIDTH = 72
 
 class ModelPicker : PickerButton() {
 
@@ -76,6 +85,9 @@ class ModelPicker : PickerButton() {
     init {
         isEnabled = false
         text = " "
+        // mycelis_change - see MODEL_PICKER_LABEL_MIN_WIDTH: pairs the smaller minimum width
+        // with graceful ellipsis instead of the label just getting clipped once it's shrunk.
+        putClientProperty(SwingTextTrimmer.KEY, SwingTextTrimmer.ELLIPSIS_AT_RIGHT)
         syncTooltip()
 
         addMouseListener(object : MouseAdapter() {
@@ -85,6 +97,9 @@ class ModelPicker : PickerButton() {
             }
         })
     }
+
+    // mycelis_change - see MODEL_PICKER_LABEL_MIN_WIDTH
+    override fun getMinimumSize(): Dimension = Dimension(JBUI.scale(MODEL_PICKER_LABEL_MIN_WIDTH), super.getMinimumSize().height)
 
     fun setItems(values: List<Item>, default: String? = null) {
         items = values

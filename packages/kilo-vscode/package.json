@@ -200,7 +200,7 @@
       {
         "command": "kilo-code.new.toggleCaffeination",
         "title": "Toggle Keep Awake",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.autocomplete.generateSuggestions",
@@ -255,7 +255,7 @@
       {
         "command": "kilo-code.new.agentManager.diagnostics",
         "title": "Agent Manager: Show Worktree Diagnostics",
-        "category": "Kilo Code"
+        "category": "Mycelis"
       },
       {
         "command": "kilo-code.new.agentManager.search",
@@ -324,7 +324,7 @@
       {
         "command": "kilo-code.new.agentManager.updateFromBase",
         "title": "Agent Manager: Update from base",
-        "category": "Kilo Code",
+        "category": "Mycelis",
         "enablement": "activeWebviewPanelId == 'kilo-code.new.AgentManagerPanel'"
       },
       {

@@ -7,12 +7,17 @@
 import { batch, createContext, useContext, createSignal, createMemo, onCleanup } from "solid-js"
 import type { ParentComponent, Accessor } from "solid-js"
 import { useVSCode } from "./vscode"
-import type { Provider, ProviderModel, ModelSelection, ExtensionMessage, ProviderAuthState } from "../types/messages"
+import type { Provider, ModelSelection, ExtensionMessage, ProviderAuthState } from "../types/messages"
 import type { ProviderAuthMethod } from "@kilocode/sdk/v2/client"
 import { flattenModels, findModel as _findModel, isModelValid as isValid } from "./provider-utils"
+import type { EnrichedModel } from "./provider-utils"
 import { KILO_AUTO } from "../../../src/shared/provider-model"
 
-export type EnrichedModel = ProviderModel & { providerID: string; providerName: string }
+// mycelis_change - re-export instead of a second, independent definition: this one had drifted
+// out of sync with provider-utils.ts's (missing providerSource), which is what actually backs
+// flattenModels()'s output above, silently breaking the "config" provider exemption for any
+// consumer that imported the type from here instead of provider-utils.ts directly.
+export type { EnrichedModel }
 
 interface ProviderContextValue {
   providers: Accessor<Record<string, Provider>>

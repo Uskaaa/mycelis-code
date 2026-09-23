@@ -24,6 +24,7 @@ import {
   deleteDeployment, // mycelis_change
   fetchMarketplaceModels, // mycelis_change
   fetchGpuEstimate, // mycelis_change
+  MYCELIS_WEB_URL, // mycelis_change
 } from "@kilocode/kilo-gateway"
 import { DIRECT_FIM_ENV, requestMistralFim, resolveFimTarget } from "@kilocode/kilo-gateway/fim"
 import { DIRECT_EDIT_ENV, extractFencedBody, resolveEditTarget } from "@kilocode/kilo-gateway/edit"
@@ -95,7 +96,12 @@ export const kiloGatewayHandlers = HttpApiBuilder.group(InstanceHttpApi, "kilo",
           // actually lets someone diagnose e.g. "Mycelis backend unreachable".
           return HttpServerResponse.jsonUnsafe({ error: outcome.message }, { status: 502 })
         }
-        return { ...outcome.value, kiloPass: null, currentOrgId: getOrganizationId(info) ?? null } // mycelis_change
+        return {
+          ...outcome.value,
+          kiloPass: null,
+          currentOrgId: getOrganizationId(info) ?? null,
+          usageUrl: `${MYCELIS_WEB_URL}/dashboard/settings`, // mycelis_change
+        }
       }
 
       if (info.type !== "oauth") return yield* Effect.fail(new HttpApiError.Unauthorized({}))
@@ -110,7 +116,10 @@ export const kiloGatewayHandlers = HttpApiBuilder.group(InstanceHttpApi, "kilo",
           ]),
         catch: () => new HttpApiError.BadRequest({}),
       })
-      return { profile, balance, kiloPass, currentOrgId }
+      // mycelis_change - matches dialog-kilo-profile.tsx's own unconditional usageUrl so every
+      // client (CLI TUI, VS Code, JetBrains) shows the same single "Usage Details" link regardless
+      // of which auth branch (Mycelis PAT vs legacy Kilo oauth) backs the fetched profile.
+      return { profile, balance, kiloPass, currentOrgId, usageUrl: `${MYCELIS_WEB_URL}/dashboard/settings` }
     })
 
     const authStatus = Effect.fn("KiloGatewayHttpApi.authStatus")(function* () {

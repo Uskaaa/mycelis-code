@@ -16185,6 +16185,7 @@ export type KiloProfileResponses = {
       nextBillingAt?: string | null
     } | null
     currentOrgId: string | null
+    usageUrl?: string
   }
 }
 

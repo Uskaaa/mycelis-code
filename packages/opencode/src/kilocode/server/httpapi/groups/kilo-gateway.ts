@@ -41,6 +41,10 @@ export const ProfileWithBalance = Schema.Struct({
   balance: Schema.NullOr(Balance),
   kiloPass: Schema.NullOr(KiloPassState),
   currentOrgId: Schema.NullOr(Schema.String),
+  // mycelis_change - single "Usage Details" deep link, matching the CLI TUI's Mycelis profile
+  // dialog (dialog-kilo-profile.tsx). Replaces the legacy Kilo Code dashboard/credits/kilo-pass
+  // links that VS Code/JetBrains still hardcode.
+  usageUrl: Schema.optional(Schema.String),
 })
 
 export const AuthStatus = Schema.Struct({

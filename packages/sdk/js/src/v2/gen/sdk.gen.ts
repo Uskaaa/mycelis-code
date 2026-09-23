@@ -223,6 +223,12 @@ import type {
   KilocodeSessionImportSessionResponses,
   KilocodeSessionModelUsageErrors,
   KilocodeSessionModelUsageResponses,
+  KilocodeSnapshotPrepareErrors,
+  KilocodeSnapshotPrepareResponses,
+  KilocodeTeardownWorktreeErrors,
+  KilocodeTeardownWorktreeResponses,
+  KilocodeWakeupsErrors,
+  KilocodeWakeupsResponses,
   KiloDeploymentsCreateErrors,
   KiloDeploymentsCreateResponses,
   KiloDeploymentsDeleteErrors,
@@ -237,12 +243,6 @@ import type {
   KiloDeploymentsStartResponses,
   KiloDeploymentsStopErrors,
   KiloDeploymentsStopResponses,
-  KilocodeSnapshotPrepareErrors,
-  KilocodeSnapshotPrepareResponses,
-  KilocodeTeardownWorktreeErrors,
-  KilocodeTeardownWorktreeResponses,
-  KilocodeWakeupsErrors,
-  KilocodeWakeupsResponses,
   KiloEditErrors,
   KiloEditResponses,
   KiloFimErrors,
@@ -7027,12 +7027,15 @@ export class Deployments extends HeyApiClient {
    * Deploy an open-source marketplace model in the currently active Mycelis workspace
    */
   public create<ThrowOnError extends boolean = false>(
-    parameters?: {
+    parameters: {
       directory?: string
       workspace?: string
-      name?: string
-      modelId?: string
+      name: string
+      modelId: string
       maxConcurrentUsers?: number
+      autoStopOnInactivity?: boolean
+      inactivityTimeoutMinutes?: number
+      isExposedToWebUi?: boolean
     },
     options?: Options<never, ThrowOnError>,
   ) {
@@ -7046,6 +7049,9 @@ export class Deployments extends HeyApiClient {
             { in: "body", key: "name" },
             { in: "body", key: "modelId" },
             { in: "body", key: "maxConcurrentUsers" },
+            { in: "body", key: "autoStopOnInactivity" },
+            { in: "body", key: "inactivityTimeoutMinutes" },
+            { in: "body", key: "isExposedToWebUi" },
           ],
         },
       ],

@@ -210,6 +210,7 @@ internal fun profileDto(p: KiloProfile200Response): ProfileDto = ProfileDto(
         )
     },
     currentOrgId = p.currentOrgId,
+    usageUrl = p.usageUrl, // mycelis_change
 )
 
 private fun progress(p: LoadProgress) = LoadProgressDto(

@@ -28,10 +28,6 @@ import java.awt.CardLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-internal const val DASHBOARD_URL = "https://app.kilo.ai/profile"
-internal const val TOP_UP_URL = "https://app.kilo.ai/credits"
-internal const val PASS_URL = "https://kilo.ai/pricing/kilo-pass"
-
 internal val edt = Dispatchers.EDT + ModalityState.any().asContextElement()
 
 private enum class Card { LOGGED_OUT, LOGGED_IN }
@@ -62,17 +58,12 @@ internal class ProfileUi(
         timers = timers,
     )
     private val account = LoggedInProfileUi(
-        dashboard = {
-            telemetry("Dashboard Opened", mapOf("surface" to "settings"))
-            browse(DASHBOARD_URL)
-        },
-        topUp = {
-            telemetry("Credits Opened", mapOf("surface" to "settings"))
-            browse(TOP_UP_URL)
-        },
-        pass = {
-            telemetry("Kilo Pass Opened", mapOf("surface" to "settings"))
-            browse(PASS_URL)
+        // mycelis_change - single "Usage Details" link from ProfileDto.usageUrl, replaces the old
+        // dashboard/top-up/kilo-pass buttons; matches the CLI's dialog-kilo-profile.tsx.
+        usageDetails = {
+            val url = prof?.usageUrl ?: return@LoggedInProfileUi
+            telemetry("Usage Details Opened", mapOf("surface" to "settings"))
+            browse(url)
         },
         logout = ::logout,
         organization = ::organization,

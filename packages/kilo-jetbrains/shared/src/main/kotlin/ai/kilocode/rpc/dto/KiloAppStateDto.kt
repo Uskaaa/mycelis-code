@@ -195,6 +195,9 @@ data class ProfileDto(
     val balance: ProfileBalanceDto? = null,
     val kiloPass: ProfileKiloPassDto? = null,
     val currentOrgId: String? = null,
+    // mycelis_change - single usage-details deep link from /kilo/profile, replaces the
+    // dashboard/top-up/kilo-pass links; matches the CLI's dialog-kilo-profile.tsx.
+    val usageUrl: String? = null,
 )
 
 @Serializable

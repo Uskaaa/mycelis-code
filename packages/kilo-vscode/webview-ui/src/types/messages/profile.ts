@@ -18,13 +18,6 @@ export interface KilocodeBalance {
   balance: number
 }
 
-export interface KiloPassState {
-  currentPeriodBaseCreditsUsd: number
-  currentPeriodUsageUsd: number
-  currentPeriodBonusCreditsUsd: number
-  nextBillingAt?: string | null
-}
-
 export interface ProfileData {
   profile: {
     email: string
@@ -34,6 +27,8 @@ export interface ProfileData {
     hasPersonalAccount?: boolean
   }
   balance: KilocodeBalance | null
-  kiloPass: KiloPassState | null
   currentOrgId: string | null
+  // mycelis_change - single usage-details deep link from /kilo/profile, replaces the old
+  // dashboard/top-up/kilo-pass links; see dialog-kilo-profile.tsx for the CLI equivalent.
+  usageUrl?: string
 }

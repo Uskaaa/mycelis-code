@@ -43,6 +43,7 @@ interface ProfileData {
   profile: KilocodeProfile
   balance: KilocodeBalance | null
   currentOrgId: string | null
+  usageUrl?: string // mycelis_change
 }
 
 // Cloud session from the Kilo cloud API (cli_sessions_v2)

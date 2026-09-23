@@ -1,9 +1,8 @@
 import { Component, For, Show } from "solid-js"
-import type { KiloPassState, ProviderUsageData } from "../../types/messages"
+import type { ProviderUsageData } from "../../types/messages"
 import type { ProviderUsageSnapshot } from "@kilocode/sdk/v2/client"
 import { Button } from "@kilocode/kilo-ui/button"
 import { Card, CardActions, CardDescription, CardHeader, CardTitle } from "@kilocode/kilo-ui/card"
-import { KiloPassMeter } from "@kilocode/kilo-ui/kilo-pass-meter"
 import { Progress } from "@kilocode/kilo-ui/progress"
 import { Spinner } from "@kilocode/kilo-ui/spinner"
 import { Tag } from "@kilocode/kilo-ui/tag"
@@ -15,11 +14,8 @@ export interface ProviderUsageCardsProps {
   data: ProviderUsageData | undefined
   loading: boolean
   error?: string
-  kiloPass?: KiloPassState | null
-  showKiloPass: boolean
   onRefresh: () => void
   onOpen: (url: string) => void
-  onGetKiloPass: () => void
 }
 
 type Language = ReturnType<typeof useLanguage>
@@ -180,72 +176,6 @@ const UsageCard: Component<{
   </Card>
 )
 
-const money = (value: number) => `$${value.toFixed(2)}`
-
-const KiloPassCard: Component<{
-  pass?: KiloPassState | null
-  onGet: () => void
-  language: Language
-}> = (props) => {
-  const renewal = () => {
-    const value = props.pass?.nextBillingAt
-    if (!value) return undefined
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return undefined
-    return new Intl.DateTimeFormat(localeToBcp47(props.language.locale()), {
-      month: "short",
-      day: "numeric",
-      timeZone: "UTC",
-    }).format(date)
-  }
-  return (
-    <Card>
-      <CardHeader>
-        <div>
-          <CardTitle icon={false} role="heading" aria-level={4}>
-            Kilo
-          </CardTitle>
-          <CardDescription>Kilo Pass</CardDescription>
-        </div>
-        <Tag>Mycelis</Tag>
-      </CardHeader>
-      <Show
-        when={props.pass}
-        fallback={
-          <CardActions>
-            <Button variant="secondary" size="small" onClick={props.onGet}>
-              {props.language.t("profile.pass.subscribe")}
-            </Button>
-          </CardActions>
-        }
-      >
-        {(pass) => (
-          <div class="provider-usage-resources">
-            <KiloPassMeter
-              used={pass().currentPeriodUsageUsd}
-              paid={pass().currentPeriodBaseCreditsUsd}
-              bonus={pass().currentPeriodBonusCreditsUsd}
-              label={props.language.t("profile.pass.usage")}
-              paidLabel={props.language.t("profile.pass.paid")}
-              bonusLabel={props.language.t("profile.pass.bonus")}
-              format={money}
-              aria-label={props.language.t("profile.pass.meter")}
-            />
-            <Show when={renewal()}>
-              {(date) => (
-                <div class="provider-usage-summary">
-                  <span>{props.language.t("profile.pass.renews")}</span>
-                  <strong>{date()}</strong>
-                </div>
-              )}
-            </Show>
-          </div>
-        )}
-      </Show>
-    </Card>
-  )
-}
-
 export const ProviderUsageCards: Component<ProviderUsageCardsProps> = (props) => {
   const language = useLanguage()
   return (
@@ -272,9 +202,6 @@ export const ProviderUsageCards: Component<ProviderUsageCardsProps> = (props) =>
             {props.error}
           </p>
         </Show>
-        <Show when={props.showKiloPass}>
-          <KiloPassCard pass={props.kiloPass} onGet={props.onGetKiloPass} language={language} />
-        </Show>
         <Show
           when={props.data}
           fallback={
@@ -299,11 +226,9 @@ export const ProviderUsageCards: Component<ProviderUsageCardsProps> = (props) =>
               <Show
                 when={data().items.length > 0}
                 fallback={
-                  <Show when={!props.showKiloPass}>
-                    <Card>
-                      <CardDescription>{language.t("profile.usage.empty")}</CardDescription>
-                    </Card>
-                  </Show>
+                  <Card>
+                    <CardDescription>{language.t("profile.usage.empty")}</CardDescription>
+                  </Card>
                 }
               >
                 <For each={order(data().items)}>

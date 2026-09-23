@@ -99,20 +99,15 @@ const ProfileView: Component<ProfileViewProps> = (props) => {
     vscode.postMessage({ type: "refreshProfile" })
   }
 
-  const handleDashboard = () => {
-    vscode.postMessage({ type: "openExternal", url: "https://app.kilo.ai/profile" })
-  }
-
   const openExternal = (url: string) => {
     vscode.postMessage({ type: "openExternal", url })
   }
 
-  const handleTopUp = () => {
-    vscode.postMessage({ type: "openExternal", url: "https://app.kilo.ai/credits" })
-  }
-
-  const handleGetPass = () => {
-    vscode.postMessage({ type: "openExternal", url: "https://kilo.ai/pricing/kilo-pass" })
+  // mycelis_change - single usage-details link from /kilo/profile, replaces the old
+  // dashboard/top-up/kilo-pass links; matches the CLI's dialog-kilo-profile.tsx.
+  const handleUsageDetails = () => {
+    const url = props.profileData?.usageUrl
+    if (url) openExternal(url)
   }
 
   const handleCancelLogin = () => {
@@ -126,13 +121,6 @@ const ProfileView: Component<ProfileViewProps> = (props) => {
       error={props.providerUsageError}
       onRefresh={() => props.onRefreshProviderUsage?.()}
       onOpen={openExternal}
-      kiloPass={props.profileData?.kiloPass}
-      showKiloPass={
-        !!props.profileData &&
-        (props.profileData.currentOrgId ?? null) === null &&
-        props.profileData.profile.hasPersonalAccount !== false
-      }
-      onGetKiloPass={handleGetPass}
     />
   )
 
@@ -239,7 +227,7 @@ const ProfileView: Component<ProfileViewProps> = (props) => {
                       margin: "0 0 8px 0",
                     }}
                   >
-                    Account
+                    {language.t("profile.workspace.title")}
                   </p>
                   <Select
                     options={orgOptions()}
@@ -295,12 +283,11 @@ const ProfileView: Component<ProfileViewProps> = (props) => {
 
               {/* Action buttons */}
               <div style={{ display: "flex", gap: "8px" }}>
-                <Button variant="secondary" onClick={handleDashboard} style={{ flex: "1" }}>
-                  {language.t("profile.action.dashboard")}
-                </Button>
-                <Button variant="secondary" onClick={handleTopUp} style={{ flex: "1" }}>
-                  {language.t("profile.action.topUp")}
-                </Button>
+                <Show when={data().usageUrl}>
+                  <Button variant="secondary" onClick={handleUsageDetails} style={{ flex: "1" }}>
+                    {language.t("profile.action.usageDetails")}
+                  </Button>
+                </Show>
                 <Button
                   variant="ghost"
                   onClick={handleLogout}

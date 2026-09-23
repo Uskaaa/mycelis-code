@@ -571,6 +571,7 @@ export const dict = {
   "profile.title": "Profile",
   "profile.notLoggedIn": "Not logged in",
   "profile.action.login": "Login with Mycelis",
+  "profile.workspace.title": "Workspace", // mycelis_change - matches CLI's dialog-kilo-profile.tsx terminology
   "profile.balance.title": "Balance",
   "profile.balance.refresh": "Refresh balance",
   "profile.usage.title": "Plans & usage",
@@ -610,14 +611,7 @@ export const dict = {
   "profile.usage.status.unlimited": "Unlimited",
   "profile.usage.status.notInPlan": "Not in plan",
   "profile.usage.status.exhausted": "Exhausted",
-  "profile.action.dashboard": "Dashboard",
-  "profile.action.topUp": "Top up",
-  "profile.pass.subscribe": "Get Mycelis Pass to add credits and earn bonuses",
-  "profile.pass.bonus": "Bonus",
-  "profile.pass.usage": "This month's usage",
-  "profile.pass.paid": "Paid",
-  "profile.pass.meter": "Mycelis Pass monthly usage",
-  "profile.pass.renews": "Renews",
+  "profile.action.usageDetails": "Usage Details", // mycelis_change - replaces Dashboard/Top-up/Kilo-Pass, matches CLI's single link
   "profile.action.logout": "Log Out",
 
   "settings.agentBehaviour.title": "Agent Behaviour",

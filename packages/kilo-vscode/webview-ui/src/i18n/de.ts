@@ -649,7 +649,8 @@ export const dict = {
   "deviceAuth.toast.codeCopied": "Code in die Zwischenablage kopiert",
   "deviceAuth.toast.errorCopied": "Fehler in die Zwischenablage kopiert",
   "deviceAuth.status.initiating": "Anmeldung wird gestartet...",
-  "deviceAuth.autoHint": "Wir haben Mycelis in deinem Browser geöffnet. Schließe die Anmeldung dort ab, um fortzufahren.",
+  "deviceAuth.autoHint":
+    "Wir haben Mycelis in deinem Browser geöffnet. Schließe die Anmeldung dort ab, um fortzufahren.",
   "deviceAuth.title": "Bei Mycelis anmelden",
   "deviceAuth.step1": "Schritt 1: Diese URL öffnen",
   "deviceAuth.action.copyUrl": "URL kopieren",

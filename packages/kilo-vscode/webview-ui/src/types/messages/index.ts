@@ -12,6 +12,7 @@ export * from "./agents"
 export * from "./config"
 export * from "./profile"
 export * from "./provider-usage"
+export * from "./deployments" // mycelis_change
 export * from "./agent-manager"
 export * from "./migration"
 export * from "./memory"

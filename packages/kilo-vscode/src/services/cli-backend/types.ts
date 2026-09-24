@@ -46,6 +46,37 @@ interface ProfileData {
   usageUrl?: string // mycelis_change
 }
 
+// mycelis_change start - deployment management, mirrors packages/opencode/src/kilocode/server/httpapi/groups/kilo-gateway.ts
+export interface KilocodeDeployment {
+  id: string
+  name: string
+  slug: string
+  modelId: string
+  modelName: string
+  status: string
+  accessUrl?: string
+  maxConcurrentUsers: number
+  costPerHour: number
+  workspaceId?: string
+}
+
+export interface KilocodeMarketplaceModel {
+  id: string
+  name: string
+  provider: string
+  description: string
+  vramRequiredGb: number
+}
+
+export interface KilocodeDeploymentGpuEstimate {
+  modelId: string
+  gpuTypeId?: string
+  gpuName?: string
+  costPerHourUsd?: number
+  memoryInGb?: number
+}
+// mycelis_change end
+
 // Cloud session from the Kilo cloud API (cli_sessions_v2)
 interface CloudSessionInfo {
   session_id: string

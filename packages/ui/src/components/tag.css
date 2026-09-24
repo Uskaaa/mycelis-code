@@ -34,4 +34,17 @@
     line-height: var(--line-height-large); /* 142.857% */
     letter-spacing: var(--letter-spacing-normal);
   }
+
+  /* mycelis_change - generic status color modifier, e.g. deployment status pills */
+  &[data-status="running"] {
+    color: var(--icon-success-base);
+  }
+
+  &[data-status="error"] {
+    color: var(--text-error);
+  }
+
+  &[data-status="stopped"] {
+    color: var(--text-weak);
+  }
 }

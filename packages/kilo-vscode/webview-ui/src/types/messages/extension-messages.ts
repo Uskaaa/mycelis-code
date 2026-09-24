@@ -21,6 +21,16 @@ import type { AnacondaDesktopExtensionMessage } from "../../../../src/shared/ana
 import type { BrowserFeedbackData, BrowserReference } from "../../../../src/shared/browser-feedback"
 import type { CodeContext } from "../../../../src/shared/code-context"
 import type { PRMergeResult, PRReviewResult } from "../../../../src/shared/pr-comment-actions"
+import type {
+  DeploymentsLoadedMessage,
+  DeploymentCreatedMessage,
+  DeploymentStartedMessage,
+  DeploymentStoppedMessage,
+  DeploymentDeletedMessage,
+  DeploymentActionErrorMessage,
+  MarketplaceModelsLoadedMessage,
+  GpuEstimateLoadedMessage,
+} from "./deployments" // mycelis_change
 
 export type { BrowserReference } from "../../../../src/shared/browser-feedback"
 
@@ -427,6 +437,18 @@ export interface ProfileDataMessage {
   type: "profileData"
   data: ProfileData | null
 }
+
+// mycelis_change start - deployment management
+export type DeploymentExtensionMessage =
+  | DeploymentsLoadedMessage
+  | DeploymentCreatedMessage
+  | DeploymentStartedMessage
+  | DeploymentStoppedMessage
+  | DeploymentDeletedMessage
+  | DeploymentActionErrorMessage
+  | MarketplaceModelsLoadedMessage
+  | GpuEstimateLoadedMessage
+// mycelis_change end
 
 export interface DeviceAuthStartedMessage {
   type: "deviceAuthStarted"
@@ -1591,6 +1613,7 @@ export interface AgentManagerBrowserDevtoolsMessage {
 }
 
 export type ExtensionMessage =
+  | DeploymentExtensionMessage // mycelis_change
   | {
       type: "agentManager.resolveCommentResult" | "agentManager.unresolveCommentResult"
       projectId?: string

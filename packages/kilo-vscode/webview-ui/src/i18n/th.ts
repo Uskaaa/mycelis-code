@@ -471,7 +471,8 @@ export const dict = {
   "settings.providers.subagentModel.description":
     "โมเดลเริ่มต้นและระดับการใช้เหตุผลสำหรับตัวแทนย่อยของ task-tool ปล่อยว่างไว้เพื่อรับค่าโมเดลจากตัวแทนที่เรียก",
   "settings.models.hidePromptTraining.title": "ซ่อนโมเดลที่ใช้พรอมต์ในการฝึก",
-  "settings.models.hidePromptTraining.description": "ซ่อนโมเดล Mycelis Gateway ที่ผู้ให้บริการอาจใช้พรอมต์ของคุณในการฝึก",
+  "settings.models.hidePromptTraining.description":
+    "ซ่อนโมเดล Mycelis Gateway ที่ผู้ให้บริการอาจใช้พรอมต์ของคุณในการฝึก",
   "settings.providers.modeModels": "โมเดลต่อโหมด",
   "settings.providers.modeModels.description":
     "แทนที่โมเดลเริ่มต้นสำหรับโหมดที่กำหนด หากไม่ได้ตั้งค่า จะใช้โมเดลเริ่มต้นทั่วไป",

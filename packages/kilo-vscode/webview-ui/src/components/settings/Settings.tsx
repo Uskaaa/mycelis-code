@@ -11,6 +11,10 @@ import { useConfig } from "../../context/config"
 import { useSession } from "../../context/session"
 import ModelsTab from "./ModelsTab"
 import ProvidersTab from "./ProvidersTab"
+import DeploymentsTab from "./DeploymentsTab" // mycelis_change
+import { DeploymentsProvider } from "../../context/deployments" // mycelis_change
+import { useProvider } from "../../context/provider" // mycelis_change
+import { KILO_PROVIDER_ID } from "../../../../src/shared/provider-model" // mycelis_change
 import AgentBehaviourTab from "./AgentBehaviourTab"
 import AutoApproveTab from "./AutoApproveTab"
 import BrowserTab from "./BrowserTab"
@@ -264,6 +268,8 @@ const Settings: Component<SettingsProps> = (props) => {
   const [active, setActive] = createSignal(props.tab ?? "models")
   const [errorExpanded, setErrorExpanded] = createSignal(false)
   const sandboxing = createMemo(() => Sandboxing.visible(features()))
+  const provider = useProvider() // mycelis_change
+  const kiloLoggedIn = createMemo(() => !!provider.authStates()[KILO_PROVIDER_ID]) // mycelis_change
 
   const busyCount = () => Object.values(session.allStatusMap()).filter((s) => s.type === "busy").length
 
@@ -362,6 +368,13 @@ const Settings: Component<SettingsProps> = (props) => {
             <Icon name="providers" />
             <span class="label">{language.t("settings.providers.title")}</span>
           </Tabs.Trigger>
+          {/* mycelis_change - Deployments management, only meaningful once connected to Mycelis */}
+          <Show when={kiloLoggedIn()}>
+            <Tabs.Trigger value="deployments" aria-label={language.t("settings.deployments.title")}>
+              <Icon name="cloud-upload" />
+              <span class="label">{language.t("settings.deployments.title")}</span>
+            </Tabs.Trigger>
+          </Show>
           <Tabs.Trigger value="agentBehaviour" aria-label={language.t("settings.agentBehaviour.title")}>
             <Icon name="brain" />
             <span class="label">{language.t("settings.agentBehaviour.title")}</span>
@@ -439,6 +452,15 @@ const Settings: Component<SettingsProps> = (props) => {
           <h3>{language.t("settings.providers.title")}</h3>
           <ProvidersTab />
         </Tabs.Content>
+        {/* mycelis_change - Deployments management */}
+        <Show when={kiloLoggedIn()}>
+          <Tabs.Content value="deployments">
+            <h3>{language.t("settings.deployments.title")}</h3>
+            <DeploymentsProvider>
+              <DeploymentsTab />
+            </DeploymentsProvider>
+          </Tabs.Content>
+        </Show>
         <Tabs.Content value="agentBehaviour">
           <h3>{language.t("settings.agentBehaviour.title")}</h3>
           <AgentBehaviourTab />

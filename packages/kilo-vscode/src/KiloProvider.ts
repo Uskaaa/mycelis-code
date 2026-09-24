@@ -122,6 +122,16 @@ import {
   type AuthContext,
 } from "./kilo-provider/handlers/auth"
 import {
+  fetchAndSendDeployments,
+  createDeployment,
+  startDeployment,
+  stopDeployment,
+  deleteDeployment,
+  fetchMarketplaceModels,
+  fetchGpuEstimate,
+  type DeploymentsContext,
+} from "./kilo-provider/handlers/deployments" // mycelis_change
+import {
   handleRequestCloudSessions,
   handleRequestCloudSessionData,
   handleImportAndSend,
@@ -1196,6 +1206,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
       if (this.handleChildSyncMessage(message)) return
       if (await this.handleMemoryMessage(message)) return
       if (await this.handleProfileDataMessage(message)) return
+      if (await this.handleDeploymentMessage(message)) return // mycelis_change
       if (this.handleMigrationMessage(message)) return
       if (this.handleNotificationSettingsMessage(message)) return
       switch (message.type) {
@@ -1680,6 +1691,66 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
     }
     if (message.type === "refreshProviderUsage") {
       await this.fetchAndSendProviderUsage(true)
+      return true
+    }
+    return false
+  }
+
+  // mycelis_change - deployment management, kept out of the main switch to avoid pushing its
+  // complexity over the ESLint limit; same "if chain in its own method" shape as
+  // handleProfileDataMessage above. Uses Record<string, unknown> + manual field extraction like
+  // handleProviderAction, since (unlike handleProfileDataMessage's fields-less messages) these
+  // carry a rich, varied payload that TypedWebviewMessage's minimal shape can't express.
+  private async handleDeploymentMessage(message: Record<string, unknown>): Promise<boolean> {
+    if (typeof message.type !== "string") return false
+    const type = message.type
+    const rid = typeof message.requestId === "string" ? message.requestId : ""
+
+    if (type === "requestDeployments") {
+      fetchAndSendDeployments(this.deploymentsCtx).catch((e) =>
+        console.error("[Kilo New] fetchAndSendDeployments failed:", e),
+      )
+      return true
+    }
+    if (type === "createDeployment" && rid) {
+      await createDeployment(this.deploymentsCtx, rid, {
+        name: typeof message.name === "string" ? message.name : "",
+        modelId: typeof message.modelId === "string" ? message.modelId : "",
+        maxConcurrentUsers: typeof message.maxConcurrentUsers === "number" ? message.maxConcurrentUsers : 0,
+        autoStopOnInactivity: message.autoStopOnInactivity === true,
+        inactivityTimeoutMinutes:
+          typeof message.inactivityTimeoutMinutes === "number" ? message.inactivityTimeoutMinutes : undefined,
+        isExposedToWebUi: message.isExposedToWebUi === true,
+      })
+      return true
+    }
+    if (type === "startDeployment" && rid && typeof message.id === "string") {
+      await startDeployment(this.deploymentsCtx, rid, message.id)
+      return true
+    }
+    if (type === "stopDeployment" && rid && typeof message.id === "string") {
+      await stopDeployment(this.deploymentsCtx, rid, message.id)
+      return true
+    }
+    if (type === "deleteDeployment" && rid && typeof message.id === "string") {
+      await deleteDeployment(this.deploymentsCtx, rid, message.id)
+      return true
+    }
+    if (type === "requestMarketplaceModels" && rid) {
+      await fetchMarketplaceModels(
+        this.deploymentsCtx,
+        rid,
+        typeof message.search === "string" ? message.search : undefined,
+      )
+      return true
+    }
+    if (type === "requestGpuEstimate" && rid && typeof message.modelId === "string") {
+      await fetchGpuEstimate(
+        this.deploymentsCtx,
+        rid,
+        message.modelId,
+        typeof message.concurrentUsers === "number" ? message.concurrentUsers : undefined,
+      )
       return true
     }
     return false
@@ -4704,6 +4775,16 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
       fetchAndSendProviders: () => this.fetchAndSendProviders(),
       fetchAndSendAgents: () => this.fetchAndSendAgents(),
       fetchAndSendSpeechToTextModels: () => this.fetchAndSendSpeechToTextModels(),
+    }
+  }
+
+  // mycelis_change - deployment handlers extracted to kilo-provider/handlers/deployments.ts
+
+  private get deploymentsCtx(): DeploymentsContext {
+    return {
+      client: this.client,
+      postMessage: (msg) => this.postMessage(msg),
+      getWorkspaceDirectory: () => this.getWorkspaceDirectory(),
     }
   }
 

@@ -9,6 +9,15 @@ import type { PRReviewCommentData, ReviewMessageData } from "../../../../src/sha
 import type { BrowserFeedbackData } from "../../../../src/shared/browser-feedback"
 import type { WorkStyle, WorkStyleState } from "../../../../src/shared/work-style-presets"
 import type { RefreshProviderUsageMessage, RequestProviderUsageMessage } from "./provider-usage"
+import type {
+  RequestDeploymentsMessage,
+  CreateDeploymentMessage,
+  StartDeploymentMessage,
+  StopDeploymentMessage,
+  DeleteDeploymentMessage,
+  RequestMarketplaceModelsMessage,
+  RequestGpuEstimateMessage,
+} from "./deployments" // mycelis_change
 import type { AnacondaDesktopWebviewMessage } from "../../../../src/shared/anaconda-desktop-messages"
 import type { RequestMigrationDataMessage, StartMigrationMessage } from "./migration"
 import type { MemoryShowMessage, MemoryOperationMessage, RequestMemoryMessage } from "./memory"
@@ -235,6 +244,17 @@ export interface SelectSourceRequest {
 export interface RequestProvidersMessage {
   type: "requestProviders"
 }
+
+// mycelis_change start - deployment management
+export type DeploymentWebviewMessage =
+  | RequestDeploymentsMessage
+  | CreateDeploymentMessage
+  | StartDeploymentMessage
+  | StopDeploymentMessage
+  | DeleteDeploymentMessage
+  | RequestMarketplaceModelsMessage
+  | RequestGpuEstimateMessage
+// mycelis_change end
 
 export interface CompactRequest {
   type: "compact"
@@ -1587,6 +1607,7 @@ export interface DismissAgentMigrationBannerMessage {
 export type WebviewMessage =
   | import("./agent-manager").BaseUpdateRequest
   | PRMergeRequest
+  | DeploymentWebviewMessage // mycelis_change
   | { type: "sessionActivity"; state: Activity }
   | { type: "acknowledgeSession"; sessionID: string; eventID: string }
   | DocumentRequestMessage

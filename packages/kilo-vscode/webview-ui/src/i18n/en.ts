@@ -377,6 +377,40 @@ export const dict = {
   "sound.option.yup05": "Yup 05",
   "sound.option.yup06": "Yup 06",
 
+  // mycelis_change start - Deployments settings tab
+  "settings.deployments.title": "Deployments",
+  "settings.deployments.empty": "No deployments yet.",
+  "settings.deployments.new": "New deployment",
+  "settings.deployments.detail.start": "Start deployment",
+  "settings.deployments.detail.stop": "Stop deployment",
+  "settings.deployments.detail.delete": "Delete deployment",
+  "settings.deployments.detail.starting": 'Starting "{{name}}"...',
+  "settings.deployments.detail.stopping": 'Stopping "{{name}}"...',
+  "settings.deployments.detail.deleted": 'Deleted "{{name}}"',
+  "settings.deployments.detail.confirmDelete":
+    'Delete "{{name}}"? This permanently deletes it and its infrastructure. This cannot be undone.',
+  "settings.deployments.create.title": "New deployment",
+  "settings.deployments.create.noModels": "No models available",
+  "settings.deployments.create.model": "Model",
+  "settings.deployments.create.name": "Name",
+  "settings.deployments.create.namePlaceholder": "e.g. Marketing Bot",
+  "settings.deployments.create.nameRequired": "Name is required",
+  "settings.deployments.create.concurrency": "Concurrent users",
+  "settings.deployments.create.concurrencyDescription": "Determines the GPU size reserved for this deployment.",
+  "settings.deployments.create.concurrencyInvalid": "Enter a whole number between 1 and 50",
+  "settings.deployments.create.autoStop": "Auto-stop on inactivity",
+  "settings.deployments.create.timeout": "Stop after minutes of inactivity",
+  "settings.deployments.create.timeoutInvalid": "Enter a whole number of minutes between 1 and 1440 (24h)",
+  "settings.deployments.create.exposeToWebUi": "Show in workspace Web-UI",
+  "settings.deployments.create.exposeToWebUiDescription":
+    "If shown, this model appears in the workspace Web-UI's model dropdown and users can chat with it directly. If not, it's only reachable via API.",
+  "settings.deployments.create.estimating": "Estimating cost...",
+  "settings.deployments.create.estimateUnavailable": "Estimated cost: unavailable",
+  "settings.deployments.create.estimatedCost": "Estimated cost: {{cost}} ({{gpu}})",
+  "settings.deployments.create.deploying": 'Deploying "{{name}}"...',
+  "settings.deployments.create.deploy": "Deploy",
+  // mycelis_change end
+
   "settings.providers.title": "Providers",
   "settings.providers.section.connected": "Connected providers",
   "settings.providers.connected.empty": "No connected providers",
@@ -812,8 +846,7 @@ export const dict = {
   "settings.browser.headless.title": "Headless Mode",
   "settings.browser.headless.description": "Run in headless mode (no visible browser window).",
 
-  "settings.language.description":
-    'Choose the language for the Mycelis UI. "Auto" uses your VS Code display language.',
+  "settings.language.description": 'Choose the language for the Mycelis UI. "Auto" uses your VS Code display language.',
   "settings.language.auto": "Auto (VS Code language)",
   "settings.language.current": "Current:",
 

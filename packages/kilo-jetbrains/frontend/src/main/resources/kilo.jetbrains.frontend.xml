@@ -64,6 +64,15 @@
                 bundle="messages.KiloBundle"
                 key="settings.providers.displayName"/>
 
+        <!-- mycelis_change -->
+        <applicationConfigurable
+                parentId="ai.kilocode.jetbrains.settings"
+                id="ai.kilocode.jetbrains.settings.deployments"
+                groupWeight="3"
+                instance="ai.kilocode.client.settings.deployments.DeploymentsConfigurable"
+                bundle="messages.KiloBundle"
+                key="settings.deployments.displayName"/>
+
         <applicationConfigurable
                 parentId="ai.kilocode.jetbrains.settings"
                 id="ai.kilocode.jetbrains.settings.marketplace"

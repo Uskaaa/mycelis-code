@@ -95,6 +95,20 @@ class MockCliServer : AutoCloseable {
     @Volatile var lastMarketplaceInstallBody: String? = null
     @Volatile var lastMarketplaceRemoveBody: String? = null
 
+    // mycelis_change start - deployment management
+    @Volatile var deployments = "[]"
+    @Volatile var deploymentsStatus = 200
+    @Volatile var deploymentCreateResult = """{"id":"dep_1","name":"test","slug":"test","modelId":"m1","modelName":"Model","status":"Stopped","maxConcurrentUsers":5,"costPerHour":0.5}"""
+    @Volatile var deploymentCreateStatus = 200
+    @Volatile var deploymentActionStatus = 200
+    @Volatile var marketplaceModels = "[]"
+    @Volatile var marketplaceModelsStatus = 200
+    @Volatile var gpuEstimate = """{"modelId":"m1"}"""
+    @Volatile var gpuEstimateStatus = 200
+    @Volatile var lastCreateDeploymentBody: String? = null
+    @Volatile var lastDeploymentActionPath: String? = null
+    // mycelis_change end
+
     // Project-scoped REST responses
     @Volatile var providers = """{"all":[],"default":{},"connected":[],"failed":[]}"""
     @Volatile var providerAuth = "{}"
@@ -473,6 +487,27 @@ class MockCliServer : AutoCloseable {
                     lastCloudSessionImportBody = body
                     respond(output, cloudSessionImportStatus, cloudSessionImport)
                 }
+                // mycelis_change start - deployment management
+                bare == "/kilo/deployments/marketplace-models" -> respond(output, marketplaceModelsStatus, marketplaceModels)
+                bare == "/kilo/deployments/gpu-estimate" -> respond(output, gpuEstimateStatus, gpuEstimate)
+                bare.matches(Regex("/kilo/deployments/[^/]+/start")) && method == "POST" -> {
+                    lastDeploymentActionPath = bare
+                    respond(output, deploymentActionStatus, deploymentCreateResult)
+                }
+                bare.matches(Regex("/kilo/deployments/[^/]+/stop")) && method == "POST" -> {
+                    lastDeploymentActionPath = bare
+                    respond(output, deploymentActionStatus, "true")
+                }
+                bare.matches(Regex("/kilo/deployments/[^/]+")) && method == "DELETE" -> {
+                    lastDeploymentActionPath = bare
+                    respond(output, deploymentActionStatus, "true")
+                }
+                bare == "/kilo/deployments" && method == "POST" -> {
+                    lastCreateDeploymentBody = body
+                    respond(output, deploymentCreateStatus, deploymentCreateResult)
+                }
+                bare == "/kilo/deployments" -> respond(output, deploymentsStatus, deployments)
+                // mycelis_change end
                 bare == "/session/status" -> respond(output, sessionStatusesStatus, sessionStatuses)
                 bare == "/permission" && method == "GET" -> respond(output, 200, pendingPermissions)
                 bare == "/question" && method == "GET" -> respond(output, 200, pendingQuestions)

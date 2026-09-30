@@ -100,6 +100,9 @@ export const dict = {
   "dialog.model.select.title": "Select model",
   "dialog.model.search.placeholder": "Search models",
   "dialog.model.empty": "No model results",
+  // mycelis_change - shown instead of dialog.model.empty while a workspace switch is refreshing
+  // the model list, so an empty-looking list mid-refresh doesn't read as "nothing here"/broken.
+  "dialog.model.loading": "Loading models...",
   "dialog.model.select": "Select",
   "dialog.model.expand": "Expand",
   "dialog.model.collapse": "Collapse",
@@ -392,6 +395,9 @@ export const dict = {
   "settings.deployments.create.title": "New deployment",
   "settings.deployments.create.noModels": "No models available",
   "settings.deployments.create.model": "Model",
+  "settings.deployments.create.modelPlaceholder": "Select a model",
+  "settings.deployments.create.modelSearchPlaceholder": "Search models...",
+  "settings.deployments.create.modelSearchNoResults": "No models match your search",
   "settings.deployments.create.name": "Name",
   "settings.deployments.create.namePlaceholder": "e.g. Marketing Bot",
   "settings.deployments.create.nameRequired": "Name is required",
@@ -412,6 +418,9 @@ export const dict = {
   // mycelis_change end
 
   "settings.providers.title": "Providers",
+  // mycelis_change
+  "settings.providers.section.custom": "Custom providers",
+  "settings.providers.custom.empty": "No custom providers added yet.",
   "settings.providers.section.connected": "Connected providers",
   "settings.providers.connected.empty": "No connected providers",
   "settings.providers.section.popular": "Popular providers",

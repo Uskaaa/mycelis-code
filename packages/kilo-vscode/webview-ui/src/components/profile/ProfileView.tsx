@@ -27,8 +27,6 @@ const formatBalance = (amount: number): string => {
   return `$${amount.toFixed(2)}`
 }
 
-const PERSONAL = "personal"
-
 interface OrgOption {
   value: string
   label: string
@@ -40,7 +38,10 @@ const ProfileView: Component<ProfileViewProps> = (props) => {
   const language = useLanguage()
   const [target, setTarget] = createSignal<string | null>(null)
 
-  const personal = createMemo(() => props.profileData?.profile.hasPersonalAccount !== false)
+  // mycelis_change - Mycelis has no personal-account tier, everything runs through workspaces
+  // (see dialog-kilo-profile.tsx in the CLI). Default to the owned workspace when no selection
+  // has ever been made, same as the CLI dialog.
+  const orgs = createMemo(() => props.profileData?.profile.organizations ?? [])
 
   // Load current profile and usage when navigating to this view.
   onMount(() => {
@@ -55,16 +56,13 @@ const ProfileView: Component<ProfileViewProps> = (props) => {
   })
 
   const orgOptions = createMemo<OrgOption[]>(() => {
-    const orgs = props.profileData?.profile.organizations ?? []
-    if (orgs.length === 0) return []
-    return [
-      ...(personal() ? [{ value: PERSONAL, label: language.t("profile.personalAccount") }] : []),
-      ...orgs.map((org) => ({ value: org.id, label: org.name, description: org.role })),
-    ]
+    return orgs().map((org) => ({ value: org.id, label: org.name, description: org.role }))
   })
 
   const currentId = createMemo(() => {
-    return props.profileData?.currentOrgId ?? (personal() ? PERSONAL : orgOptions()[0]?.value)
+    return (
+      props.profileData?.currentOrgId ?? orgs().find((org) => org.role === "Owner")?.id ?? orgs().at(0)?.id
+    )
   })
 
   const switching = createMemo(() => {
@@ -83,7 +81,7 @@ const ProfileView: Component<ProfileViewProps> = (props) => {
     setTarget(option.value)
     vscode.postMessage({
       type: "setOrganization",
-      organizationId: option.value === PERSONAL ? null : option.value,
+      organizationId: option.value,
     })
   }
 

@@ -1,6 +1,6 @@
 /**
  * AccountSwitcher component
- * Dropdown for switching between personal and organization accounts.
+ * Dropdown for switching between workspaces.
  * Placed in the welcome screen header, matching the legacy OrganizationSelector pattern.
  * Visible only when the user is logged in and belongs to at least one organization.
  */
@@ -12,8 +12,9 @@ import { useVSCode } from "../../context/vscode"
 import { useLanguage } from "../../context/language"
 import { BalanceChip } from "./BalanceChip"
 
-const PERSONAL = "personal"
-
+// mycelis_change - Mycelis has no personal-account tier, everything runs through workspaces
+// (see dialog-kilo-profile.tsx in the CLI). Default to the owned workspace when no selection has
+// ever been made, same as the CLI dialog and ProfileView.tsx.
 export const AccountSwitcher: Component<{ class?: string }> = (props) => {
   const server = useServer()
   const vscode = useVSCode()
@@ -24,17 +25,15 @@ export const AccountSwitcher: Component<{ class?: string }> = (props) => {
 
   const profile = () => server.profileData()
   const orgs = () => profile()?.profile.organizations ?? []
-  const personal = () => profile()?.profile.hasPersonalAccount !== false
   const visible = () => !!profile() && orgs().length > 0
-  const current = () => profile()?.currentOrgId ?? (personal() ? PERSONAL : (orgs()[0]?.id ?? PERSONAL))
+  const current = () => profile()?.currentOrgId ?? orgs().find((org) => org.role === "Owner")?.id ?? orgs().at(0)?.id
 
   const selected = createMemo(() => {
     const id = current()
-    if (id === PERSONAL) return undefined
     return orgs().find((o) => o.id === id)
   })
 
-  const label = createMemo(() => selected()?.name ?? language.t("profile.personalAccount"))
+  const label = createMemo(() => selected()?.name ?? orgs().at(0)?.name ?? "")
 
   // Clear switching state when profile data changes (switch completed or failed)
   createEffect(() => {
@@ -42,15 +41,15 @@ export const AccountSwitcher: Component<{ class?: string }> = (props) => {
     setSwitching(false)
   })
 
-  function pick(org: { id: string; name: string; role: string } | null) {
-    if (org?.id === current() || (!org && current() === PERSONAL)) {
+  function pick(org: { id: string; name: string; role: string }) {
+    if (org.id === current()) {
       setOpen(false)
       return
     }
     setSwitching(true)
     vscode.postMessage({
       type: "setOrganization",
-      organizationId: org?.id ?? null,
+      organizationId: org.id,
     })
     setOpen(false)
   }
@@ -90,7 +89,7 @@ export const AccountSwitcher: Component<{ class?: string }> = (props) => {
               ? language.t("profile.switchingAccount")
               : selected()
                 ? `${selected()!.name} – ${selected()!.role.toUpperCase()}`
-                : language.t("profile.personalAccount")
+                : ""
           }
         >
           <span class="account-switcher-label">{label()}</span>
@@ -120,17 +119,6 @@ export const AccountSwitcher: Component<{ class?: string }> = (props) => {
 
         <Show when={open() && !switching()}>
           <div class="account-switcher-dropdown" role="listbox" aria-label="Account">
-            <Show when={personal()}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={current() === PERSONAL}
-                class="account-switcher-item"
-                onClick={() => pick(null)}
-              >
-                <span class="account-switcher-item-name">{language.t("profile.personalAccount")}</span>
-              </button>
-            </Show>
             <For each={orgs()}>
               {(org) => (
                 <button

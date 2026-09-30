@@ -26,6 +26,7 @@ import { IconButton } from "@kilocode/kilo-ui/icon-button"
 import { Tag } from "@kilocode/kilo-ui/tag"
 import { Icon } from "@kilocode/kilo-ui/icon"
 import { Tooltip } from "@kilocode/kilo-ui/tooltip"
+import { Spinner } from "@kilocode/kilo-ui/spinner"
 import { useProvider } from "../../context/provider"
 import type { EnrichedModel } from "../../context/provider"
 import { useSession, SessionContext } from "../../context/session"
@@ -149,7 +150,7 @@ export interface ModelSelectorBaseProps {
 }
 
 export const ModelSelectorBase: Component<ModelSelectorBaseProps> = (props) => {
-  const { models, findModel } = useProvider()
+  const { models, findModel, ready } = useProvider()
   const language = useLanguage()
   const vscode = useVSCode()
   // Session context is optional — ModelSelectorBase is also used in Settings
@@ -167,6 +168,13 @@ export const ModelSelectorBase: Component<ModelSelectorBaseProps> = (props) => {
   })
 
   const [open, setOpen] = createSignal(false)
+
+  // mycelis_change - a workspace switch clears providers.kilo while it reloads (see
+  // provider.tsx's providersLoading handler); without this the trigger stayed clickable and,
+  // if already open, kept showing a mid-refresh list with no indication anything was happening.
+  createEffect(() => {
+    if (!ready()) setOpen(false)
+  })
   // Shared, host-persisted expand/collapse preference (see VSCodeProvider).
   // Inline `@` model references force the compact layout and must not read or
   // write that preference.
@@ -853,7 +861,9 @@ export const ModelSelectorBase: Component<ModelSelectorBaseProps> = (props) => {
             variant: "secondary",
             size: "normal",
             get disabled() {
-              return props.blocked || !canOpen()
+              // mycelis_change - !ready(): block the whole selector while a workspace switch is
+              // reloading providers, instead of leaving it clickable over a mid-refresh list.
+              return props.blocked || !canOpen() || !ready()
             },
             get ["aria-label"]() {
               return controlLabel()
@@ -969,8 +979,22 @@ export const ModelSelectorBase: Component<ModelSelectorBaseProps> = (props) => {
                   onMouseMove={pointerMove}
                 >
                   <Show when={groups().length === 0}>
+                    {/* mycelis_change - a workspace switch clears providers.kilo while refetching
+                    (see provider.tsx's providersLoading handler), which used to render as this
+                    same "No model results" text with nothing to distinguish "genuinely empty"
+                    from "still loading" - looking like the switch silently failed. */}
                     <div class="model-selector-empty" role="status" aria-live="polite">
-                      {language.t("dialog.model.empty")}
+                      <Show
+                        when={ready()}
+                        fallback={
+                          <>
+                            <Spinner style={{ width: "14px", height: "14px" }} />
+                            {language.t("dialog.model.loading")}
+                          </>
+                        }
+                      >
+                        {language.t("dialog.model.empty")}
+                      </Show>
                     </div>
                   </Show>
 

@@ -454,12 +454,14 @@
   position: relative;
 }
 
+/* mycelis_change - was position: absolute, overlaying the top of the transcript. That only worked
+while it was empty-state-only (the transcript underneath was blank); now that the switcher stays
+up for the life of the session (see MessageList.tsx), an overlay covered the first messages
+whenever scrolled to the top. Laid out in-flow instead, so it takes its own row and pushes the
+scrollable transcript down rather than floating over it. */
 .welcome-header {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  z-index: 10;
+  flex-shrink: 0;
+  padding: 12px 12px 0 12px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -577,7 +579,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 6px 10px;
+  /* mycelis_change - was 6px 10px; the extra left inset on top of the dropdown's own border made
+  the row text read as indented compared to the trigger button above it. */
+  padding: 6px 8px;
   border: none;
   background: transparent;
   color: var(--vscode-foreground);

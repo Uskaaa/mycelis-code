@@ -840,14 +840,15 @@ export const MessageList: Component<MessageListProps> = (props) => {
           {announcement()}
         </div>
       </Show>
-      <Show when={isEmpty()}>
-        <div class="welcome-header" data-slot="welcome-header">
-          <AccountSwitcher class="account-switcher-welcome" />
-          <Show when={!props.introduction || props.readonly}>
-            <KiloNotifications sessionID={props.sessionID} />
-          </Show>
-        </div>
-      </Show>
+      {/* mycelis_change - was gated on isEmpty(): the workspace switcher and balance disappeared
+      the moment a session had any messages, leaving no way to tell which Mycelis workspace was
+      active or check remaining balance mid-chat. Keep it up for the life of the session. */}
+      <div class="welcome-header" data-slot="welcome-header">
+        <AccountSwitcher class="account-switcher-welcome" />
+        <Show when={isEmpty() && (!props.introduction || props.readonly)}>
+          <KiloNotifications sessionID={props.sessionID} />
+        </Show>
+      </div>
       <div
         ref={setScrollRef}
         onScroll={handleScroll}

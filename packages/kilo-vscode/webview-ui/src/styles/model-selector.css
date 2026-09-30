@@ -346,6 +346,11 @@
   color: var(--text-weak, var(--vscode-descriptionForeground));
   font-size: var(--kilo-font-size-12);
   text-align: center;
+  /* mycelis_change - was text-only; the loading state adds a Spinner next to the message */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .model-selector-group-label {

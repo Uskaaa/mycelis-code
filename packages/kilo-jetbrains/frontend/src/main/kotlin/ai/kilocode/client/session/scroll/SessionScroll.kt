@@ -35,6 +35,7 @@ internal class SessionScroll(
         private const val THRESHOLD = 32
         private const val OPEN_PASSES = 12
         private const val FOLLOW_PASSES = 6
+        private const val SCROLL_UNIT = 16
         private val KEY_SCROLL_ACTIONS = listOf(
             "scrollUp", "scrollDown", "scrollHome", "scrollEnd", "unitScrollUp", "unitScrollDown",
         )
@@ -49,6 +50,11 @@ internal class SessionScroll(
         // Transparent over the self-rendered SessionUi backdrop; the message list paints its own.
         isOpaque = false
         viewport.isOpaque = false
+        // mycelis_change - the transcript panel is a plain JPanel, not a Scrollable, so without this
+        // the scrollbar's unitIncrement defaults to 1px/notch. The first bit of any wheel/trackpad
+        // gesture barely moves the content until the OS's own wheel acceleration ramps up, which
+        // read as a slow, stuttering start to every scroll.
+        verticalScrollBar.unitIncrement = JBUI.scale(SCROLL_UNIT)
     }
 
     internal val bar: JScrollBar get() = component.verticalScrollBar

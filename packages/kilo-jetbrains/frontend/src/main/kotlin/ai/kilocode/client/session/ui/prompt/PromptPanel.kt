@@ -406,6 +406,18 @@ class PromptPanel(
     }
 
     private fun syncBorder() {
+        if (rounded) {
+            // mycelis_change - inset, fully rounded card: margins on every side instead of a full-width
+            // panel with a separator line on top.
+            val focus = if (hostedInEditorTab) SessionUiStyle.View.Prompt.FOCUS_WIDTH else 0
+            border = JBUI.Borders.empty(
+                SessionUiStyle.View.Prompt.CARD_MARGIN_TOP,
+                SessionUiStyle.View.Prompt.CARD_MARGIN_HORIZONTAL + focus,
+                SessionUiStyle.View.Prompt.CARD_MARGIN_BOTTOM + focus,
+                SessionUiStyle.View.Prompt.CARD_MARGIN_HORIZONTAL + focus,
+            )
+            return
+        }
         border = JBUI.Borders.compound(
             if (focused) {
                 JBUI.Borders.emptyTop(JBUI.scale(1))
@@ -432,6 +444,11 @@ class PromptPanel(
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             g2.color = SessionUiStyle.View.Prompt.bgColor(style)
             g2.fill(surface(0f))
+            if (rounded) {
+                g2.color = SessionUiStyle.View.Prompt.separator()
+                g2.stroke = BasicStroke(JBUI.scale(1).toFloat())
+                g2.draw(surface(JBUI.scale(1) / 2f))
+            }
         } finally {
             g2.dispose()
         }
@@ -452,7 +469,16 @@ class PromptPanel(
         }
     }
 
-    private fun surface(inset: Float): Path2D.Float {
+    private fun surface(inset: Float): java.awt.Shape {
+        if (rounded) {
+            // mycelis_change - all four corners rounded, inside the card margins.
+            val l = inset + insets.left
+            val t = inset + insets.top
+            val r = width - inset - insets.right
+            val b = height - inset - insets.bottom
+            val arc = JBUI.scale(SessionUiStyle.View.Prompt.CARD_ARC).toFloat()
+            return java.awt.geom.RoundRectangle2D.Float(l, t, (r - l).coerceAtLeast(0f), (b - t).coerceAtLeast(0f), arc, arc)
+        }
         val top = inset
         val left = inset + insets.left
         val right = width - inset - insets.right
@@ -1183,7 +1209,9 @@ class PromptPanel(
         val root = root ?: return null
         if (root.height <= 0) return null
         val chrome = (shell.preferredSize.height - editor.preferredSize.height).coerceAtLeast(0)
-        return (root.height / 3 - chrome).coerceAtLeast(min)
+        // mycelis_change - the card margins are part of the panel height too
+        val ins = insets
+        return (root.height / 3 - chrome - ins.top - ins.bottom).coerceAtLeast(min)
     }
 
     @RequiresEdt

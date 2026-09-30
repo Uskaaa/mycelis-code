@@ -177,9 +177,12 @@ object UiStyle {
         }
 
         object ActivityAttention : Style {
+            // mycelis_change - softened from a vivid traffic-cone orange (0xE66D17) to a muted amber:
+            // this badge shows for every question/permission/plan prompt, so it is one of the most
+            // frequently seen colors in normal chat use.
             override fun bg(): Color = JBColor.namedColor(
                 "Kilo.Activity.attentionBackground",
-                JBColor(Color(0xE6, 0x6D, 0x17), Color(0xC7, 0x7D, 0x55)),
+                JBColor(Color(0xC9, 0x8A, 0x2E), Color(0xB8, 0x8A, 0x5C)),
             )
 
             override fun fg(): Color = JBColor.namedColor(

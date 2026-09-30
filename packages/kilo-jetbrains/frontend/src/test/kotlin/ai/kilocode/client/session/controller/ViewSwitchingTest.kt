@@ -27,7 +27,11 @@ class ViewSwitchingTest : SessionControllerTestBase() {
         edt { m.prompt("hello") }
         flush()
 
-        assertControllerEvents("ViewChanged session", events)
+        // mycelis_change - the account overlay now stays visible in the session view instead of hiding.
+        assertControllerEvents("""
+            ViewChanged session
+            AccountOverlayChanged show loggedIn=false
+        """, events)
         assertSession(
             """
             [app: DISCONNECTED] [workspace: PENDING]
@@ -61,7 +65,10 @@ class ViewSwitchingTest : SessionControllerTestBase() {
         edt { m.prompt("second") }
         flush()
 
-        assertControllerEvents("ViewChanged session", events)
+        assertControllerEvents("""
+            ViewChanged session
+            AccountOverlayChanged show loggedIn=false
+        """, events)
     }
 
     fun `test recent sessions show after workspace ready`() {
@@ -468,7 +475,7 @@ class ViewSwitchingTest : SessionControllerTestBase() {
         assertEquals(prof.email, show.account.profile?.email)
     }
 
-    fun `test first prompt hides overlay`() {
+    fun `test first prompt keeps overlay visible`() {
         projectRpc.state.value = workspaceReady()
         rpc.recent.add(session("ses_1"))
         val m = controller()
@@ -478,11 +485,11 @@ class ViewSwitchingTest : SessionControllerTestBase() {
         edt { m.prompt("hello") }
         flush()
 
-        assertTrue(events.any { it is SessionControllerEvent.AccountOverlayChanged.Hide })
-        assertFalse(events.filterIsInstance<SessionControllerEvent.AccountOverlayChanged.Show>().any { it.account.profile != null })
+        assertFalse(events.any { it is SessionControllerEvent.AccountOverlayChanged.Hide })
+        assertTrue(events.any { it is SessionControllerEvent.AccountOverlayChanged.Show })
     }
 
-    fun `test explicit local session load never shows overlay`() {
+    fun `test explicit local session load shows overlay`() {
         projectRpc.state.value = workspaceReady()
         rpc.recent.add(session("ses_1"))
         seedHistory("ses_test")
@@ -491,10 +498,10 @@ class ViewSwitchingTest : SessionControllerTestBase() {
 
         flush()
 
-        assertFalse(events.any { it is SessionControllerEvent.AccountOverlayChanged.Show })
+        assertTrue(events.any { it is SessionControllerEvent.AccountOverlayChanged.Show })
     }
 
-    fun `test explicit cloud import never shows overlay`() {
+    fun `test explicit cloud import shows overlay`() {
         projectRpc.state.value = workspaceReady()
         rpc.importedCloudSession = session("ses_imported")
         rpc.recent.add(session("ses_1"))
@@ -504,7 +511,7 @@ class ViewSwitchingTest : SessionControllerTestBase() {
 
         flush()
 
-        assertFalse(events.any { it is SessionControllerEvent.AccountOverlayChanged.Show })
+        assertTrue(events.any { it is SessionControllerEvent.AccountOverlayChanged.Show })
     }
 
     fun `test app profile change refreshes overlay while allowed`() {

@@ -2579,7 +2579,9 @@ class SessionController(
         when (event) {
             is SessionControllerEvent.ViewChanged.ShowEmpty -> showAccountOverlay()
             is SessionControllerEvent.ViewChanged.ShowProgress -> hideAccountOverlay()
-            is SessionControllerEvent.ViewChanged.ShowSession -> hideAccountOverlay()
+            // mycelis_change - the workspace/balance/profile overlay used to disappear as soon as a
+            // session had messages; it stays visible in the transcript view too now.
+            is SessionControllerEvent.ViewChanged.ShowSession -> showAccountOverlay()
         }
     }
 

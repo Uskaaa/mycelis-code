@@ -42,12 +42,10 @@ class SessionAccountOverlayTest : SessionControllerTestBase() {
         organizations: List<ProfileOrganizationDto> = emptyList(),
         balance: ProfileBalanceDto? = null,
         currentOrgId: String? = null,
-        hasPersonalAccount: Boolean = true,
     ) = ProfileDto(
         email = email,
         name = name,
         organizations = organizations,
-        hasPersonalAccount = hasPersonalAccount,
         balance = balance,
         currentOrgId = currentOrgId,
     )
@@ -62,9 +60,12 @@ class SessionAccountOverlayTest : SessionControllerTestBase() {
         edt { assertFalse(panel.isVisible) }
     }
 
-    // --- test 2: logged-in personal account shows picker title ---
+    // --- test 2: logged-in with no organizations falls back to the profile name/email ---
+    // mycelis_change - Mycelis has no personal-account tier; a profile with zero organizations
+    // is not a real production state, but must not crash, show a stale "Personal Account" label,
+    // or leave the picker blank (which reads as the whole overlay having disappeared).
 
-    fun `test logged in personal account shows picker title`() {
+    fun `test logged in with no organizations shows profile name as picker title`() {
         val prof = profile(
             email = "user@example.com",
             name = "Test User",
@@ -75,14 +76,14 @@ class SessionAccountOverlayTest : SessionControllerTestBase() {
             assertTrue(panel.isVisible)
             assertTrue(panel.loggedInVisible())
             assertTrue(panel.pickerVisible())
-            assertEquals("Personal Account", panel.accountTitle())
+            assertEquals("Test User", panel.accountTitle())
         }
     }
 
-    fun `test logged in with email fallback still shows personal account title`() {
+    fun `test logged in with no organizations and no name falls back to email`() {
         val prof = profile(email = "user@example.com")
         show(snap(prof))
-        edt { assertEquals("Personal Account", panel.accountTitle()) }
+        edt { assertEquals("user@example.com", panel.accountTitle()) }
     }
 
     // --- test 3: logged-in org account shows org title in picker ---
@@ -100,24 +101,6 @@ class SessionAccountOverlayTest : SessionControllerTestBase() {
             assertTrue(panel.isVisible)
             assertTrue(panel.loggedInVisible())
             assertTrue(panel.pickerVisible())
-            assertEquals("Acme", panel.accountTitle())
-            // personal + acme = 2 choices
-            assertEquals(2, panel.choiceCount())
-            // selected index is 1 (org_1 is the second item)
-            assertEquals(1, panel.selectedIndex())
-        }
-    }
-
-    fun `test profile without personal account hides personal choice`() {
-        val acme = org("org_1", "Acme", "MEMBER")
-        val prof = profile(
-            email = "user@example.com",
-            organizations = listOf(acme),
-            currentOrgId = "org_1",
-            hasPersonalAccount = false,
-        )
-        show(snap(prof))
-        edt {
             assertEquals("Acme", panel.accountTitle())
             assertEquals(1, panel.choiceCount())
             assertEquals(0, panel.selectedIndex())
@@ -199,26 +182,6 @@ class SessionAccountOverlayTest : SessionControllerTestBase() {
         }
     }
 
-    fun `test switching to personal account shows personal account title`() {
-        val acme = org("org_1", "Acme")
-        val prof = profile(
-            email = "user@example.com",
-            organizations = listOf(acme),
-            currentOrgId = "org_1",
-        )
-        val switchingSnap = AccountOverlaySnapshot(
-            status = KiloAppStatusDto.READY,
-            profile = prof,
-            switching = true,
-            targetOrgId = null,
-        )
-        show(switchingSnap)
-        edt {
-            assertEquals("Personal Account", panel.accountTitle())
-            assertFalse(panel.pickerEnabled())
-        }
-    }
-
     fun `test account switcher uses session view background and border`() {
         val prof = profile(email = "user@example.com")
         show(snap(prof))
@@ -231,11 +194,12 @@ class SessionAccountOverlayTest : SessionControllerTestBase() {
     // --- test 7: transient null profile keeps existing logged-in content ---
 
     fun `test transient null profile keeps logged in card`() {
-        val prof = profile(email = "user@example.com", name = "Test User")
+        val acme = org("org_1", "Acme")
+        val prof = profile(email = "user@example.com", name = "Test User", organizations = listOf(acme), currentOrgId = "org_1")
         show(snap(prof))
         edt {
             assertTrue(panel.loggedInVisible())
-            assertEquals("Personal Account", panel.accountTitle())
+            assertEquals("Acme", panel.accountTitle())
         }
 
         // Show transient null (pending switch)
@@ -369,21 +333,6 @@ class SessionAccountOverlayTest : SessionControllerTestBase() {
         edt { p.activate(AccountChoice("org_1", "Acme")) }
 
         assertEquals(listOf<String?>("org_1"), selected)
-    }
-
-    fun `test activate personal calls select with null`() {
-        val selected = mutableListOf<String?>()
-        val p = SessionAccountOverlay(
-            select = { org -> selected.add(org) },
-            profile = {},
-        )
-        val acme = org("org_1", "Acme")
-        val prof = profile(organizations = listOf(acme), currentOrgId = "org_1")
-        edt { p.onEvent(SessionControllerEvent.AccountOverlayChanged.Show(snap(prof))) }
-
-        edt { p.activate(AccountChoice(null, "Personal Account")) }
-
-        assertEquals(listOf<String?>(null), selected)
     }
 
     fun `test activate same account does not call select callback`() {

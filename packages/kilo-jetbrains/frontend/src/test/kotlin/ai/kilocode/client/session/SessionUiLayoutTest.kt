@@ -124,7 +124,8 @@ class SessionUiLayoutTest : SessionUiTestBase() {
         assertTrue(prompt.parent is Align)
         assertSame(root.content, prompt.parent.parent.parent)
         assertSame(root.overlay, connection.parent)
-        assertTrue(root.overlay.components.any { it is SessionAccountOverlay })
+        // mycelis_change - the account row is the footer under the prompt, not a floating overlay
+        assertTrue(prompt.parent.parent.components.any { it is SessionAccountOverlay })
         assertFalse(root.content.components.contains(connection))
     }
 
@@ -633,13 +634,11 @@ class SessionUiLayoutTest : SessionUiTestBase() {
         assertEquals(java.awt.Rectangle(0, 0, root.overlay.width, root.overlay.height), drop.bounds)
     }
 
-    fun `test drop overlay is above account and scroll overlays`() {
+    fun `test drop overlay is above scroll overlays`() {
         val root = find<SessionRootPanel>(ui)
         val drop = find<SessionDropOverlay>(ui)
-        val account = find<SessionAccountOverlay>(ui)
         val jump = jumpButton()
 
-        assertTrue(root.overlay.getComponentZOrder(drop) < root.overlay.getComponentZOrder(account))
         assertTrue(root.overlay.getComponentZOrder(drop) < root.overlay.getComponentZOrder(jump))
     }
 
@@ -1200,11 +1199,13 @@ class SessionUiLayoutTest : SessionUiTestBase() {
 
     // --- account overlay layout tests ---
 
-    fun `test account overlay is registered in root overlay layer`() {
-        val root = find<SessionRootPanel>(ui)
+    fun `test account overlay is the footer row under the prompt`() {
+        val prompt = find<PromptPanel>(ui)
         val overlay = find<SessionAccountOverlay>(ui)
 
-        assertSame(root.overlay, overlay.parent)
+        // mycelis_change - same bottom container as the prompt, right after it
+        assertSame(prompt.parent.parent, overlay.parent)
+        assertEquals(prompt.parent.parent.getComponentZOrder(prompt.parent) + 1, overlay.parent.getComponentZOrder(overlay))
     }
 
     fun `test account overlay hidden before recents complete`() {
@@ -1231,7 +1232,7 @@ class SessionUiLayoutTest : SessionUiTestBase() {
         assertTrue(overlay.isVisible)
     }
 
-    fun `test account overlay hides after first prompt`() {
+    fun `test account overlay stays visible after first prompt`() {
         appRpc.state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = ProfileDto(email = "user@example.com"))
         rpc.recent.add(session("ses_1"))
         ui = newUi(displayMs = 1_000)
@@ -1245,10 +1246,11 @@ class SessionUiLayoutTest : SessionUiTestBase() {
         }
         settle()
 
-        assertFalse(overlay.isVisible)
+        // mycelis_change - the workspace/balance overlay stays visible in a running session
+        assertTrue(overlay.isVisible)
     }
 
-    fun `test account overlay stays hidden when prompt races empty history load`() {
+    fun `test account overlay shows when prompt races empty history load`() {
         appRpc.state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = ProfileDto(email = "user@example.com"))
         val gate = CompletableDeferred<Unit>()
         rpc.historyGate = gate
@@ -1261,7 +1263,7 @@ class SessionUiLayoutTest : SessionUiTestBase() {
         settle()
 
         val overlay = find<SessionAccountOverlay>(ui)
-        assertFalse(overlay.isVisible)
+        assertTrue(overlay.isVisible)
     }
 
     fun `test non-empty explicit session does not show overlay`() {
@@ -1273,21 +1275,20 @@ class SessionUiLayoutTest : SessionUiTestBase() {
         assertFalse(overlay.isVisible)
     }
 
-    fun `test account overlay uses prompt panel top and right insets`() {
+    fun `test account overlay sits below the prompt with matching side margins`() {
         appRpc.state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = ProfileDto(email = "user@example.com"))
         rpc.recent.add(session("ses_1"))
         ui = newUi(displayMs = 1_000)
         settle()
         layout()
 
-        val root = find<SessionRootPanel>(ui)
+        val prompt = find<PromptPanel>(ui)
         val overlay = find<SessionAccountOverlay>(ui)
-        val top = JBUI.scale(SessionUiStyle.View.Prompt.PANEL_VERTICAL_PADDING)
-        val right = JBUI.scale(SessionUiStyle.View.Prompt.PANEL_HORIZONTAL_PADDING)
 
         assertTrue(overlay.isVisible)
-        assertEquals(top, overlay.y)
-        assertEquals(root.overlay.width - overlay.width - right, overlay.x)
+        // mycelis_change - footer row below the rounded prompt card, same width as the prompt area
+        assertTrue(overlay.y >= prompt.parent.y + prompt.parent.height)
+        assertEquals(prompt.parent.width, overlay.width)
     }
 
     // Reassigns [ui] without disposing the previous instance first, matching every other `ui =

@@ -29,7 +29,7 @@ internal class ModelPickerRenderer private constructor(
     private val parts: Parts,
 ) : PickerListRenderer<ModelPickerRow>(
     model = model,
-    checked = { it.key == active() },
+    checked = { !it.header && it.key == active() },
     sectionTitle = ::modelPickerSectionTitle,
     content = parts.head,
     trailing = parts.star,
@@ -49,6 +49,8 @@ internal class ModelPickerRenderer private constructor(
             return PickerListRenderer.trailingClickZone(list, bounds, point, FAVORITE_CLICK_AREA_WIDTH)
         }
     }
+
+    override fun isHeader(value: ModelPickerRow): Boolean = value.header
 
     override fun getListCellRendererComponent(
         list: JList<out ModelPickerRow>,
@@ -70,6 +72,19 @@ internal class ModelPickerRenderer private constructor(
     ) {
         val secondary = if (selected) weak else SessionUiStyle.Text.Secondary.foreground()
         parts.title.clear()
+        parts.title.icon = null
+        if (value.header) {
+            // mycelis_change - collapsible provider header: arrow + provider name + model count.
+            parts.title.icon = if (value.folded) AllIcons.General.ArrowRight else AllIcons.General.ArrowDown
+            parts.title.append(value.emptyText, SimpleTextAttributes(SimpleTextAttributes.STYLE_BOLD, foreground))
+            parts.title.append("  ${value.count}", SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, secondary))
+            parts.badgeLabel.isVisible = false
+            parts.byokLabel.isVisible = false
+            parts.warn.isVisible = false
+            parts.provider.isVisible = false
+            parts.star.icon = EmptyIcon.ICON_16
+            return
+        }
         val item = value.item
         if (item == null) {
             parts.title.append(value.emptyText, SimpleTextAttributes(SimpleTextAttributes.STYLE_BOLD, foreground))

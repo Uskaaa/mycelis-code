@@ -45,3 +45,34 @@ internal val AttentionDotIcon = DotIcon(UiStyle.Badge.ActivityAttention)
 
 /** The mark a merge conflict gets wherever it is named in words rather than drawn behind a badge. */
 internal val ConflictDotIcon = DotIcon(UiStyle.Badge.ActivityError, glyph = true)
+
+/**
+ * [base] with a small status dot painted in the bottom-right corner - the only way to signal
+ * "still working" or "needs you" while the tool window itself is collapsed in the stripe. A null
+ * [style] paints [base] unchanged.
+ */
+internal class BadgedIcon(private val base: Icon, private val style: UiStyle.Badge.Style?) : Icon {
+    override fun getIconWidth() = base.iconWidth
+
+    override fun getIconHeight() = base.iconHeight
+
+    override fun paintIcon(c: Component?, g: Graphics, x: Int, y: Int) {
+        base.paintIcon(c, g, x, y)
+        val badge = style ?: return
+        val g2 = g.create() as Graphics2D
+        try {
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+            val size = JBUI.scale(BADGE).toFloat()
+            val cx = (x + iconWidth - size).toFloat()
+            val cy = (y + iconHeight - size).toFloat()
+            g2.color = badge.bg()
+            g2.fill(Ellipse2D.Float(cx, cy, size, size))
+        } finally {
+            g2.dispose()
+        }
+    }
+
+    private companion object {
+        const val BADGE = 7
+    }
+}

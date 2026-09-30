@@ -64,6 +64,9 @@ internal class PickerPopup<T>(
     private val mode: Mode,
     private val autoClose: Boolean = mode == Mode.Single,
     private val onPrimary: (T) -> Unit,
+    // mycelis_change - rows that only toggle something (e.g. a collapsible group header) keep an
+    // auto-closing popup open and rebuild the list around the same row instead.
+    private val stayOpen: (T) -> Boolean = { false },
     private val sectionTitle: (List<T>, Int) -> String? = { _, _ -> null },
     private val trailingHit: ((JList<*>, java.awt.Rectangle, java.awt.Point) -> Boolean)? = null,
     private val onTrailing: ((T) -> Unit)? = null,
@@ -75,6 +78,9 @@ internal class PickerPopup<T>(
     private val minWidth: Int = 420,
     private val maxWidth: Int = 760,
     private val maxVisibleRows: Int = 10,
+    // mycelis_change - row count the popup height is sized for, when it differs from the current list
+    // (e.g. collapsed groups): a folded picker still opens at, and stays at, its full size.
+    private val sizeRows: (() -> Int)? = null,
     private val emptyListHeight: Int = 120,
     private val emptyText: String = KiloBundle.message("model.picker.no.matches"),
 ) {
@@ -276,7 +282,7 @@ internal class PickerPopup<T>(
 
     private fun primary(value: T) {
         onPrimary(value)
-        if (autoClose) {
+        if (autoClose && !stayOpen(value)) {
             popup.closeOk(null)
             return
         }
@@ -376,12 +382,15 @@ internal class PickerPopup<T>(
     private fun computeListPreferredHeight(list: JList<T>): Int {
         val renderer = list.cellRenderer ?: return JBUI.scale(emptyListHeight)
         val model = list.model
-        val count = model.size.coerceAtMost(maxVisibleRows)
+        val count = (sizeRows?.invoke() ?: model.size).coerceAtLeast(model.size).coerceAtMost(maxVisibleRows)
         if (count <= 0) return JBUI.scale(emptyListHeight)
-        val height = (0 until count).sumOf { idx ->
+        val real = model.size.coerceAtMost(count)
+        val heights = (0 until real).map { idx ->
             val value = model.getElementAt(idx)
             renderer.getListCellRendererComponent(list, value, idx, false, false).preferredSize.height
         }
+        // rows that are not in the list right now (folded away) are estimated at the average row height
+        val height = heights.sum() + (count - real) * (heights.average().takeIf { !it.isNaN() }?.toInt() ?: 0)
         val ins = list.insets
         return height + ins.top + ins.bottom
     }

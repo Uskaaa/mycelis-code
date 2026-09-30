@@ -115,25 +115,28 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
     }
 
     fun `test organization switch updates balance UI`() {
-        val orgs = listOf(ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"))
-        val personal = ProfileDto(
+        val orgs = listOf(
+            ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"),
+            ProfileOrganizationDto(id = "org_2", name = "Beta", role = "MEMBER"),
+        )
+        val initial = ProfileDto(
             email = "alice@test.com",
             name = "Alice",
             organizations = orgs,
             balance = ProfileBalanceDto(10.0),
         )
-        val org = personal.copy(balance = ProfileBalanceDto(25.0), currentOrgId = "org_1")
-        rpc.fakeProfile = personal
-        rpc.orgProfiles["org_1"] = org
-        app._state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = personal)
-        edt { panel.update(personal, KiloAppStatusDto.READY) }
+        val switched = initial.copy(balance = ProfileBalanceDto(25.0), currentOrgId = "org_2")
+        rpc.fakeProfile = initial
+        rpc.orgProfiles["org_2"] = switched
+        app._state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = initial)
+        edt { panel.update(initial, KiloAppStatusDto.READY) }
 
         edt {
             val t = text(panel)
             assertTrue(t, t.contains("\$10.00"))
             val combo = combos(panel).single()
-            assertEquals("Acme", combo.getItemAt(1))
-            assertFalse(combo.getItemAt(1).toString().contains("admin", ignoreCase = true))
+            assertEquals("Acme", combo.getItemAt(0))
+            assertFalse(combo.getItemAt(0).toString().contains("admin", ignoreCase = true))
             combo.selectedIndex = 1
         }
         flush()
@@ -142,7 +145,7 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
             val t = text(panel)
             assertTrue(t, t.contains("\$25.00"))
         }
-        assertEquals(listOf("org_1"), rpc.orgSelections)
+        assertEquals(listOf("org_2"), rpc.orgSelections)
     }
 
     fun `test logged in profile uses compact stack and copyable email`() {
@@ -294,19 +297,22 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
     }
 
     fun `test organization switch retains combo`() {
-        val orgs = listOf(ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"))
-        val personal = ProfileDto(
+        val orgs = listOf(
+            ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"),
+            ProfileOrganizationDto(id = "org_2", name = "Beta", role = "MEMBER"),
+        )
+        val initial = ProfileDto(
             email = "alice@test.com",
             name = "Alice",
             organizations = orgs,
             balance = ProfileBalanceDto(10.0),
         )
-        val org = personal.copy(balance = ProfileBalanceDto(25.0), currentOrgId = "org_1")
-        rpc.fakeProfile = personal
-        rpc.orgProfiles["org_1"] = org
-        app._state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = personal)
+        val switched = initial.copy(balance = ProfileBalanceDto(25.0), currentOrgId = "org_2")
+        rpc.fakeProfile = initial
+        rpc.orgProfiles["org_2"] = switched
+        app._state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = initial)
 
-        edt { panel.update(personal, KiloAppStatusDto.READY) }
+        edt { panel.update(initial, KiloAppStatusDto.READY) }
 
         val captured = edt { combos(panel).single() }
 
@@ -323,14 +329,17 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
     }
 
     fun `test organization switch keeps account visible during transient null profile`() {
-        val orgs = listOf(ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"))
-        val personal = ProfileDto(
+        val orgs = listOf(
+            ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"),
+            ProfileOrganizationDto(id = "org_2", name = "Beta", role = "MEMBER"),
+        )
+        val initial = ProfileDto(
             email = "alice@test.com",
             name = "Alice",
             organizations = orgs,
             balance = ProfileBalanceDto(10.0),
         )
-        app._state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = personal)
+        app._state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = initial)
 
         // A transient null profile update with PENDING progress (e.g. mid-switch state from collector)
         // must keep the logged-in card visible and not reset combo selection.
@@ -341,7 +350,7 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
         )
 
         edt {
-            panel.update(personal, KiloAppStatusDto.READY)
+            panel.update(initial, KiloAppStatusDto.READY)
             // Simulate user switching org — sets selectedIndex to 1
             combos(panel).single().selectedIndex = 1
             // State-collector fires a transient null before RPC completes
@@ -540,18 +549,21 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
     }
 
     fun `test combo model not rebuilt when org list unchanged during switch`() {
-        val orgs = listOf(ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"))
-        val personal = ProfileDto(
+        val orgs = listOf(
+            ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"),
+            ProfileOrganizationDto(id = "org_2", name = "Beta", role = "MEMBER"),
+        )
+        val initial = ProfileDto(
             email = "alice@test.com",
             name = "Alice",
             organizations = orgs,
             balance = ProfileBalanceDto(10.0),
         )
-        val switched = personal.copy(balance = ProfileBalanceDto(25.0), currentOrgId = "org_1")
-        rpc.fakeProfile = personal
-        rpc.orgProfiles["org_1"] = switched
-        app._state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = personal)
-        edt { panel.update(personal, KiloAppStatusDto.READY) }
+        val switched = initial.copy(balance = ProfileBalanceDto(25.0), currentOrgId = "org_2")
+        rpc.fakeProfile = initial
+        rpc.orgProfiles["org_2"] = switched
+        app._state.value = KiloAppStateDto(KiloAppStatusDto.READY, profile = initial)
+        edt { panel.update(initial, KiloAppStatusDto.READY) }
 
         val combo = edt { combos(panel).single() }
 
@@ -608,7 +620,7 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
 
         edt {
             assertEquals("removals should be 0 for unchanged org list", 0, removals)
-            assertEquals("selection should remain at org_1 index", 1, combos(panel).single().selectedIndex)
+            assertEquals("selection should remain at org_1 index", 0, combos(panel).single().selectedIndex)
             assertTrue(text(panel).contains("\$99.00"))
         }
     }
@@ -650,11 +662,11 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
             val c = combos(panel).single()
             // Same combo instance retained — never replaced
             assertSame(combo, c)
-            // 3 items: personal + org_1 + org_2
-            assertEquals(3, c.itemCount)
-            assertEquals("Beta", c.getItemAt(2))
+            // 2 items: org_1 + org_2
+            assertEquals(2, c.itemCount)
+            assertEquals("Beta", c.getItemAt(1))
             // Selection is at org_2
-            assertEquals(2, c.selectedIndex)
+            assertEquals(1, c.selectedIndex)
             // Model was never fully emptied during the update
             assertTrue(
                 "combo model must never become empty during org list change",
@@ -737,7 +749,7 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
             val t = text(panel)
             assertTrue("logged-in card must stay visible", t.contains("Alice"))
             assertFalse("must not flip to logged-out", t.contains("Not logged in"))
-            assertEquals("combo selection must be retained", 1, combos(panel).single().selectedIndex)
+            assertEquals("combo selection must be retained", 0, combos(panel).single().selectedIndex)
         }
 
         // Profile arrives — UI updates with new data
@@ -750,7 +762,10 @@ class UserProfileConfigurableTest : BasePlatformTestCase() {
     }
 
     fun `test connecting while logged in with org selected keeps combo selection`() {
-        val orgs = listOf(ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"))
+        val orgs = listOf(
+            ProfileOrganizationDto(id = "org_1", name = "Acme", role = "ADMIN"),
+            ProfileOrganizationDto(id = "org_2", name = "Beta", role = "MEMBER"),
+        )
         val profile = ProfileDto(
             email = "alice@test.com",
             name = "Alice",

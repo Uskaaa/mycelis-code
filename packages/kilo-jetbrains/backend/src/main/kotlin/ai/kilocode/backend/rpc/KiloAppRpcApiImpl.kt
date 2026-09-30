@@ -187,16 +187,14 @@ internal fun appStateDto(state: KiloAppState): KiloAppStateDto =
         )
     }
 
+// mycelis_change - Mycelis has no personal-account tier, everything runs through workspaces
+// (see dialog-kilo-profile.tsx in the CLI), so ProfileDto carries no hasPersonalAccount field.
 internal fun profileDto(p: KiloProfile200Response): ProfileDto = ProfileDto(
     email = p.profile.email,
     name = p.profile.name,
     organizations = p.profile.organizations.orEmpty().map { org ->
         ProfileOrganizationDto(id = org.id, name = org.name, role = org.role)
     },
-    // The pinned CLI release does not expose hasPersonalAccount yet, so default to
-    // showing the personal account. Flip back to p.profile.hasPersonalAccount once a
-    // CLI release ships the field.
-    hasPersonalAccount = true,
     balance = p.balance?.balance?.let { ProfileBalanceDto(balance = it) },
     kiloPass = p.kiloPass?.let {
         val base = it.currentPeriodBaseCreditsUsd ?: return@let null

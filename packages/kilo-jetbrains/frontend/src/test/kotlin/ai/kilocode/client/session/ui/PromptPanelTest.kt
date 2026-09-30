@@ -221,17 +221,18 @@ class PromptPanelTest : BasePlatformTestCase() {
         val focus = TestFocusManager()
         KeyboardFocusManager.setCurrentKeyboardFocusManager(focus)
         try {
-            assertEquals(SessionUiStyle.View.Prompt.separator().rgb, paint(panel, panel.width / 2, 0).rgb)
+            val top = panel.insets.top
+            assertEquals(SessionUiStyle.View.Prompt.separator().rgb, paint(panel, panel.width / 2, top).rgb)
 
             focus.focus(editor.contentComponent)
             editor.contentComponent.focusListeners.forEach {
                 it.focusGained(FocusEvent(editor.contentComponent, FocusEvent.FOCUS_GAINED))
             }
 
-            assertTrue(SessionUiStyle.View.Prompt.separator().rgb != paint(panel, panel.width / 2, 0).rgb)
-            assertEquals(JBUI.CurrentTheme.Focus.focusColor().rgb, paint(panel, panel.width / 2, 1).rgb)
-            assertEquals(JBUI.CurrentTheme.Focus.focusColor().rgb, paint(panel, 1, panel.height / 2).rgb)
-            assertEquals(JBUI.CurrentTheme.Focus.focusColor().rgb, paint(panel, panel.width - 1, panel.height / 2).rgb)
+            assertTrue(SessionUiStyle.View.Prompt.separator().rgb != paint(panel, panel.width / 2, top).rgb)
+            assertEquals(JBUI.CurrentTheme.Focus.focusColor().rgb, paint(panel, panel.width / 2, top + 1).rgb)
+            assertEquals(JBUI.CurrentTheme.Focus.focusColor().rgb, paint(panel, panel.insets.left + 1, panel.height / 2).rgb)
+            assertEquals(JBUI.CurrentTheme.Focus.focusColor().rgb, paint(panel, panel.width - panel.insets.right - 1, panel.height / 2).rgb)
         } finally {
             KeyboardFocusManager.setCurrentKeyboardFocusManager(current)
         }
@@ -250,9 +251,11 @@ class PromptPanelTest : BasePlatformTestCase() {
         panel.doLayout()
         val ins = panel.insets
 
-        assertEquals(JBUI.scale(SessionUiStyle.View.Prompt.FOCUS_WIDTH), ins.bottom)
-        assertEquals(ins.bottom, ins.left)
-        assertEquals(ins.bottom, ins.right)
+        // mycelis_change - inset rounded card: margins plus the focus ring width on every side
+        val ring = SessionUiStyle.View.Prompt.FOCUS_WIDTH
+        assertEquals(JBUI.scale(SessionUiStyle.View.Prompt.CARD_MARGIN_BOTTOM + ring), ins.bottom)
+        assertEquals(JBUI.scale(SessionUiStyle.View.Prompt.CARD_MARGIN_HORIZONTAL + ring), ins.left)
+        assertEquals(ins.left, ins.right)
         assertEquals(SessionUiStyle.Colors.sessionBackground().rgb, paint(panel, 0, panel.height / 2).rgb)
         assertEquals(SessionUiStyle.Colors.sessionBackground().rgb, paint(panel, panel.width - 1, panel.height / 2).rgb)
         assertEquals(SessionUiStyle.Colors.sessionBackground().rgb, paint(panel, panel.width / 2, panel.height - 1).rgb)
@@ -555,9 +558,9 @@ class PromptPanelTest : BasePlatformTestCase() {
             editor.document.insertString(0, "hello")
         }
 
-        invokeComponentAction("Kilo Session Undo", editor)
+        invokeComponentAction("Mycelis Session Undo", editor)
         assertEquals("", editor.document.text)
-        invokeComponentAction("Kilo Session Redo", editor)
+        invokeComponentAction("Mycelis Session Redo", editor)
         assertEquals("hello", editor.document.text)
     }
 
@@ -1873,7 +1876,7 @@ class PromptPanelTest : BasePlatformTestCase() {
 
     private fun invokeCompletionAction(editor: Editor) {
         val action = ActionUtil.getActions(editor.contentComponent).first { item ->
-            item.templatePresentation.text == "Kilo Prompt Completion"
+            item.templatePresentation.text == "Mycelis Prompt Completion"
         }
         val event = event(action, editor)
         ActionUtil.updateAction(action, event)

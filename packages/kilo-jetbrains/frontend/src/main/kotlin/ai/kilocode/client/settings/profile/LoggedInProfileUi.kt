@@ -208,12 +208,14 @@ internal class LoggedInProfileUi(
 
     @RequiresEdt
     private fun applyOrganizations(profile: ProfileDto) {
+        // mycelis_change - Mycelis has no personal-account tier, everything runs through
+        // workspaces (see dialog-kilo-profile.tsx in the CLI). Default to the owned workspace
+        // when no selection has ever been made, same as the CLI dialog.
         val orgs = profile.organizations
-        val personal = profile.hasPersonalAccount
-        val keys: List<Pair<String?, String>> = (if (personal) listOf(null to KiloBundle.message("profile.personalAccount")) else emptyList()) +
-                orgs.map { it.id to it.name }
+        val keys: List<Pair<String?, String>> = orgs.map { it.id to it.name }
 
-        val target = keys.indexOfFirst { it.first == profile.currentOrgId }.takeIf { it >= 0 } ?: 0
+        val fallback = orgs.indexOfFirst { it.role == "Owner" }.takeIf { it >= 0 } ?: 0
+        val target = keys.indexOfFirst { it.first == profile.currentOrgId }.takeIf { it >= 0 } ?: fallback
 
         currentOrgId = profile.currentOrgId
 
@@ -223,7 +225,9 @@ internal class LoggedInProfileUi(
                 comboKeys = keys
                 syncModel(keys)
             }
-            if (combo.selectedIndex != target) combo.selectedIndex = target
+            // No organizations means an empty model (there is no "personal" entry to fall back on), and
+            // JComboBox rejects any index on an empty model.
+            if (keys.isNotEmpty() && combo.selectedIndex != target) combo.selectedIndex = target
         } finally {
             applying = false
         }

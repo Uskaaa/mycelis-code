@@ -72,6 +72,14 @@ internal abstract class PickerListRenderer<T>(
     }
     private val wrap = PickerRow()
 
+    // mycelis_change - a header row (e.g. a collapsible provider group) drops the check column and
+    // most of the row padding, so it reads as a flush-left label above its items instead of one more
+    // indented, full-height item.
+    protected open fun isHeader(value: T): Boolean = false
+
+    private val rowBorder = row.border
+    private val headerBorder = JBUI.Borders.empty(UiStyle.Gap.MD, 0, UiStyle.Gap.XS, UiStyle.Gap.PAD)
+
     init {
         isOpaque = true
         top.isOpaque = true
@@ -101,6 +109,15 @@ internal abstract class PickerListRenderer<T>(
         sep.caption = section
         sep.setHideLine(index == 0)
         top.isVisible = section != null
+        val header = isHeader(value)
+        check.isVisible = !header
+        row.border = if (header) headerBorder else rowBorder
+        // mycelis_change - the popup's own selection inset is what keeps a header off the left edge;
+        // shrink just its left side so the group label lines up near the popup edge.
+        if (header) {
+            val ins = wrap.border?.getBorderInsets(wrap)
+            if (ins != null) wrap.border = javax.swing.BorderFactory.createEmptyBorder(ins.top, JBUI.scale(6), ins.bottom, ins.right)
+        }
         check.icon = if (checked(value)) checkedIcon else emptyIcon
         update(value, index, selected, focus, fg, weak)
         top.invalidate()

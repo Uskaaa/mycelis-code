@@ -17,7 +17,11 @@ import ai.kilocode.client.agentManager.AgentManagerPanel
 import ai.kilocode.client.agentManager.sessionAttentionNeeded
 import ai.kilocode.client.plugin.KiloBundle
 import ai.kilocode.client.ui.AttentionDotIcon
+import ai.kilocode.client.ui.BadgedIcon
+import ai.kilocode.client.ui.UiStyle
 import ai.kilocode.log.KiloLog
+import ai.kilocode.rpc.dto.SessionActivityDto
+import ai.kilocode.rpc.dto.SessionActivityKindDto
 import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DataProvider
@@ -27,6 +31,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowContentUiType
 import com.intellij.openapi.wm.ToolWindowFactory
@@ -202,6 +207,23 @@ internal class KiloToolWindowSetupService(
             }
             Disposer.register(manager) { dot.cancel() }
 
+            // mycelis_change - status badge on the tool window's own stripe icon: the only signal
+            // available while the window is collapsed. Green while a session is generating a
+            // response, orange/red when one is waiting on you (question/plan/permission) or failed,
+            // no badge when everything is idle.
+            // Reuse the tool window's own current icon (as the platform already resolved and scaled
+            // it for the stripe) instead of loading a fresh one - a freshly loaded icon rendered
+            // smaller than the platform-registered one on this run.
+            val baseIcon = toolWindow.icon ?: IconLoader.getIcon("/icons/kilo.svg", KiloToolWindowFactory::class.java)
+            val badge = cs.launch {
+                project.service<KiloSessionService>().activity.map(::toolWindowBadge).collect { style ->
+                    withContext(Dispatchers.Main) {
+                        toolWindow.setIcon(BadgedIcon(baseIcon, style))
+                    }
+                }
+            }
+            Disposer.register(manager) { badge.cancel() }
+
             val actions = listOfNotNull(
                 ActionManager.getInstance().getAction("Kilo.NewSession"),
                 ActionManager.getInstance().getAction("Kilo.NewWorktree"),
@@ -219,4 +241,21 @@ internal class KiloToolWindowSetupService(
             LOG.error("Failed to set up Kilo tool window content", e)
         }
     }
+}
+
+/**
+ * Status badge style for the tool window's own stripe icon, from the same global activity map
+ * [sessionAttentionNeeded] reads. Priority: a failed session outranks one waiting on you, which
+ * outranks one still generating a response.
+ */
+private fun toolWindowBadge(activity: Map<String, SessionActivityDto>): UiStyle.Badge.Style? {
+    if (activity.values.any { it.kind == SessionActivityKindDto.ERROR }) return UiStyle.Badge.ActivityError
+    if (activity.values.any {
+            it.kind == SessionActivityKindDto.QUESTION ||
+                it.kind == SessionActivityKindDto.PLAN ||
+                it.kind == SessionActivityKindDto.PERMISSION
+        }
+    ) return UiStyle.Badge.ActivityAttention
+    if (activity.values.any { it.kind == SessionActivityKindDto.RUNNING }) return UiStyle.Badge.ActivityRunning
+    return null
 }

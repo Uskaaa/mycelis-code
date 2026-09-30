@@ -30,16 +30,17 @@ internal class AccountPickerRenderer(
         horizontalAlignment = SwingConstants.LEFT
         verticalAlignment = SwingConstants.CENTER
     }
-    private val row = JPanel(BorderLayout(UiStyle.Gap.md(), 0))
+    private val row = JPanel(BorderLayout(UiStyle.Gap.sm(), 0))
     private val wrap = PickerRow()
 
     init {
         UiStyle.Components.transparent(this, icon, title, row)
+        // mycelis_change - tighter padding: the popup and the row inset already add their own margin
         row.border = JBUI.Borders.empty(
+            UiStyle.Gap.sm(),
+            UiStyle.Gap.xs(),
+            UiStyle.Gap.sm(),
             UiStyle.Gap.md(),
-            UiStyle.Gap.lg(),
-            UiStyle.Gap.md(),
-            UiStyle.Gap.lg(),
         )
         row.add(icon, BorderLayout.WEST)
         row.add(title, BorderLayout.CENTER)

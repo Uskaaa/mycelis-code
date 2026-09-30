@@ -8,9 +8,13 @@ import ai.kilocode.client.ui.HoverIcon
 import ai.kilocode.client.ui.PickerButton
 import ai.kilocode.client.ui.RoundedContentPanel
 import ai.kilocode.client.ui.UiStyle
+import ai.kilocode.client.ui.layout.HAlign
+import ai.kilocode.client.ui.layout.VAlign
+import ai.kilocode.client.ui.layout.align
 import ai.kilocode.client.ui.layout.Stack
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.ui.popup.PopupShowOptions
 import com.intellij.ui.CollectionListModel
 import com.intellij.ui.ListUtil
 import com.intellij.ui.ScrollPaneFactory
@@ -40,9 +44,14 @@ import javax.swing.ScrollPaneConstants
 internal class SessionAccountOverlay(
     private val select: (String?) -> Unit,
     private val profile: () -> Unit,
+    // mycelis_change - flat: rendered as the footer row under the prompt box (workspace picker and
+    // balance on the left, profile button on the right, no card, popup opens upward) instead of a
+    // floating rounded card over the transcript.
+    private val flat: Boolean = false,
 ) : BorderLayoutPanel() {
 
     private val picker = PickerButton().apply {
+        if (flat) idleFill = null
         isEnabled = false
         text = " "
         cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
@@ -67,13 +76,21 @@ internal class SessionAccountOverlay(
         addActionListener { profile() }
     }
 
-    private val row = Stack.horizontal(gap = UiStyle.Gap.md())
-        .next(picker)
-        .next(balance)
-        .next(profileBtn)
+    private val row: JComponent = if (flat) {
+        BorderLayoutPanel().apply {
+            isOpaque = false
+            addToLeft(Stack.horizontal(gap = UiStyle.Gap.md()).next(picker).next(balance))
+            addToRight(profileBtn.align(HAlign.CENTER, VAlign.CENTER))
+        }
+    } else {
+        Stack.horizontal(gap = UiStyle.Gap.md())
+            .next(picker)
+            .next(balance)
+            .next(profileBtn)
+    }
 
     private val panel = RoundedContentPanel(UiStyle.Gap.lg(), UiStyle.Gap.lg()).apply {
-        addToCenter(row)
+        if (!flat) addToCenter(row)
     }
 
     private var choices: List<AccountChoice> = emptyList()
@@ -82,7 +99,13 @@ internal class SessionAccountOverlay(
     init {
         isOpaque = false
         isVisible = false
-        addToCenter(panel)
+        if (flat) border = JBUI.Borders.empty(
+            UiStyle.Gap.XS,
+            SessionUiStyle.View.Prompt.CARD_MARGIN_HORIZONTAL,
+            UiStyle.Gap.SM,
+            SessionUiStyle.View.Prompt.CARD_MARGIN_HORIZONTAL,
+        )
+        addToCenter(if (flat) row else panel)
     }
 
     @RequiresEdt
@@ -123,10 +146,11 @@ internal class SessionAccountOverlay(
     private fun updateLoggedIn(prof: ai.kilocode.rpc.dto.ProfileDto, switching: Boolean, target: String?): Boolean {
         var layout = false
 
+        // mycelis_change - Mycelis has no personal-account tier, everything runs through
+        // workspaces (see dialog-kilo-profile.tsx in the CLI). Default to the owned workspace
+        // when no selection has ever been made, same as the CLI dialog.
         val orgs = prof.organizations
-        val personal = prof.hasPersonalAccount
-        val next = (if (personal) listOf(AccountChoice(null, KiloBundle.message("profile.personalAccount"))) else emptyList()) +
-            orgs.map { org -> AccountChoice(org.id, org.name) }
+        val next = orgs.map { org -> AccountChoice(org.id, org.name) }
         if (next != choices) {
             choices = next
             layout = true
@@ -134,9 +158,14 @@ internal class SessionAccountOverlay(
 
         if (currentOrgId != prof.currentOrgId) currentOrgId = prof.currentOrgId
 
-        val activeId = if (switching) target else prof.currentOrgId ?: if (personal) null else orgs.firstOrNull()?.id
+        val fallback = orgs.firstOrNull { it.role == "Owner" }?.id ?: orgs.firstOrNull()?.id
+        val activeId = if (switching) target else prof.currentOrgId ?: fallback
         val active = choices.firstOrNull { it.org == activeId } ?: choices.firstOrNull()
-        val title = "${active?.title ?: " "} ▾"
+        // mycelis_change - never show a blank picker label: while organizations is still empty
+        // (e.g. not loaded yet), fall back to the profile's own name/email instead of "  ▾", which
+        // reads as the whole overlay having disappeared.
+        val label = active?.title ?: prof.name?.takeIf { it.isNotBlank() } ?: prof.email
+        val title = "$label ▾"
         if (picker.text != title) {
             picker.text = title
             layout = true
@@ -250,7 +279,7 @@ internal class SessionAccountOverlay(
             viewport.background = bg
             viewport.isOpaque = true
         }
-        val content = RoundedContentPanel(UiStyle.Gap.sm(), UiStyle.Gap.sm()).apply {
+        val content = RoundedContentPanel(UiStyle.Gap.xs(), UiStyle.Gap.xs()).apply {
             addToCenter(scroll)
         }
 
@@ -265,7 +294,7 @@ internal class SessionAccountOverlay(
             .setMovable(false)
             .createPopup()
 
-        popup.showUnderneathOf(picker)
+        if (flat) popup.show(PopupShowOptions.aboveComponent(picker)) else popup.showUnderneathOf(picker)
     }
 
     /**

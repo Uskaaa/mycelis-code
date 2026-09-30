@@ -32,10 +32,16 @@ object SessionUiStyle {
          */
         private const val SESSION_DELTA = 8
 
+        // mycelis_change - dark themes' plain panel background (e.g. Darcula's ~#3C3F41) reads as a
+        // light gray rather than a true dark backdrop. Shift it toward black; light themes are left
+        // exactly as the platform theme provides.
+        private const val DARK_SHIFT = 18
+
         /**
          * Whole session backdrop: follows the panel (chrome) background, distinct from raised
          * surfaces. When the panel background matches the raised surface — so raised surfaces would
-         * be invisible against it — the backdrop is shifted by [SESSION_DELTA] instead.
+         * be invisible against it — the backdrop is shifted by [SESSION_DELTA] instead. In a dark
+         * theme, the result is additionally darkened by [DARK_SHIFT].
          *
          * Not a `namedColor`: `JBColor.namedColor` resolves through theme `"*"` wildcard rules by
          * suffix (`name.endsWith("background")`), so any theme with a `*.background` rule would
@@ -46,9 +52,17 @@ object SessionUiStyle {
             UIManager.getColor("Kilo.Session.background") ?: run {
                 val raised = codeBlockBackground()
                 val panel = UIManager.getColor("Panel.background") ?: raised
-                if (panel.rgb == raised.rgb) UiStyle.Colors.contrast(raised, SESSION_DELTA) else panel
+                val base = if (panel.rgb == raised.rgb) UiStyle.Colors.contrast(raised, SESSION_DELTA) else panel
+                if (UiStyle.Colors.bright(base)) base else darken(base, DARK_SHIFT)
             }
         }
+
+        private fun darken(color: Color, amount: Int): Color = Color(
+            (color.red - amount).coerceAtLeast(0),
+            (color.green - amount).coerceAtLeast(0),
+            (color.blue - amount).coerceAtLeast(0),
+            color.alpha,
+        )
 
         /** Single raised surface (code blocks, tool/shell output, prompt bubble, prompt input): the editor background. */
         fun codeBlockBackground(): Color = JBColor.namedColor(
@@ -234,6 +248,12 @@ object SessionUiStyle {
             const val EDITOR_CHROME = 16
             const val SEND_BUTTON_SIZE = 24
             const val CORNER_ARC = 10
+            // mycelis_change - the input box is an inset, fully rounded card (side/top margins, corner
+            // radius) with the workspace/balance footer row underneath it.
+            const val CARD_MARGIN_HORIZONTAL = 12
+            const val CARD_MARGIN_TOP = 8
+            const val CARD_MARGIN_BOTTOM = 2
+            const val CARD_ARC = 14
             const val FOCUS_WIDTH = 2
             const val PANEL_VERTICAL_PADDING = 8
             const val PANEL_HORIZONTAL_PADDING = 12

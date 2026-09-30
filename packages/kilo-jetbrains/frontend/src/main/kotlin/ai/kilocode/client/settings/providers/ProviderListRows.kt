@@ -58,32 +58,22 @@ internal fun providerListActionText(action: ProviderListAction) = when (action) 
     ProviderListAction.ENABLE -> KiloBundle.message("settings.providers.enable")
 }
 
+// mycelis_change - Mycelis is the only supported sign-in path, so this dropped the "Popular
+// providers"/"All providers" catalog browsing sections (third-party BYOK sign-ins). The list now
+// shows only Mycelis itself - always, so its OAuth/Disconnect action stays reachable regardless of
+// login state - and any custom OpenAI-compatible provider the user configured via kilo.json/the
+// Add Custom Provider dialog. isPopularProvider/popularProviderIndex/hiddenProvider in
+// ProviderCatalog.kt are unused now but kept intact so restoring BYOK catalog browsing later is
+// just bringing this filtering back.
 internal fun providerListRows(state: ProviderSettingsDto, query: String, disabledRows: Boolean = false): List<ProviderListRow> {
     val q = query.trim()
     val ids = state.connected.toSet()
     val disabled = state.disabled.toSet()
     val filtered = state.providers.filter { ModelSearch.matches(q, it.name) }
-    val connected = filtered
-        .filter { configured(it, state, ids) }
-        .sortedWith(compareBy<ProviderSettingsProviderDto> { popularProviderIndex(it) }.thenBy { it.name.lowercase() }.thenBy { it.id })
-    val connectedIds = connected.mapTo(mutableSetOf()) { it.id }
-    val popular = filtered
-        .filter { it.id !in connectedIds }
-        .filter { it.id !in disabled }
-        .filter { !hiddenProvider(it) }
-        .filter { isPopularProvider(it) }
-        .sortedWith(compareBy<ProviderSettingsProviderDto> { popularProviderIndex(it) }.thenBy { it.name.lowercase() }.thenBy { it.id })
-    val popularIds = popular.mapTo(mutableSetOf()) { it.id }
-    val all = filtered
-        .filter { it.id !in connectedIds }
-        .filter { it.id !in popularIds }
-        .filter { !hiddenProvider(it) }
-        .sortedWith(compareBy<ProviderSettingsProviderDto> { it.name.lowercase() }.thenBy { it.id })
-    val rows = mutableListOf<ProviderListRow>()
-    rows += connected.map { ProviderListRow(it, KiloBundle.message("settings.providers.connected"), providerActions(it, state, disabled), disabled = disabledRows) }
-    rows += popular.map { ProviderListRow(it, KiloBundle.message("settings.providers.popular"), providerActions(it, state, disabled), disabled = disabledRows) }
-    rows += all.map { ProviderListRow(it, KiloBundle.message("settings.providers.all"), providerActions(it, state, disabled), disabled = disabledRows) }
-    return rows
+    val visible = filtered
+        .filter { it.id == KILO_PROVIDER_ID || it.id in disabled || configured(it, state, ids) }
+        .sortedWith(compareBy<ProviderSettingsProviderDto> { it.id != KILO_PROVIDER_ID }.thenBy { it.name.lowercase() }.thenBy { it.id })
+    return visible.map { ProviderListRow(it, KiloBundle.message("settings.providers.connected"), providerActions(it, state, disabled), disabled = disabledRows) }
 }
 
 internal fun providerActions(

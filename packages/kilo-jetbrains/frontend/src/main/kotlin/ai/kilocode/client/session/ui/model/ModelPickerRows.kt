@@ -10,6 +10,10 @@ internal fun modelPickerRows(
     allowEmpty: Boolean = false,
     emptyText: String = KiloBundle.message("settings.models.notSet"),
     includeSmall: Boolean = false,
+    // mycelis_change - when set, each provider group is preceded by a clickable header row and its
+    // models are dropped while the provider is in [collapsed] (never while searching).
+    collapsible: Boolean = false,
+    collapsed: Set<String> = emptySet(),
 ): List<ModelPickerRow> {
     val q = query.trim()
     val all = if (includeSmall) items else items.filterNot(ModelText::small)
@@ -40,10 +44,16 @@ internal fun modelPickerRows(
         val section = KiloBundle.message("model.picker.recommended")
         out += recommended.map { ModelPickerRow(it, section, favorite = false) }
     }
-    for ((_, list) in grouped) {
+    for ((provider, list) in grouped) {
         val sorted = list.sortedWith(compareBy<ModelPicker.Item> { it.display.lowercase() }.thenBy { it.id })
         val label = sorted.firstOrNull()?.providerName ?: continue
-        out += sorted.map { ModelPickerRow(it, label, favorite = false) }
+        if (!collapsible) {
+            out += sorted.map { ModelPickerRow(it, label, favorite = false) }
+            continue
+        }
+        val fold = q.isBlank() && provider in collapsed
+        out += ModelPickerRow(null, label, favorite = false, emptyText = label, header = true, folded = fold, count = sorted.size, group = provider)
+        if (!fold) out += sorted.map { ModelPickerRow(it, label, favorite = false) }
     }
     return out
 }
@@ -68,7 +78,7 @@ internal fun modelCycle(
 }
 
 internal fun modelPickerIndex(rows: List<ModelPickerRow>, key: String?): Int {
-    if (key == null) return rows.indexOfFirst { it.item == null }
+    if (key == null) return rows.indexOfFirst { it.item == null && !it.header }
     return rows.indexOfFirst { it.item?.key == key }
 }
 
@@ -79,6 +89,8 @@ internal fun modelPickerIndex(rows: List<ModelPickerRow>, index: Int): Int {
 
 internal fun modelPickerSectionTitle(rows: List<ModelPickerRow>, index: Int): String? {
     val row = rows.getOrNull(index) ?: return null
+    // A provider header row draws its own label, so it needs no separator caption on top of it.
+    if (row.header) return null
     val section = row.section ?: return null
     val prev = rows.getOrNull(index - 1)
     return if (prev?.section != section) section else null

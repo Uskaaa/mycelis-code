@@ -506,7 +506,7 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         edt {
             content.update(
                 ProviderSettingsDto(
-                    providers = listOf(provider("models-dev-provider", "Models Dev Provider")),
+                    providers = listOf(provider("kilo", "Models Dev Provider")),
                 ),
             )
         }
@@ -523,9 +523,9 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         edt {
             content.update(
                 ProviderSettingsDto(
-                    providers = listOf(provider("cloudflare-ai-gateway", "Cloudflare AI Gateway")),
+                    providers = listOf(provider("kilo", "Cloudflare AI Gateway")),
                     auth = mapOf(
-                        "cloudflare-ai-gateway" to listOf(
+                        "kilo" to listOf(
                             ProviderAuthMethodDto("api", "API key"),
                             ProviderAuthMethodDto("oauth", "OAuth"),
                         ),
@@ -555,12 +555,13 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
                 ProviderSettingsDto(
                     providers = listOf(
                         provider(
-                            "openai",
-                            "OpenAI",
-                            metadata = ProviderMetadataDto(noteKey = "settings.providers.note.openai"),
+                            "kilo",
+                            "Kilo",
+                            metadata = ProviderMetadataDto(noteKey = "settings.providers.note.kilo"),
                         ),
                         provider("plain", "Plain"),
                     ),
+                    config = mapOf("plain" to CustomProviderConfigDto("plain", npm = CUSTOM_PROVIDER_PACKAGE)),
                 ),
             )
             val list = list(content)
@@ -568,7 +569,7 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
             list.doLayout()
             UIUtil.dispatchAllInvocationEvents()
 
-            val noted = rows(content).indexOfFirst { it.key == "openai" }
+            val noted = rows(content).indexOfFirst { it.key == "kilo" }
             val plain = rows(content).indexOfFirst { it.key == "plain" }
             val notedBounds = list.getCellBounds(noted, noted)
             val plainBounds = list.getCellBounds(plain, plain)
@@ -649,6 +650,7 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
                     provider("env-provider", "Env Provider", source = "env"),
                 ),
                 config = mapOf("local-openai" to CustomProviderConfigDto("local-openai", npm = "@ai-sdk/openai-compatible")),
+                connected = listOf("env-provider"),
             ),
             "",
         )
@@ -657,44 +659,26 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         assertEquals(listOf("env"), rows.single { it.key == "env-provider" }.badges.map { it.text })
     }
 
-    fun `test popular rows use vscode order including kilo`() {
+    // mycelis_change - "Popular providers"/"All providers" catalog browsing is retired (Mycelis is
+    // the only sign-in path); Mycelis and custom providers are now always in one section.
+
+    fun `test kilo always visible and unconnected third party providers are hidden`() {
         val rows = providerListRows(
             ProviderSettingsDto(
                 providers = listOf(
-                    provider("openrouter", "OpenRouter", priority = 5),
                     provider("kilo", "Kilo", priority = 0),
-                    provider("google", "Google", priority = 4),
                     provider("anthropic", "Anthropic", priority = 1),
-                    provider("vercel", "Vercel", priority = 6),
                     provider("openai", "OpenAI", priority = 3),
-                    provider("deepseek", "DeepSeek", priority = 2),
                 ),
             ),
             "",
         )
 
-        assertEquals(listOf("kilo", "anthropic", "deepseek", "openai", "google", "openrouter", "vercel"), rows.map { it.key })
-        assertEquals("Popular providers", activeListSectionTitle(rows, 0))
+        assertEquals(listOf("kilo"), rows.map { it.key })
+        assertEquals("Connected providers", activeListSectionTitle(rows, 0))
     }
 
-    fun `test popular rows use fallback order without metadata`() {
-        val rows = providerListRows(
-            ProviderSettingsDto(
-                providers = listOf(
-                    provider("unknown", "Unknown"),
-                    provider("openai", "OpenAI"),
-                    provider("anthropic", "Anthropic"),
-                ),
-            ),
-            "",
-        )
-
-        assertEquals(listOf("anthropic", "openai", "unknown"), rows.map { it.key })
-        assertEquals("Popular providers", activeListSectionTitle(rows, 0))
-        assertEquals("All providers", activeListSectionTitle(rows, 2))
-    }
-
-    fun `test connected providers appear first and are not duplicated in popular section`() {
+    fun `test connected providers appear, unconnected third party providers do not`() {
         val rows = providerListRows(
             ProviderSettingsDto(
                 providers = listOf(provider("anthropic", "Anthropic", priority = 1), provider("openai", "OpenAI", priority = 3)),
@@ -703,13 +687,12 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
             "",
         )
 
-        assertEquals(listOf("anthropic", "openai"), rows.map { it.key })
+        assertEquals(listOf("anthropic"), rows.map { it.key })
         assertEquals("Connected providers", activeListSectionTitle(rows, 0))
-        assertEquals("Popular providers", activeListSectionTitle(rows, 1))
         assertEquals(listOf(ProviderListAction.DISCONNECT), rows[0].actions)
     }
 
-    fun `test source custom catalog providers remain visible while configured custom providers are connected`() {
+    fun `test unconfigured custom provider templates are hidden while configured ones are connected`() {
         val rows = providerListRows(
             ProviderSettingsDto(
                 providers = listOf(
@@ -722,10 +705,8 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
             "",
         )
 
-        assertEquals(listOf("local-openai", "anthropic", "available-custom"), rows.map { it.key })
+        assertEquals(listOf("local-openai"), rows.map { it.key })
         assertEquals("Connected providers", activeListSectionTitle(rows, 0))
-        assertEquals("Popular providers", activeListSectionTitle(rows, 1))
-        assertEquals("All providers", activeListSectionTitle(rows, 2))
         assertEquals(listOf(ProviderListAction.EDIT, ProviderListAction.DELETE), rows[0].actions)
     }
 
@@ -793,7 +774,7 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         assertTrue(rows.single().actions.isEmpty())
     }
 
-    fun `test disabled popular provider appears in all providers with enable`() {
+    fun `test disabled provider still appears with enable action`() {
         val rows = providerListRows(
             ProviderSettingsDto(
                 providers = listOf(provider("anthropic", "Anthropic", priority = 1), provider("openai", "OpenAI", priority = 3)),
@@ -802,25 +783,9 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
             "",
         )
 
-        assertEquals(listOf("openai", "anthropic"), rows.map { it.key })
-        assertEquals("All providers", activeListSectionTitle(rows, 1))
-        assertEquals(listOf(ProviderListAction.ENABLE), rows[1].actions)
-    }
-
-    fun `test non popular providers appear in all providers alphabetically`() {
-        val rows = providerListRows(
-            ProviderSettingsDto(
-                providers = listOf(
-                    provider("zeta", "Zeta"),
-                    provider("alpha", "Alpha"),
-                    provider("openai", "OpenAI", priority = 3),
-                ),
-            ),
-            "",
-        )
-
-        assertEquals(listOf("openai", "alpha", "zeta"), rows.map { it.key })
-        assertEquals("All providers", activeListSectionTitle(rows, 1))
+        assertEquals(listOf("anthropic"), rows.map { it.key })
+        assertEquals("Connected providers", activeListSectionTitle(rows, 0))
+        assertEquals(listOf(ProviderListAction.ENABLE), rows[0].actions)
     }
 
     fun `test filtering by provider name updates rows and sections`() {
@@ -828,19 +793,16 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         edt {
             content.update(
                 ProviderSettingsDto(
-                    providers = listOf(
-                        provider("openai", "OpenAI", priority = 3),
-                        provider("anthropic", "Anthropic", priority = 1),
-                        provider("alpha", "Alpha Labs"),
-                    ),
+                    providers = listOf(provider("kilo", "Kilo"), provider("local-openai", "Local OpenAI", source = "custom")),
+                    config = mapOf("local-openai" to CustomProviderConfigDto("local-openai", npm = CUSTOM_PROVIDER_PACKAGE)),
                 ),
             )
 
-            content.filter("open")
+            content.filter("local")
 
             val rows = rows(content)
-            assertEquals(listOf("openai"), rows.map { it.key })
-            assertEquals("Popular providers", activeListSectionTitle(rows, 0))
+            assertEquals(listOf("local-openai"), rows.map { it.key })
+            assertEquals("Connected providers", activeListSectionTitle(rows, 0))
         }
     }
 
@@ -1072,13 +1034,13 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
     }
 
     fun `test provider reload clears loading overlay after state loads`() {
-        val rpc = installProvider(providerState(provider("openai", "OpenAI")))
+        val rpc = installProvider(providerState(provider("kilo", "OpenAI")))
         val panel = edt { createUi() }
 
-        flushUntil { rpc.stateCalls.isNotEmpty() && edt { rows(panel).map { it.key } == listOf("openai") && !text(panel).contains("Loading providers") } }
+        flushUntil { rpc.stateCalls.isNotEmpty() && edt { rows(panel).map { it.key } == listOf("kilo") && !text(panel).contains("Loading providers") } }
 
         edt {
-            assertEquals(listOf("openai"), rows(panel).map { it.key })
+            assertEquals(listOf("kilo"), rows(panel).map { it.key })
             assertFalse(text(panel).contains("Loading providers"))
         }
     }
@@ -1087,14 +1049,14 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         val ready = CompletableDeferred<ProviderOAuthReadyDto>()
         val rpc = installProvider(
             ProviderSettingsDto(
-                providers = listOf(provider("github-copilot", "GitHub Copilot")),
-                auth = mapOf("github-copilot" to listOf(ProviderAuthMethodDto("oauth", "OAuth"))),
+                providers = listOf(provider("kilo", "GitHub Copilot")),
+                auth = mapOf("kilo" to listOf(ProviderAuthMethodDto("oauth", "OAuth"))),
             ),
         )
         rpc.authorizesReady.add(ready)
         val panel = edt { createUi() }
 
-        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("github-copilot") } }
+        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("kilo") } }
         edt { triggerPrimary(panel) }
         flushUntil { rpc.authorizes.size == 1 && edt { text(panel).contains("Starting OAuth for GitHub Copilot") } }
 
@@ -1117,15 +1079,15 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         val callback = CompletableDeferred<ai.kilocode.rpc.dto.ProviderActionResultDto>()
         val rpc = installProvider(
             ProviderSettingsDto(
-                providers = listOf(provider("github-copilot", "GitHub Copilot")),
-                auth = mapOf("github-copilot" to listOf(ProviderAuthMethodDto("oauth", "OAuth"))),
+                providers = listOf(provider("kilo", "GitHub Copilot")),
+                auth = mapOf("kilo" to listOf(ProviderAuthMethodDto("oauth", "OAuth"))),
             ),
         )
         rpc.ready = ProviderOAuthReadyDto(method = "auto")
         rpc.callbacksReady.add(callback)
         val panel = edt { createUi() }
 
-        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("github-copilot") } }
+        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("kilo") } }
         edt { triggerPrimary(panel) }
         flushUntil { rpc.callbacks.size == 1 && edt { text(panel).contains("Waiting for authorization... (1:30)") } }
         edt { components(panel).filterIsInstance<JButton>().single { it.text == "Cancel" && it.isVisible }.doClick() }
@@ -1136,7 +1098,7 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
 
         edt {
             assertEquals(1, rpc.stateCalls.size)
-            assertEquals(listOf("github-copilot"), rows(panel).map { it.key })
+            assertEquals(listOf("kilo"), rows(panel).map { it.key })
             assertFalse(text(panel).contains("Cancel"))
         }
     }
@@ -1144,9 +1106,9 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
     fun `test provider oauth prefers headless method original index`() {
         val rpc = installProvider(
             ProviderSettingsDto(
-                providers = listOf(provider("openai", "OpenAI")),
+                providers = listOf(provider("kilo", "OpenAI")),
                 auth = mapOf(
-                    "openai" to listOf(
+                    "kilo" to listOf(
                         ProviderAuthMethodDto("oauth", "ChatGPT Pro/Plus"),
                         ProviderAuthMethodDto("oauth", "ChatGPT Pro/Plus (headless)"),
                     ),
@@ -1155,7 +1117,7 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         )
         val panel = edt { createUi() }
 
-        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("openai") } }
+        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("kilo") } }
         edt { triggerPrimary(panel) }
         flushUntil { rpc.authorizes.size == 1 }
 
@@ -1165,9 +1127,9 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
     fun `test provider oauth falls back to first oauth method original index`() {
         val rpc = installProvider(
             ProviderSettingsDto(
-                providers = listOf(provider("github-copilot", "GitHub Copilot")),
+                providers = listOf(provider("kilo", "GitHub Copilot")),
                 auth = mapOf(
-                    "github-copilot" to listOf(
+                    "kilo" to listOf(
                         ProviderAuthMethodDto("oauth", "OAuth"),
                     ),
                 ),
@@ -1175,69 +1137,25 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         )
         val panel = edt { createUi() }
 
-        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("github-copilot") } }
+        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("kilo") } }
         edt { triggerPrimary(panel) }
         flushUntil { rpc.authorizes.size == 1 }
 
         assertEquals("0", rpc.authorizes.single().method)
     }
 
-    fun `test provider oauth auto response shows device auth panel`() {
-        val callback = CompletableDeferred<ai.kilocode.rpc.dto.ProviderActionResultDto>()
-        val browser = installBrowser()
-        val rpc = installProvider(
-            ProviderSettingsDto(
-                providers = listOf(provider("openai", "OpenAI")),
-                auth = mapOf(
-                    "openai" to listOf(
-                        ProviderAuthMethodDto("oauth", "ChatGPT Pro/Plus"),
-                        ProviderAuthMethodDto("oauth", "ChatGPT Pro/Plus (headless)"),
-                    ),
-                ),
-            ),
-        )
-        rpc.ready = ProviderOAuthReadyDto(
-            method = "auto",
-            url = "https://auth.openai.com/device",
-            instructions = "Enter code: ABCD-EFGH",
-        )
-        rpc.callbacksReady.add(callback)
-        val panel = edt { createUi() }
-
-        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("openai") } }
-        edt { triggerPrimary(panel) }
-        flushUntil { rpc.callbacks.size == 1 && edt { text(panel).contains("Waiting for authorization... (1:30)") } }
-
-        edt {
-            val t = text(panel)
-            assertTrue(t, t.contains("Starting OAuth for OpenAI"))
-            assertTrue(t, t.contains("Open this URL"))
-            assertTrue(t, t.contains("A B C D - E F G H"))
-            assertTrue(t, t.contains("Open Browser"))
-            assertTrue(t, t.contains("Cancel"))
-            assertEquals("https://auth.openai.com/device", fieldsByName(panel, "kilo.provider.oauth.url").single().text)
-            assertEquals(listOf("https://auth.openai.com/device"), browser.urls)
-            val qr = components(panel).filterIsInstance<JBLabel>().single { it.name == "kilo.provider.oauth.qr" }
-            assertNotNull(qr.icon)
-        }
-
-        edt { components(panel).filterIsInstance<JButton>().single { it.text == "Cancel" && it.isVisible }.doClick() }
-        flushUntil { edt { rpc.callbacks.size == 1 && rows(panel).single().disabled.not() } }
-        callback.complete(ai.kilocode.rpc.dto.ProviderActionResultDto(providerState(provider("stale", "Stale"))))
-    }
-
     fun `test provider oauth cancel before authorize completion skips callback`() {
         val ready = CompletableDeferred<ProviderOAuthReadyDto>()
         val rpc = installProvider(
             ProviderSettingsDto(
-                providers = listOf(provider("github-copilot", "GitHub Copilot")),
-                auth = mapOf("github-copilot" to listOf(ProviderAuthMethodDto("oauth", "OAuth"))),
+                providers = listOf(provider("kilo", "GitHub Copilot")),
+                auth = mapOf("kilo" to listOf(ProviderAuthMethodDto("oauth", "OAuth"))),
             ),
         )
         rpc.authorizesReady.add(ready)
         val panel = edt { createUi() }
 
-        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("github-copilot") } }
+        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("kilo") } }
         edt { triggerPrimary(panel) }
         flushUntil { rpc.authorizes.size == 1 && edt { text(panel).contains("Cancel") } }
         edt { components(panel).filterIsInstance<JButton>().single { it.text == "Cancel" && it.isVisible }.doClick() }
@@ -1247,7 +1165,7 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         edt {
             assertTrue(rpc.callbacks.isEmpty())
             assertEquals(1, rpc.stateCalls.size)
-            assertEquals(listOf("github-copilot"), rows(panel).map { it.key })
+            assertEquals(listOf("kilo"), rows(panel).map { it.key })
         }
     }
 
@@ -1255,14 +1173,14 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         val ready = CompletableDeferred<ProviderOAuthReadyDto>()
         val rpc = installProvider(
             ProviderSettingsDto(
-                providers = listOf(provider("github-copilot", "GitHub Copilot")),
-                auth = mapOf("github-copilot" to listOf(ProviderAuthMethodDto("oauth", "OAuth"))),
+                providers = listOf(provider("kilo", "GitHub Copilot")),
+                auth = mapOf("kilo" to listOf(ProviderAuthMethodDto("oauth", "OAuth"))),
             ),
         )
         rpc.authorizesReady.add(ready)
         val panel = edt { createUi() }
 
-        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("github-copilot") } }
+        flushUntil { rpc.stateCalls.size == 1 && edt { rows(panel).map { it.key } == listOf("kilo") } }
         edt { triggerPrimary(panel) }
         flushUntil { rpc.authorizes.size == 1 && edt { text(panel).contains("Starting OAuth for GitHub Copilot") } }
         val timeout = runBlocking {
@@ -1312,10 +1230,10 @@ class ProvidersSettingsUiTest : BasePlatformTestCase() {
         flushUntil { rpc.stateCalls.size == 1 }
         edt { panel.reload() }
         flushUntil { rpc.stateCalls.size == 1 }
-        first.complete(providerState(provider("old", "Old")))
+        first.complete(providerState(provider("kilo", "Old")))
         flushUntil { first.isCompleted }
 
-        edt { assertEquals(listOf("old"), rows(panel).map { it.key }) }
+        edt { assertEquals(listOf("kilo"), rows(panel).map { it.key }) }
     }
 
     fun `test dispose ignores pending reload completion`() {

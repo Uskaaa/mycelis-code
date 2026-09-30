@@ -53,6 +53,7 @@ class HistoryLoadingTest : SessionControllerTestBase() {
             WorkspaceChanged
             ViewChanged progress
             ViewChanged session
+            AccountOverlayChanged show loggedIn=false
         """, events)
 
         assertSession(
@@ -108,6 +109,7 @@ class HistoryLoadingTest : SessionControllerTestBase() {
             WorkspaceChanged
             ViewChanged progress
             ViewChanged session
+            AccountOverlayChanged show loggedIn=false
         """, events)
     }
 

@@ -115,12 +115,17 @@ data class SessionEditorStyle(
             return create(scheme, scheme.editorFontName, size)
         }
 
+        // mycelis_change - a small fixed bump on top of the editor-tracked size: the chat transcript
+        // read noticeably small at the platform's default editor font size.
+        private const val TRANSCRIPT_SIZE_BUMP = 2
+
         internal fun create(
             scheme: EditorColorsScheme = EditorColorsManager.getInstance().globalScheme,
             family: String = scheme.editorFontName,
             size: Int = scheme.editorFontSize,
         ): SessionEditorStyle {
             val small = scaledEditorSize(size, JBFont.small())
+            val transcriptSize = size + TRANSCRIPT_SIZE_BUMP
             return SessionEditorStyle(
                 editorScheme = scheme,
                 editorFamily = family,
@@ -128,9 +133,9 @@ data class SessionEditorStyle(
                 editorForeground = scheme.defaultForeground,
                 editorBackground = scheme.defaultBackground,
                 editorFont = Font(family, Font.PLAIN, size),
-                transcriptFont = uiFont(UiStyle.Fonts.regular(), Font.PLAIN, size),
+                transcriptFont = uiFont(UiStyle.Fonts.regular(), Font.PLAIN, transcriptSize),
                 smallEditorFont = uiFont(UiStyle.Fonts.small(), Font.PLAIN, small),
-                boldEditorFont = uiFont(UiStyle.Fonts.regular(), Font.BOLD, size),
+                boldEditorFont = uiFont(UiStyle.Fonts.regular(), Font.BOLD, transcriptSize),
                 headerFont = UiStyle.Fonts.header(),
                 regularFont = UiStyle.Fonts.regular(),
                 boldFont = UiStyle.Fonts.bold(),

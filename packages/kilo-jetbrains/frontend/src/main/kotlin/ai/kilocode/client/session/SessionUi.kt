@@ -479,21 +479,13 @@ class SessionUi(
             onStart = { onboarding.start() }
         }
 
+        // mycelis_change - the workspace/balance/profile widget is the footer row under the prompt box
+        // (see the bottom container below), not a floating card over the transcript's top-right corner.
         account = SessionAccountOverlay(
             select = { org -> controller.selectOrganization(org) },
             profile = { controller.openProfile() },
+            flat = true,
         )
-        root.addOverlay(account) { pane, child ->
-            val size = child.preferredSize
-            val top = JBUI.scale(SessionUiStyle.View.Prompt.PANEL_VERTICAL_PADDING)
-            val right = JBUI.scale(SessionUiStyle.View.Prompt.PANEL_HORIZONTAL_PADDING)
-            java.awt.Rectangle(
-                pane.width - size.width - right,
-                top,
-                size.width,
-                size.height,
-            )
-        }
 
         sessionContent = JPanel(BorderLayout()).apply { isOpaque = false }
 
@@ -672,6 +664,7 @@ class SessionUi(
                 container.next(row)
             }
             container.next(aligned)
+            container.next(account)
             bottom = container
             root.content.add(container, BorderLayout.SOUTH)
         }

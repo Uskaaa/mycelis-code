@@ -185,8 +185,15 @@ class ModelPicker : PickerButton() {
         onClear()
     }
 
+    // mycelis_change - provider sections the user folded away in the popup; kept per picker so the
+    // choice survives reopening it. A non-blank search always shows every match.
+    private val collapsed = mutableSetOf<String>()
+
+    private fun rows(query: String) =
+        modelPickerRows(items, favorites(), query, allowEmpty, emptyText, includeSmall, collapsible = true, collapsed = collapsed)
+
     private fun showPopup() {
-        val data = CollectionListModel(modelPickerRows(items, favorites(), "", allowEmpty, emptyText, includeSmall))
+        val data = CollectionListModel(rows(""))
         var popup: PickerPopup<ModelPickerRow>? = null
         val renderer = ModelPickerRenderer(
             model = data,
@@ -202,6 +209,11 @@ class ModelPicker : PickerButton() {
         }
 
         fun activate(row: ModelPickerRow) {
+            if (row.header) {
+                val group = row.group ?: return
+                if (!collapsed.add(group)) collapsed.remove(group)
+                return
+            }
             val item = row.item
             if (item == null) {
                 clear()
@@ -227,12 +239,14 @@ class ModelPicker : PickerButton() {
                 Placement.ABOVE -> PickerPopup.Placement.ABOVE
                 Placement.BELOW -> PickerPopup.Placement.BELOW
             },
-            rows = { q -> modelPickerRows(items, favorites(), q, allowEmpty, emptyText, includeSmall) },
+            rows = { q -> rows(q) },
             model = data,
             renderer = renderer,
             key = { it.key },
             mode = PickerPopup.Mode.Single,
             onPrimary = ::activate,
+            stayOpen = { it.header },
+            sizeRows = { modelPickerRows(items, favorites(), "", allowEmpty, emptyText, includeSmall, collapsible = true, collapsed = emptySet()).size },
             sectionTitle = ::modelPickerSectionTitle,
             trailingHit = ModelPickerRenderer::isFavoriteClick,
             onTrailing = ::toggle,
@@ -255,14 +269,21 @@ class ModelPicker : PickerButton() {
 
 internal const val MODEL_PICKER_EXPANDED_KEY = "kilo.model.picker.expanded"
 
+// mycelis_change - header/folded/count/group describe a collapsible provider header row (only built
+// when modelPickerRows is asked for collapsible sections); clicking one toggles that provider's
+// models instead of selecting anything.
 internal data class ModelPickerRow(
     val item: ModelPicker.Item?,
     val section: String?,
     val favorite: Boolean,
     val emptyText: String = "",
+    val header: Boolean = false,
+    val folded: Boolean = false,
+    val count: Int = 0,
+    val group: String? = null,
 ) {
     val key: String? get() = item?.key
-    val isEmpty: Boolean get() = item == null
+    val isEmpty: Boolean get() = item == null && !header
 }
 
 internal object ModelSearch {

@@ -77,6 +77,29 @@ class KiloBackendWorkspaceManager(
     }
 
     /**
+     * Reload every currently open workspace's providers/agents/commands/skills.
+     *
+     * mycelis_change - a workspace switch (see KiloBackendAppService.setOrganization) changes
+     * which Mycelis workspace the "kilo" provider's model list is scoped to server-side, but each
+     * open KiloBackendWorkspace already cached its own `/provider` response from before the
+     * switch. Without this, `/models` kept showing the previous workspace's models (or none)
+     * until the project was closed and reopened.
+     */
+    fun reloadAll() {
+        workspaces.values.forEach { it.reload() }
+    }
+
+    /**
+     * Directories of every currently open workspace.
+     *
+     * mycelis_change - the CLI's own provider/model cache for a directory is keyed by that exact
+     * directory (see InstanceState in opencode); [KiloBackendAppService.setOrganization] needs
+     * this list to invalidate each open workspace's server-side cache, not just the CLI's
+     * directory-less default instance.
+     */
+    fun directories(): List<String> = workspaces.keys.toList()
+
+    /**
      * Remove any cached workspace whose directory resolves to the same real path as [dir].
      * Callers pass git porcelain paths, while workspaces are often keyed by the resolved
      * (`toRealPath`) path or the IDE base path, so an exact-string match would miss the entry

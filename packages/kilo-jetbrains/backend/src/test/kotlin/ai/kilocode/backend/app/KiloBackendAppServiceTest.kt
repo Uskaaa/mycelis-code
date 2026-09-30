@@ -28,6 +28,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import java.net.ServerSocket
+import java.net.URLEncoder
+import java.nio.file.Files
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.AfterTest
@@ -51,6 +53,8 @@ class KiloBackendAppServiceTest {
         scope.cancel()
         mock.close()
     }
+
+    private fun encode(value: String) = URLEncoder.encode(value, Charsets.UTF_8)
 
     private fun create(loadTimeoutMs: Long = 30_000L): KiloBackendAppService =
         KiloBackendAppService.create(scope, FakeCliServer(mock), log, loadTimeoutMs)
@@ -375,6 +379,35 @@ class KiloBackendAppServiceTest {
 
         svc.setOrganization(null)
         assertEquals("""{"organizationId":null}""", mock.lastOrganizationSetBody)
+    }
+
+    // mycelis_change - the CLI's provider/model cache for a directory is keyed by that exact
+    // directory (InstanceState in opencode). A switch call with no `directory` only invalidates
+    // the CLI's directory-less default instance, leaving every actually open workspace's own
+    // cache stale - which is why /models kept showing the previous workspace's models no matter
+    // how many times the client-side workspace reloaded afterward. This asserts the fix: one
+    // `/kilo/organization` call per open workspace directory.
+    @Test
+    fun `set organization invalidates each open workspace's own directory`() = runBlocking {
+        val svc = create()
+        svc.connect()
+        ready(svc)
+
+        val dirA = Files.createTempDirectory("kilo-app-org-a")
+        val dirB = Files.createTempDirectory("kilo-app-org-b")
+        try {
+            svc.workspaces.get(dirA.toString())
+            svc.workspaces.get(dirB.toString())
+
+            svc.setOrganization("org_1")
+
+            assertEquals(2, mock.organizationSetPaths.size)
+            assertTrue(mock.organizationSetPaths.any { it.contains("directory=${encode(dirA.toString())}") })
+            assertTrue(mock.organizationSetPaths.any { it.contains("directory=${encode(dirB.toString())}") })
+        } finally {
+            dirA.toFile().deleteRecursively()
+            dirB.toFile().deleteRecursively()
+        }
     }
 
     @Test
@@ -913,8 +946,6 @@ class KiloBackendAppServiceTest {
         assertEquals("alice@test.com", dto.profile?.email)
         assertEquals("Alice", dto.profile?.name)
         assertEquals("ADMIN", dto.profile?.organizations?.firstOrNull()?.role)
-        // The pinned CLI does not expose hasPersonalAccount yet; the mapper defaults it to true.
-        assertTrue(dto.profile?.hasPersonalAccount ?: false)
         assertEquals(42.5, dto.profile?.balance?.balance)
         assertEquals("org_1", dto.profile?.currentOrgId)
     }

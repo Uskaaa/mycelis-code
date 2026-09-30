@@ -660,6 +660,41 @@ class KiloBackendWorkspaceTest {
         assertEquals(1, state.agents.agents.size)
     }
 
+    // mycelis_change - a workspace switch changes which Mycelis workspace the "kilo" provider's
+    // model list is scoped to server-side, but each open KiloBackendWorkspace had already cached
+    // its own /provider response from before the switch. Without reloading them, /models kept
+    // showing the previous workspace's models until the project was closed and reopened.
+    @Test
+    fun `set organization reloads open workspaces with fresh providers`() = runBlocking {
+        mock.providers = PROVIDERS_JSON
+        mock.agents = AGENTS_JSON
+        mock.commands = COMMANDS_JSON
+        mock.skills = SKILLS_JSON
+
+        val app = setup()
+        val ws = ready(app)
+        loaded(ws)
+
+        mock.providers = OPENAI_PROVIDERS_JSON
+        val before = mock.requestCount("/provider")
+
+        app.setOrganization("org_1")
+
+        assertTrue(
+            mock.awaitRequestCount("/provider", before + 1),
+            "Organization switch did not reload workspace providers; state=${ws.state.value}; logs=${log.messages}",
+        )
+
+        val state = withTimeout(15_000) {
+            ws.state.first {
+                it is KiloWorkspaceState.Ready &&
+                    it.providers.providers.firstOrNull()?.id == "openai"
+            }
+        } as KiloWorkspaceState.Ready
+
+        assertEquals("openai", state.providers.providers[0].id)
+    }
+
     @Test
     fun `SSE global disposed triggers full app reload with new data`() = runBlocking {
         mock.providers = PROVIDERS_JSON

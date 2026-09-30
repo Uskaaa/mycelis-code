@@ -64,6 +64,11 @@ class MockCliServer : AutoCloseable {
     @Volatile var lastWorkspaceConfigPatchPath: String? = null
     @Volatile var lastWorkspaceConfigPatchBody: String? = null
     @Volatile var lastOrganizationSetBody: String? = null
+    // mycelis_change - one entry (full path, including its `directory` query param) per
+    // `/kilo/organization` POST received; lets tests assert the real CLI's per-directory
+    // model/provider cache gets invalidated for every open workspace, not just a directory-less
+    // default instance.
+    val organizationSetPaths = CopyOnWriteArrayList<String>()
     @Volatile var mcp = "[]"
     @Volatile var mcpStatus = 200
     @Volatile var mcpActionStatus = 200
@@ -410,6 +415,7 @@ class MockCliServer : AutoCloseable {
                 }
                 bare == "/kilo/organization" && method == "POST" -> {
                     lastOrganizationSetBody = body
+                    organizationSetPaths.add(path)
                     respond(output, organizationSetStatus, "true")
                 }
                 path == "/global/event" -> handleSse(output, latch)

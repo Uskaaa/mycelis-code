@@ -920,18 +920,35 @@ class KiloBackendAppService private constructor(
         val body = JsonObject(
             mapOf("organizationId" to (organizationId?.let { JsonPrimitive(it) } ?: JsonNull)),
         ).toString()
-        val request = Request.Builder()
-            .url("http://127.0.0.1:$port/kilo/organization")
-            .header("Accept", "application/json")
-            .post(body.toRequestBody("application/json".toMediaType()))
-            .build()
+        // mycelis_change - the CLI's own provider/model cache for a directory is keyed by that
+        // exact directory (InstanceState in opencode); this endpoint only invalidates the
+        // directory it is called with (or the CLI's directory-less default instance, if none is
+        // given). A plain call with no `directory` therefore left every actually open workspace's
+        // server-side cache stale, so `/models` kept showing the previous workspace's models no
+        // matter how many times the client-side workspace was reloaded afterward. Call it once per
+        // open workspace directory so each one's own cache gets invalidated.
+        val dirs = workspaces.directories().ifEmpty { listOf(null) }
         withContext(Dispatchers.IO) {
-            http.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    throw IllegalStateException("Organization switch failed: HTTP ${response.code} ${response.message}")
+            dirs.forEach { dir ->
+                val url = "http://127.0.0.1:$port/kilo/organization" +
+                    if (dir != null) "?directory=${java.net.URLEncoder.encode(dir, Charsets.UTF_8)}" else ""
+                val request = Request.Builder()
+                    .url(url)
+                    .header("Accept", "application/json")
+                    .post(body.toRequestBody("application/json".toMediaType()))
+                    .build()
+                http.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        throw IllegalStateException("Organization switch failed: HTTP ${response.code} ${response.message}")
+                    }
                 }
             }
         }
+        // mycelis_change - each open workspace already cached the stale /provider response from
+        // before the switch (see KiloBackendWorkspaceManager.reloadAll). Reload them so /models
+        // reflects the newly selected workspace immediately instead of only after reopening the
+        // project.
+        workspaces.reloadAll()
         return refreshProfile()
     }
 

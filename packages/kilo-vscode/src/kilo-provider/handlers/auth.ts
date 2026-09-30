@@ -70,12 +70,23 @@ export async function handleLogin(ctx: AuthContext, attempt: number, getAttempt:
 
     ctx.invalidateProviderUsage()
     ctx.invalidateProviders()
-    await ctx.disposeGlobal()
 
     // Step 3: Fetch profile and push to webview
     const { data: profile } = await ctx.client.kilo.profile(undefined, { throwOnError: true })
     ctx.postMessage({ type: "profileData", data: profile })
+    // mycelis_change - was gated behind disposeGlobal() (client.global.dispose()) - a full
+    // teardown/rebuild of every provider/model list for every open instance, not just this one's,
+    // which is what made login "take forever" even though the actual OAuth callback had already
+    // succeeded. Fire deviceAuthComplete as soon as we have a profile - the model list itself is
+    // still refreshing in the background below, and the model picker already shows a loading
+    // state for that (see ModelSelector.tsx) instead of blocking here.
     ctx.postMessage({ type: "deviceAuthComplete" })
+    ctx.fetchAndSendProviders().catch((e) =>
+      console.error("[Kilo New] KiloProvider: Failed to refresh providers after login:", e),
+    )
+    ctx.fetchAndSendAgents().catch((e) =>
+      console.error("[Kilo New] KiloProvider: Failed to refresh agents after login:", e),
+    )
   } catch (error) {
     if (attempt !== getAttempt()) return
     ctx.postMessage({
@@ -118,7 +129,17 @@ export async function handleSetOrganization(ctx: AuthContext, organizationId: st
 
   console.log("[Kilo New] KiloProvider: Switching organization:", organizationId ?? "personal")
   try {
-    await ctx.client.kilo.organization.set({ organizationId }, { throwOnError: true })
+    // mycelis_change - the CLI's provider/model cache for a directory is keyed by that exact
+    // directory (InstanceState in opencode). Without `directory` here, the server's own
+    // provider.invalidate() (run as part of this same request - see kilo-gateway.ts) invalidated
+    // its directory-less default instance instead of this workspace's, leaving the real workspace
+    // cache stale. That staleness used to get papered over by disposeGlobal() below doing a full
+    // global.dispose() - tearing down and rebuilding every provider/model list for every open
+    // instance, not just this workspace's - which is the "takes forever" switch users saw.
+    await ctx.client.kilo.organization.set(
+      { organizationId, directory: ctx.getWorkspaceDirectory() },
+      { throwOnError: true },
+    )
   } catch (error) {
     console.error("[Kilo New] KiloProvider: Failed to switch organization:", error)
     // Re-fetch current profile to reset webview state — best-effort
@@ -133,7 +154,6 @@ export async function handleSetOrganization(ctx: AuthContext, organizationId: st
 
   ctx.invalidateProviderUsage()
   ctx.invalidateProviders()
-  await ctx.disposeGlobal()
 
   // Org switch succeeded — refresh profile and providers independently (best-effort)
   try {

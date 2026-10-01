@@ -213,6 +213,9 @@
         <action id="Kilo.OpenMarketplaceSettings"
                 class="ai.kilocode.client.actions.OpenMarketplaceSettingsAction"/>
 
+        <action id="Kilo.SetNotificationSound"
+                class="ai.kilocode.client.actions.SetNotificationSoundAction"/>
+
         <action id="Kilo.OpenLocalConfig"
                 class="ai.kilocode.client.actions.OpenLocalConfigAction"/>
 
@@ -244,6 +247,7 @@
             <separator/>
             <reference ref="Kilo.OpenUserProfileSettings"/>
             <reference ref="Kilo.OpenMarketplaceSettings"/>
+            <reference ref="Kilo.SetNotificationSound"/>
             <separator/>
             <reference ref="Kilo.OpenConfigGroup"/>
             <separator/>

@@ -3,6 +3,7 @@ package ai.kilocode.client
 import ai.kilocode.client.app.KiloWorkspaceService
 import ai.kilocode.client.app.Workspace
 import ai.kilocode.client.app.KiloSessionService
+import ai.kilocode.client.attention.SessionAttentionSoundService
 import ai.kilocode.client.session.SessionManager
 import ai.kilocode.client.session.SessionSidePanelManager
 import ai.kilocode.client.telemetry.Telemetry
@@ -223,6 +224,11 @@ internal class KiloToolWindowSetupService(
                 }
             }
             Disposer.register(manager) { badge.cancel() }
+
+            // mycelis_change - notification sound: force this light service to be created now, off
+            // the same `activity` flow the dot/badge above already subscribe to. Its own constructor
+            // owns the subscription and lives for the project's lifetime; nothing else calls it.
+            project.service<SessionAttentionSoundService>()
 
             val actions = listOfNotNull(
                 ActionManager.getInstance().getAction("Kilo.NewSession"),

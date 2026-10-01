@@ -243,7 +243,7 @@ Supported sound names are `default`, `question`, `permission`, `error`, `done`, 
 
 The `attention.sound_pack` setting selects a sound pack registered by a TUI plugin. Setting an arbitrary pack name does not install or load a pack. Per-event file overrides remain the simplest way to customize sounds without a plugin.
 
-There is no slash command or command-palette toggle for notifications or sounds. Use `tui.json` or `tui.jsonc` so all attention behavior is controlled by the same configuration. Keep Awake is separate and has its own `/caffeinate` command; see [Keep Awake](/docs/getting-started/settings/keep-awake).
+Use `/sound` (or the "Set Notification Sound" command palette entry) to pick a single sound that plays for every attention event - question, permission, error, and done - with a live preview as you move through the list. This choice is stored locally and takes priority over `attention.sounds` and the active sound pack; pick "Default (per event)" to fall back to those again, or "Off" to mute attention sounds regardless of the `sound` config value. `enabled` and `notifications` still require `tui.json`/`tui.jsonc`, since they are not part of this picker. Keep Awake is separate and has its own `/caffeinate` command; see [Keep Awake](/docs/getting-started/settings/keep-awake).
 
 ## Slash Commands
 

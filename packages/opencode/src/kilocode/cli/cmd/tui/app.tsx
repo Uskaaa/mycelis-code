@@ -23,6 +23,7 @@ import { isKiloError, showKiloErrorToast } from "@/kilocode/kilo-errors"
 import { registerKiloCommands } from "@/kilocode/kilo-commands"
 import { initializeTUIDependencies } from "@kilocode/kilo-gateway/tui"
 import { DialogProcessList } from "@/kilocode/cli/cmd/tui/component/dialog-process-list"
+import { DialogNotificationSound } from "@/kilocode/cli/cmd/tui/component/dialog-notification-sound" // mycelis_change
 import { useIndexingWarnings } from "@/kilocode/cli/cmd/tui/indexing-warning"
 import { KiloTerminalTitle } from "./terminal-title"
 import type { KiloTitleIcon } from "./title-icon"
@@ -282,6 +283,20 @@ export function init() {
           dialog.replace(() => <DialogProcessList />)
         },
       },
+      // mycelis_change start - notification sound picker, parity with the VS Code/JetBrains dialogs
+      {
+        namespace: "palette",
+        name: "notification.set_sound",
+        title: "Set Notification Sound",
+        desc: "Choose the sound Kilo plays when it's done or needs your input",
+        category: "Mycelis",
+        slashName: "sound",
+        slashAliases: ["notification-sound"],
+        run: () => {
+          dialog.replace(() => <DialogNotificationSound />)
+        },
+      },
+      // mycelis_change end
       {
         namespace: "palette",
         name: "permission.allow_everything",

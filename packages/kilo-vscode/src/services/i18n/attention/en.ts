@@ -13,4 +13,10 @@ export const dict = {
   "kilocode:attention.unsupported": "OS notifications aren't supported on this platform.",
   "kilocode:attention.identity":
     "Could not determine this editor's notification identity, so native notifications are unavailable. VS Code notifications still work.",
+  "kilocode:attention.sound.pickerTitle": "Set Notification Sound",
+  "kilocode:attention.sound.pickerPlaceholder": "Choose the sound Kilo plays when it's done or needs your input",
+  "kilocode:attention.sound.current": "Current",
+  "kilocode:attention.sound.preview": "Play",
+  "kilocode:attention.sound.default": "Default (per event)",
+  "kilocode:attention.sound.system": "System sound",
 }

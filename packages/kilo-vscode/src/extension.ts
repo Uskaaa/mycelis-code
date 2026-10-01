@@ -16,7 +16,7 @@ import { KiloConnectionService } from "./services/cli-backend"
 import { registerAutocompleteProvider } from "./services/autocomplete"
 import { ensureBackendForAutocomplete } from "./services/autocomplete/ensure-backend"
 import { AutocompleteServiceManager } from "./services/autocomplete/AutocompleteServiceManager"
-import { AttentionService, showOSNotification } from "./services/attention"
+import { AttentionService, showOSNotification, pickNotificationSound } from "./services/attention"
 import { CaffeinationService } from "./services/caffeination"
 import { confirmCaffeination } from "./services/caffeination/confirm"
 import { createCaffeinationDriver } from "./services/caffeination/inhibitor"
@@ -572,6 +572,7 @@ export async function activate(context: vscode.ExtensionContext) {
       }
       return toggle(next)
     }),
+    vscode.commands.registerCommand("kilo-code.new.setNotificationSound", () => pickNotificationSound()),
     vscode.commands.registerCommand("kilo-code.new.generateTerminalCommand", async () => {
       const input = await vscode.window.showInputBox({
         prompt: "Describe the terminal command you want to generate",

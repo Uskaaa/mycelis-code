@@ -203,6 +203,11 @@
         "category": "Mycelis"
       },
       {
+        "command": "kilo-code.new.setNotificationSound",
+        "title": "Set Notification Sound",
+        "category": "Mycelis"
+      },
+      {
         "command": "kilo-code.new.autocomplete.generateSuggestions",
         "title": "Generate Suggested Edits",
         "category": "Mycelis"

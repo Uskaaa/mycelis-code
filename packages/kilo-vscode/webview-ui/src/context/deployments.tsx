@@ -1,9 +1,12 @@
 // mycelis_change - new file, mirrors context/provider.tsx's load/retry shape
-import { createContext, useContext, createSignal, onCleanup } from "solid-js"
+import { createContext, useContext, createSignal, createEffect, onCleanup } from "solid-js"
 import type { ParentComponent, Accessor } from "solid-js"
 import { useVSCode } from "./vscode"
 import type { Deployment, ExtensionMessage, MarketplaceModel, DeploymentGpuEstimate } from "../types/messages"
 import { createDeploymentAction } from "../utils/deployment-action"
+import { isDeploymentSettled } from "../utils/deployment-status"
+
+const POLL_INTERVAL_MS = 5000
 
 interface DeploymentsContextValue {
   deployments: Accessor<Deployment[]>
@@ -54,9 +57,25 @@ export const DeploymentsProvider: ParentComponent = (props) => {
     if (loading()) vscode.postMessage({ type: "requestDeployments" })
   })
 
+  // mycelis_change start - a deployment can take minutes to provision or stop, with no push/SSE
+  // status update - poll while anything is still transitioning, and stop once everything settles.
+  let pollTimer: ReturnType<typeof setInterval> | undefined
+  createEffect(() => {
+    const pending = deployments().some((d) => !isDeploymentSettled(d.status))
+    if (pending && !pollTimer) {
+      pollTimer = setInterval(() => vscode.postMessage({ type: "requestDeployments" }), POLL_INTERVAL_MS)
+    }
+    if (!pending && pollTimer) {
+      clearInterval(pollTimer)
+      pollTimer = undefined
+    }
+  })
+  // mycelis_change end
+
   onCleanup(() => {
     unsubReady()
     clearTimeout(fallback)
+    if (pollTimer) clearInterval(pollTimer)
     action.dispose()
   })
 

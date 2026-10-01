@@ -1,5 +1,5 @@
 // mycelis_change - new file
-import { Component, Show, createSignal } from "solid-js"
+import { Component, Show, createSignal, createEffect } from "solid-js"
 import { Dialog } from "@kilocode/kilo-ui/dialog"
 import { Button } from "@kilocode/kilo-ui/button"
 import { Tag } from "@kilocode/kilo-ui/tag"
@@ -28,6 +28,14 @@ const DeploymentDetailDialog: Component<DeploymentDetailDialogProps> = (props) =
   const [busy, setBusy] = createSignal(false)
   const [confirmDelete, setConfirmDelete] = createSignal(false)
 
+  // mycelis_change - the deployments context polls the list while anything is transitioning (see
+  // context/deployments.tsx); pick up that live status instead of staying stuck on the snapshot
+  // this dialog was opened with.
+  createEffect(() => {
+    const found = deployments.deployments().find((d) => d.id === props.deployment.id)
+    if (found) setStatus(found.status)
+  })
+
   const running = () => status().toLowerCase() === "running"
 
   const toggle = async () => {
@@ -35,14 +43,16 @@ const DeploymentDetailDialog: Component<DeploymentDetailDialogProps> = (props) =
     try {
       if (running()) {
         await deployments.stop(props.deployment.id)
-        setStatus("Stopped")
+        // mycelis_change - "Stopping", not "Stopped": the request was only just accepted, the
+        // real status takes a moment to catch up (the context's poll picks it up from here).
+        setStatus("Stopping")
         showToast({
           variant: "success",
           title: language.t("settings.deployments.detail.stopping", { name: props.deployment.name }),
         })
       } else {
         await deployments.start(props.deployment.id)
-        setStatus("Running")
+        setStatus("Starting") // mycelis_change - see "Stopping" note above
         showToast({
           variant: "success",
           title: language.t("settings.deployments.detail.starting", { name: props.deployment.name }),

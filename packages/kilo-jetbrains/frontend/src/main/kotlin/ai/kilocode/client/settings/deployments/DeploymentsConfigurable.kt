@@ -29,6 +29,9 @@ import java.util.Locale
 import javax.swing.JComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private val edt = Dispatchers.EDT + ModalityState.any().asContextElement()
@@ -55,6 +58,7 @@ internal class DeploymentsSettingsUi(
 ) : SettingsListPanel(cs, ActiveListConfig.Equal) {
     private var dir = dir
     private var deployments: Map<String, DeploymentDto> = emptyMap()
+    private var pollJob: Job? = null
 
     init {
         start()
@@ -74,6 +78,27 @@ internal class DeploymentsSettingsUi(
         withContext(edt) { deployments = state.deployments.associateBy { it.id } }
         return state.deployments.map(::item)
     }
+
+    // mycelis_change start - a deployment can take minutes to provision or stop, with no push
+    // update for status - poll while anything is still transitioning (see isDeploymentSettled),
+    // and stop once everything has settled. Runs after every apply (initial load, manual refresh,
+    // post-mutation reload, and the poll's own reload), so it naturally re-arms or cancels itself.
+    override fun afterApply() {
+        pollJob?.cancel()
+        pollJob = null
+        if (deployments.values.all { isDeploymentSettled(it.status) }) return
+        pollJob = cs.launch {
+            delay(POLL_INTERVAL_MS)
+            withContext(edt) { reload() }
+        }
+    }
+
+    override fun dispose() {
+        pollJob?.cancel()
+        pollJob = null
+        super.dispose()
+    }
+    // mycelis_change end
 
     override fun onCell(key: String, cellId: String) {
         when (cellId) {
@@ -177,6 +202,7 @@ internal class DeploymentsSettingsUi(
         const val START_CELL = "start"
         const val STOP_CELL = "stop"
         const val DELETE_CELL = "delete"
+        const val POLL_INTERVAL_MS = 5000L
         val LOG = KiloLog.create(DeploymentsSettingsUi::class.java)
     }
 }

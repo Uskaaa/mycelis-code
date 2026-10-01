@@ -12,13 +12,16 @@
  * a detail view (dialog-deployment-detail.tsx) to start/stop/delete instead of acting instantly.
  */
 
-import { createSignal } from "solid-js"
+import { createSignal, onCleanup, onMount } from "solid-js"
 import { useDialog } from "@tui/ui/dialog"
 import { useToast } from "@tui/ui/toast"
 import { useTheme } from "@tui/context/theme"
 import { DialogSelect, type DialogSelectOption } from "@tui/ui/dialog-select"
 import { DialogDeploymentCreate } from "./dialog-deployment-create.js"
 import { DialogDeploymentDetail } from "./dialog-deployment-detail.js"
+import { isDeploymentSettled } from "./deployment-status.js"
+
+const POLL_INTERVAL_MS = 5000
 
 // These types are OpenCode-internal and imported at runtime
 type UseSDK = any
@@ -70,6 +73,36 @@ export function DialogDeployments(props: DialogDeploymentsProps) {
       reopen(deployments())
     }
   }
+
+  // mycelis_change start - a deployment can take minutes to provision or stop, with no push/SSE
+  // status update - poll in place (no dialog.replace, so the list's cursor position is undisturbed)
+  // while anything is still transitioning, and stop once everything has settled.
+  let pollTimer: ReturnType<typeof setInterval> | undefined
+
+  function stopPoll() {
+    if (!pollTimer) return
+    clearInterval(pollTimer)
+    pollTimer = undefined
+  }
+
+  function schedulePoll() {
+    if (pollTimer) return
+    if (!deployments().some((d) => !isDeploymentSettled(d.status))) return
+    pollTimer = setInterval(async () => {
+      try {
+        const response = await sdk.client.kilo.deployments.list()
+        const next = (response?.data as Deployment[]) ?? deployments()
+        setDeployments(next)
+        if (!next.some((d) => !isDeploymentSettled(d.status))) stopPoll()
+      } catch {
+        // A transient failure shouldn't stop status updates - just retry next tick.
+      }
+    }, POLL_INTERVAL_MS)
+  }
+
+  onMount(schedulePoll)
+  onCleanup(stopPoll)
+  // mycelis_change end
 
   function openCreate() {
     dialog.replace(() => (

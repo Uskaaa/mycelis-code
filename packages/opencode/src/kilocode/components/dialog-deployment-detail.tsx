@@ -6,7 +6,7 @@
  * lets the user start, stop, or delete it, then returns to a refreshed list.
  */
 
-import { createSignal } from "solid-js"
+import { createSignal, onCleanup, onMount } from "solid-js"
 import { TextAttributes } from "@opentui/core"
 import { useDialog } from "@tui/ui/dialog"
 import { useToast } from "@tui/ui/toast"
@@ -14,6 +14,9 @@ import { useTheme } from "@tui/context/theme"
 import { DialogSelect } from "@tui/ui/dialog-select"
 import { DialogConfirm } from "@tui/ui/dialog-confirm"
 import { useBindings } from "@tui/keymap"
+import { isDeploymentSettled } from "./deployment-status.js"
+
+const POLL_INTERVAL_MS = 5000
 
 // These types are OpenCode-internal and imported at runtime
 type UseSDK = any
@@ -54,6 +57,37 @@ export function DialogDeploymentDetail(props: DialogDeploymentDetailProps) {
     return theme.textMuted
   }
 
+  // mycelis_change start - a deployment can take minutes to provision or stop, with no push/SSE
+  // status update - poll this one deployment while it's still transitioning (e.g. the user opened
+  // detail on an already-pending deployment and stayed here), and stop once it settles.
+  let pollTimer: ReturnType<typeof setInterval> | undefined
+
+  function stopPoll() {
+    if (!pollTimer) return
+    clearInterval(pollTimer)
+    pollTimer = undefined
+  }
+
+  function schedulePoll() {
+    if (pollTimer) return
+    if (isDeploymentSettled(status())) return
+    pollTimer = setInterval(async () => {
+      try {
+        const response = await sdk.client.kilo.deployments.list()
+        const found = ((response?.data as Deployment[]) ?? []).find((d) => d.id === props.deployment.id)
+        if (!found) return stopPoll()
+        setStatus(found.status)
+        if (isDeploymentSettled(found.status)) stopPoll()
+      } catch {
+        // A transient failure shouldn't stop status updates - just retry next tick.
+      }
+    }, POLL_INTERVAL_MS)
+  }
+
+  onMount(schedulePoll)
+  onCleanup(stopPoll)
+  // mycelis_change end
+
   async function toggle() {
     if (busy()) return
     setBusy(true)
@@ -67,7 +101,9 @@ export function DialogDeploymentDetail(props: DialogDeploymentDetailProps) {
       toast.show({ message: `Failed to ${isRunning ? "stop" : "start"} deployment`, variant: "error" })
       return
     }
-    setStatus(isRunning ? "Stopped" : "Running")
+    // mycelis_change - "Starting"/"Stopping" rather than "Running"/"Stopped": the request was only
+    // just accepted, the real status takes a moment to catch up (the list polls for it next).
+    setStatus(isRunning ? "Stopping" : "Starting")
     toast.show({ message: isRunning ? "Stopping..." : "Starting...", variant: "success" })
     props.onBack()
   }
